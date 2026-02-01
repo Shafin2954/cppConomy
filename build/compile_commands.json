@@ -1,0 +1,80 @@
+[
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\main.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\main.cpp",
+  "file": "E:/works/code/C/cppConomy/src/main.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/main.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\core\\Person.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\core\\Person.cpp",
+  "file": "E:/works/code/C/cppConomy/src/core/Person.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/core/Person.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\core\\Firm.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\core\\Firm.cpp",
+  "file": "E:/works/code/C/cppConomy/src/core/Firm.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\core\\Government.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\core\\Government.cpp",
+  "file": "E:/works/code/C/cppConomy/src/core/Government.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\core\\Economy.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\core\\Economy.cpp",
+  "file": "E:/works/code/C/cppConomy/src/core/Economy.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\core\\Market.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\core\\Market.cpp",
+  "file": "E:/works/code/C/cppConomy/src/core/Market.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/core/Market.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\commands\\CommandParser.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\commands\\CommandParser.cpp",
+  "file": "E:/works/code/C/cppConomy/src/commands/CommandParser.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\commands\\CommandExecutor.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\commands\\CommandExecutor.cpp",
+  "file": "E:/works/code/C/cppConomy/src/commands/CommandExecutor.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\gui\\MainFrame.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\gui\\MainFrame.cpp",
+  "file": "E:/works/code/C/cppConomy/src/gui/MainFrame.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\gui\\DashboardPanel.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\gui\\DashboardPanel.cpp",
+  "file": "E:/works/code/C/cppConomy/src/gui/DashboardPanel.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\gui\\EventLogPanel.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\gui\\EventLogPanel.cpp",
+  "file": "E:/works/code/C/cppConomy/src/gui/EventLogPanel.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\gui\\CommandPanel.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\gui\\CommandPanel.cpp",
+  "file": "E:/works/code/C/cppConomy/src/gui/CommandPanel.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj"
+},
+{
+  "directory": "E:/works/code/C/cppConomy/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -D__WXMSW__ @CMakeFiles/cppConomy.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\cppConomy.dir\\src\\gui\\HistoryPanel.cpp.obj -c E:\\works\\code\\C\\cppConomy\\src\\gui\\HistoryPanel.cpp",
+  "file": "E:/works/code/C/cppConomy/src/gui/HistoryPanel.cpp",
+  "output": "CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj"
+}
+]

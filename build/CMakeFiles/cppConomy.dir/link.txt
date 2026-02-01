@@ -1,0 +1,3 @@
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E rm -f CMakeFiles\cppConomy.dir/objects.a
+C:\msys64\ucrt64\bin\ar.exe qc CMakeFiles\cppConomy.dir/objects.a @CMakeFiles\cppConomy.dir\objects1.rsp
+C:\msys64\ucrt64\bin\g++.exe -g -mwindows -static -static-libgcc -static-libstdc++ -Wl,--subsystem,windows -Wl,--whole-archive CMakeFiles\cppConomy.dir/objects.a -Wl,--no-whole-archive -o cppConomy.exe -Wl,--out-implib,libcppConomy.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\cppConomy.dir\linkLibs.rsp
