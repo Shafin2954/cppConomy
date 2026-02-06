@@ -671,41 +671,27 @@ CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/atomic_lockfree_defines.h \
  C:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:\works\code\C\cppConomy\src\gui\DashboardPanel.h \
- E:/works/code/C/cppConomy/src/core/Economy.h \
+ E:/works/code/C/cppConomy/src/core/Simulation.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/map \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tree.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_map.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_multimap.h \
  E:/works/code/C/cppConomy/src/core/Person.h \
- E:/works/code/C/cppConomy/src/core/Agent.h \
- E:/works/code/C/cppConomy/src/utils/Config.h \
- E:/works/code/C/cppConomy/src/utils/Statistics.h \
- C:/msys64/ucrt64/include/c++/15.2.0/numeric \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_numeric.h \
- C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
- C:/msys64/ucrt64/include/c++/15.2.0/random \
- C:/msys64/ucrt64/include/c++/15.2.0/cstdint \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
- C:/msys64/ucrt64/include/stdint.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/random.h \
- C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/opt_random.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/random.tcc \
- E:/works/code/C/cppConomy/src/core/Firm.h \
- E:/works/code/C/cppConomy/src/core/Government.h \
+ E:/works/code/C/cppConomy/src/core/Product.h \
+ E:/works/code/C/cppConomy/src/core/Worker.h \
+ E:/works/code/C/cppConomy/src/core/Farmer.h \
+ E:/works/code/C/cppConomy/src/core/Owner.h \
  E:/works/code/C/cppConomy/src/core/Market.h \
- C:/msys64/ucrt64/include/c++/15.2.0/queue \
- C:/msys64/ucrt64/include/c++/15.2.0/deque \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_deque.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/deque.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_queue.h \
+ E:/works/code/C/cppConomy/src/core/Government.h \
+ E:\works\code\C\cppConomy\src\gui\DashboardPanel.h \
  E:\works\code\C\cppConomy\src\gui\EventLogPanel.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/listctrl.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/listbase.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/itemattr.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/systhemectrl.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/withimages.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/msw/listctrl.h \
  E:/works/code/C/cppConomy/src/utils/Logger.h \
  C:/msys64/ucrt64/include/c++/15.2.0/chrono \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/chrono.h \
  C:/msys64/ucrt64/include/c++/15.2.0/ratio \
+ C:/msys64/ucrt64/include/c++/15.2.0/cstdint \
+ C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
+ C:/msys64/ucrt64/include/stdint.h \
  C:/msys64/ucrt64/include/c++/15.2.0/ctime \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/parse_numbers.h \
  C:/msys64/ucrt64/include/c++/15.2.0/sstream \
@@ -720,15 +706,13 @@ CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/locale_conv.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/quoted_string.h \
  E:\works\code\C\cppConomy\src\gui\CommandPanel.h \
- E:\works\code\C\cppConomy\src\gui\HistoryPanel.h \
+ E:\works\code\C\cppConomy\src\gui\SelectionPanel.h \
+ E:\works\code\C\cppConomy\src\gui\CommandsPanel.h \
  E:/works/code/C/cppConomy/src/commands/CommandExecutor.h \
  E:/works/code/C/cppConomy/src/commands/CommandParser.h \
- C:/msys64/ucrt64/include/c++/15.2.0/map \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tree.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_map.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_multimap.h \
  C:/msys64/ucrt64/include/c++/15.2.0/variant \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/monostate.h \
  C:/msys64/ucrt64/include/c++/15.2.0/optional \
+ E:/works/code/C/cppConomy/src/utils/Config.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/splitter.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/generic/splitter.h

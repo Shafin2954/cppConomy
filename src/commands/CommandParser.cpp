@@ -5,39 +5,47 @@
 
 CommandParser::CommandParser()
 {
-    // Initialize available commands
+    // Initialize available commands (simplified for v2)
+    // Property assignment syntax: entity(filter).property = value
+    // Examples:
+    //   worker(name='Alice').wage = 1500
+    //   market(name='rice').price = 150
+    //   system.income_tax_rate = 0.2
     m_commands = {
-        {"adjust_tax", "Set tax rate for target group", {{"rate", "Tax rate (0.0-1.0)"}, {"target", "\"income\", \"corporate\", or \"all\""}}},
+        // Entity listing commands
+        {"persons", "List all persons", {}},
+        {"workers", "List all workers", {}},
+        {"farmers", "List all farmers", {}},
+        {"owners", "List all owners", {}},
+        {"markets", "List all markets", {}},
 
-        {"set_interest", "Set central bank interest rate", {{"rate", "Interest rate (0.0-0.25)"}}},
+        // Entity detail commands (queries)
+        {"person", "Get person details", {{"name", "Person name"}}},
+        {"worker", "Get worker details", {{"name", "Worker name"}}},
+        {"farmer", "Get farmer details", {{"name", "Farmer name"}}},
+        {"owner", "Get owner details", {{"name", "Owner name"}}},
+        {"market", "Get market details", {{"name", "Market name"}}},
 
-        {"inject_money", "Increase money supply (QE)", {{"amount", "Amount to inject"}}},
+        // System properties (queries)
+        {"system", "Get system property", {}},
 
-        {"grant_stimulus", "Direct payments to citizens/firms", {{"amount", "Total stimulus amount"}, {"sector", "Target sector (optional)"}}},
+        // Entity creation
+        {"add_worker", "Add a worker", {{"name", "Worker name"}, {"income", "Monthly income"}, {"skill", "Skill level (0.0-1.0)"}}},
+        {"add_farmer", "Add a farmer", {{"name", "Farmer name"}, {"land", "Land size"}, {"crop", "Crop name"}}},
+        {"add_owner", "Add a business owner", {{"name", "Owner name"}, {"capital", "Initial capital"}, {"product", "Product type"}, {"monopoly", "true/false"}}},
+        {"add_market", "Add a market", {{"product", "Product name"}}},
 
-        {"print_stats", "Display specific statistic", {{"variable", "\"gdp\", \"inflation\", \"unemployment\", \"all\""}}},
+        {"select", "Select entities to show", {{"worker", "Worker name"}, {"farmer", "Farmer name"}, {"owner", "Owner name"}, {"market", "Market name"}}},
+        {"clear_selection", "Clear current selection", {}},
 
-        {"simulate", "Run simulation ticks", {{"ticks", "Number of ticks to run"}}},
+        // Actions
+        {"buy", "Worker buys product", {{"worker", "Worker name"}, {"product", "Product name"}, {"quantity", "Quantity"}, {"price", "Price"}}},
+        {"harvest", "Harvest crops", {{"farmer", "Farmer name (optional)"}}},
 
-        {"pause", "Pause simulation", {}},
-
-        {"resume", "Resume simulation", {}},
-
-        {"trigger_shock", "Manually trigger economic shock", {{"type", "\"pandemic\", \"market_crash\", \"tech_boom\", \"oil_shock\""}, {"severity", "Severity multiplier (0.1-2.0)"}}},
-
-        {"add_firms", "Add new firms to economy", {{"count", "Number of firms"}, {"sector", "Sector name"}}},
-
-        {"add_citizens", "Add new citizens to economy", {{"count", "Number of citizens"}}},
-
-        {"export_data", "Export statistics to CSV", {{"filename", "Output filename"}}},
-
+        {"reset", "Reset simulation", {}},
+        {"status", "Show simulation status", {}},
         {"help", "Show help for a command", {{"command", "Command name (optional)"}}},
-
-        {"clear", "Clear the event log", {}},
-
-        {"reset", "Reset the entire simulation", {}},
-
-        {"status", "Show current simulation status", {}}};
+        {"clear", "Clear the event log", {}}};
 }
 
 Command CommandParser::parse(const std::string &input)
@@ -51,8 +59,105 @@ Command CommandParser::parse(const std::string &input)
         return cmd;
     }
 
+    // Check for assignment syntax: object(params).property = value
+    auto findAssignmentEquals = [](const std::string &text) -> size_t
+    {
+        int parenDepth = 0;
+        bool inSingleQuote = false;
+        bool inDoubleQuote = false;
+
+        for (size_t i = 0; i < text.size(); ++i)
+        {
+            char c = text[i];
+            if (c == '\'' && !inDoubleQuote)
+                inSingleQuote = !inSingleQuote;
+            else if (c == '"' && !inSingleQuote)
+                inDoubleQuote = !inDoubleQuote;
+            else if (!inSingleQuote && !inDoubleQuote)
+            {
+                if (c == '(')
+                    parenDepth++;
+                else if (c == ')' && parenDepth > 0)
+                    parenDepth--;
+                else if (c == '=' && parenDepth == 0)
+                    return i;
+            }
+        }
+        return std::string::npos;
+    };
+
+    size_t eqPos = findAssignmentEquals(trimmed);
+    if (eqPos != std::string::npos)
+    {
+        // This is an assignment
+        cmd.commandType = Command::Type::Assignment;
+
+        // Left side: object(params).property
+        std::string leftSide = trim(trimmed.substr(0, eqPos));
+        // Right side: value
+        std::string rightSide = trim(trimmed.substr(eqPos + 1));
+
+        // Parse the value
+        cmd.assignmentValue = parseValue(rightSide);
+
+        // Find the property and object
+        size_t dotPos = std::string::npos;
+        size_t parenClose = leftSide.rfind(')');
+        if (parenClose != std::string::npos)
+        {
+            dotPos = leftSide.find('.', parenClose);
+        }
+        else
+        {
+            dotPos = leftSide.find('.');
+        }
+
+        if (dotPos == std::string::npos)
+        {
+            cmd.errorMessage = "Invalid assignment: missing property";
+            return cmd;
+        }
+
+        cmd.assignmentProperty = trim(leftSide.substr(dotPos + 1));
+        std::string mainPart = leftSide.substr(0, dotPos);
+
+        // Extract object name
+        cmd.name = extractName(mainPart);
+        if (cmd.name.empty())
+        {
+            cmd.errorMessage = "Invalid object name in assignment";
+            return cmd;
+        }
+
+        // Extract parameters
+        cmd.params = extractParams(mainPart, cmd.name);
+        cmd.valid = true;
+        return cmd;
+    }
+
+    // Check for property access syntax: system.property or name(params).property (queries)
+    size_t dotPos = std::string::npos;
+    size_t parenClose = trimmed.rfind(')');
+    if (parenClose != std::string::npos)
+    {
+        // Check for dot after closing parenthesis
+        dotPos = trimmed.find('.', parenClose);
+    }
+    else
+    {
+        // Simple dot access like system.gdp
+        dotPos = trimmed.find('.');
+    }
+
+    std::string mainPart = trimmed;
+    if (dotPos != std::string::npos)
+    {
+        cmd.propertyAccess = trimmed.substr(dotPos + 1);
+        mainPart = trimmed.substr(0, dotPos);
+    }
+
     // Extract command name
-    cmd.name = extractName(trimmed);
+    cmd.name = extractName(mainPart);
     if (cmd.name.empty())
     {
         cmd.errorMessage = "Invalid command format";
@@ -77,7 +182,7 @@ Command CommandParser::parse(const std::string &input)
     }
 
     // Extract parameters
-    cmd.params = extractParams(trimmed);
+    cmd.params = extractParams(mainPart, cmd.name);
     cmd.valid = true;
 
     return cmd;
@@ -115,7 +220,7 @@ std::string CommandParser::getParameterHints(const std::string &commandName) con
             ss << commandName << "(";
             for (size_t i = 0; i < cmd.parameters.size(); ++i)
             {
-                ss << cmd.parameters[i].first << "=...";
+                ss << cmd.parameters[i].first;
                 if (i < cmd.parameters.size() - 1)
                 {
                     ss << ", ";
@@ -160,9 +265,14 @@ std::string CommandParser::extractName(const std::string &input) const
     return trim(name);
 }
 
-std::map<std::string, ParamValue> CommandParser::extractParams(const std::string &input) const
+std::map<std::string, ParamValue> CommandParser::extractParams(const std::string &input,
+                                                               const std::string &commandName) const
 {
     std::map<std::string, ParamValue> params;
+
+    const CommandInfo *cmdInfo = findCommandInfo(commandName);
+    const auto *paramList = cmdInfo ? &cmdInfo->parameters : nullptr;
+    size_t positionalIndex = 0;
 
     size_t startParen = input.find('(');
     size_t endParen = input.rfind(')');
@@ -175,7 +285,7 @@ std::map<std::string, ParamValue> CommandParser::extractParams(const std::string
 
     std::string paramStr = input.substr(startParen + 1, endParen - startParen - 1);
 
-    // Parse key=value pairs
+    // Parse key=value pairs or positional values
     std::stringstream ss(paramStr);
     std::string token;
 
@@ -186,16 +296,31 @@ std::map<std::string, ParamValue> CommandParser::extractParams(const std::string
             continue;
 
         size_t eqPos = token.find('=');
-        if (eqPos == std::string::npos)
-            continue;
-
-        std::string key = trim(token.substr(0, eqPos));
-        std::string value = trim(token.substr(eqPos + 1));
-
-        params[key] = parseValue(value);
+        if (eqPos != std::string::npos)
+        {
+            std::string key = trim(token.substr(0, eqPos));
+            std::string value = trim(token.substr(eqPos + 1));
+            params[key] = parseValue(value);
+        }
+        else if (paramList && positionalIndex < paramList->size())
+        {
+            const std::string &key = (*paramList)[positionalIndex].first;
+            params[key] = parseValue(token);
+            positionalIndex++;
+        }
     }
 
     return params;
+}
+
+const CommandInfo *CommandParser::findCommandInfo(const std::string &commandName) const
+{
+    for (const auto &cmd : m_commands)
+    {
+        if (cmd.name == commandName)
+            return &cmd;
+    }
+    return nullptr;
 }
 
 ParamValue CommandParser::parseValue(const std::string &value) const
@@ -246,7 +371,9 @@ ParamValue CommandParser::parseValue(const std::string &value) const
     {
         try
         {
-            return std::stoi(value);
+            int intVal = std::stoi(value);
+            // DEBUG: Return as double so it can be extracted as double
+            return static_cast<double>(intVal);
         }
         catch (...)
         {

@@ -101,50 +101,50 @@ CMakeFiles/cppConomy.dir/src/core/Person.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Person.cpp.s"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Person.cpp -o CMakeFiles\cppConomy.dir\src\core\Person.cpp.s
 
-CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
-CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
-CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj: E:/works/code/C/cppConomy/src/core/Firm.cpp
-CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Firm.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Firm.cpp.obj -c E:\works\code\C\cppConomy\src\core\Firm.cpp
+CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
+CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
+CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj: E:/works/code/C/cppConomy/src/core/Worker.cpp
+CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Worker.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Worker.cpp.obj -c E:\works\code\C\cppConomy\src\core\Worker.cpp
 
-CMakeFiles/cppConomy.dir/src/core/Firm.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Firm.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Firm.cpp > CMakeFiles\cppConomy.dir\src\core\Firm.cpp.i
+CMakeFiles/cppConomy.dir/src/core/Worker.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Worker.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Worker.cpp > CMakeFiles\cppConomy.dir\src\core\Worker.cpp.i
 
-CMakeFiles/cppConomy.dir/src/core/Firm.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Firm.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Firm.cpp -o CMakeFiles\cppConomy.dir\src\core\Firm.cpp.s
+CMakeFiles/cppConomy.dir/src/core/Worker.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Worker.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Worker.cpp -o CMakeFiles\cppConomy.dir\src\core\Worker.cpp.s
 
-CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
-CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
-CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: E:/works/code/C/cppConomy/src/core/Government.cpp
-CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Government.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Government.cpp.obj -c E:\works\code\C\cppConomy\src\core\Government.cpp
+CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
+CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
+CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj: E:/works/code/C/cppConomy/src/core/Farmer.cpp
+CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Farmer.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Farmer.cpp.obj -c E:\works\code\C\cppConomy\src\core\Farmer.cpp
 
-CMakeFiles/cppConomy.dir/src/core/Government.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Government.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Government.cpp > CMakeFiles\cppConomy.dir\src\core\Government.cpp.i
+CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Farmer.cpp > CMakeFiles\cppConomy.dir\src\core\Farmer.cpp.i
 
-CMakeFiles/cppConomy.dir/src/core/Government.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Government.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Government.cpp -o CMakeFiles\cppConomy.dir\src\core\Government.cpp.s
+CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Farmer.cpp -o CMakeFiles\cppConomy.dir\src\core\Farmer.cpp.s
 
-CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
-CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
-CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj: E:/works/code/C/cppConomy/src/core/Economy.cpp
-CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Economy.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Economy.cpp.obj -c E:\works\code\C\cppConomy\src\core\Economy.cpp
+CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
+CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
+CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj: E:/works/code/C/cppConomy/src/core/Owner.cpp
+CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Owner.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Owner.cpp.obj -c E:\works\code\C\cppConomy\src\core\Owner.cpp
 
-CMakeFiles/cppConomy.dir/src/core/Economy.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Economy.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Economy.cpp > CMakeFiles\cppConomy.dir\src\core\Economy.cpp.i
+CMakeFiles/cppConomy.dir/src/core/Owner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Owner.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Owner.cpp > CMakeFiles\cppConomy.dir\src\core\Owner.cpp.i
 
-CMakeFiles/cppConomy.dir/src/core/Economy.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Economy.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Economy.cpp -o CMakeFiles\cppConomy.dir\src\core\Economy.cpp.s
+CMakeFiles/cppConomy.dir/src/core/Owner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Owner.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Owner.cpp -o CMakeFiles\cppConomy.dir\src\core\Owner.cpp.s
 
 CMakeFiles/cppConomy.dir/src/core/Market.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
 CMakeFiles/cppConomy.dir/src/core/Market.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
@@ -161,11 +161,41 @@ CMakeFiles/cppConomy.dir/src/core/Market.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Market.cpp.s"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Market.cpp -o CMakeFiles\cppConomy.dir\src\core\Market.cpp.s
 
+CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
+CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
+CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: E:/works/code/C/cppConomy/src/core/Government.cpp
+CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Government.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Government.cpp.obj -c E:\works\code\C\cppConomy\src\core\Government.cpp
+
+CMakeFiles/cppConomy.dir/src/core/Government.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Government.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Government.cpp > CMakeFiles\cppConomy.dir\src\core\Government.cpp.i
+
+CMakeFiles/cppConomy.dir/src/core/Government.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Government.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Government.cpp -o CMakeFiles\cppConomy.dir\src\core\Government.cpp.s
+
+CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
+CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
+CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj: E:/works/code/C/cppConomy/src/core/Simulation.cpp
+CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj -MF CMakeFiles\cppConomy.dir\src\core\Simulation.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\core\Simulation.cpp.obj -c E:\works\code\C\cppConomy\src\core\Simulation.cpp
+
+CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\core\Simulation.cpp > CMakeFiles\cppConomy.dir\src\core\Simulation.cpp.i
+
+CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\core\Simulation.cpp -o CMakeFiles\cppConomy.dir\src\core\Simulation.cpp.s
+
 CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
 CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
 CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj: E:/works/code/C/cppConomy/src/commands/CommandParser.cpp
 CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj -MF CMakeFiles\cppConomy.dir\src\commands\CommandParser.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\commands\CommandParser.cpp.obj -c E:\works\code\C\cppConomy\src\commands\CommandParser.cpp
 
 CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.i: cmake_force
@@ -180,7 +210,7 @@ CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: CMakeFiles/cppCon
 CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
 CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: E:/works/code/C/cppConomy/src/commands/CommandExecutor.cpp
 CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj -MF CMakeFiles\cppConomy.dir\src\commands\CommandExecutor.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\commands\CommandExecutor.cpp.obj -c E:\works\code\C\cppConomy\src\commands\CommandExecutor.cpp
 
 CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.i: cmake_force
@@ -195,7 +225,7 @@ CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj: CMakeFiles/cppConomy.dir/fla
 CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
 CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj: E:/works/code/C/cppConomy/src/gui/MainFrame.cpp
 CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj -MF CMakeFiles\cppConomy.dir\src\gui\MainFrame.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\gui\MainFrame.cpp.obj -c E:\works\code\C\cppConomy\src\gui\MainFrame.cpp
 
 CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.i: cmake_force
@@ -210,7 +240,7 @@ CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj: CMakeFiles/cppConomy.di
 CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
 CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj: E:/works/code/C/cppConomy/src/gui/DashboardPanel.cpp
 CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj -MF CMakeFiles\cppConomy.dir\src\gui\DashboardPanel.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\gui\DashboardPanel.cpp.obj -c E:\works\code\C\cppConomy\src\gui\DashboardPanel.cpp
 
 CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.i: cmake_force
@@ -225,7 +255,7 @@ CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj: CMakeFiles/cppConomy.dir
 CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
 CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj: E:/works/code/C/cppConomy/src/gui/EventLogPanel.cpp
 CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj -MF CMakeFiles\cppConomy.dir\src\gui\EventLogPanel.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\gui\EventLogPanel.cpp.obj -c E:\works\code\C\cppConomy\src\gui\EventLogPanel.cpp
 
 CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.i: cmake_force
@@ -240,7 +270,7 @@ CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj: CMakeFiles/cppConomy.dir/
 CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
 CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj: E:/works/code/C/cppConomy/src/gui/CommandPanel.cpp
 CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj -MF CMakeFiles\cppConomy.dir\src\gui\CommandPanel.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\gui\CommandPanel.cpp.obj -c E:\works\code\C\cppConomy\src\gui\CommandPanel.cpp
 
 CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.i: cmake_force
@@ -251,53 +281,74 @@ CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.s"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\gui\CommandPanel.cpp -o CMakeFiles\cppConomy.dir\src\gui\CommandPanel.cpp.s
 
-CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
-CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
-CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj: E:/works/code/C/cppConomy/src/gui/HistoryPanel.cpp
-CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj -MF CMakeFiles\cppConomy.dir\src\gui\HistoryPanel.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\gui\HistoryPanel.cpp.obj -c E:\works\code\C\cppConomy\src\gui\HistoryPanel.cpp
+CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
+CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
+CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj: E:/works/code/C/cppConomy/src/gui/SelectionPanel.cpp
+CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj -MF CMakeFiles\cppConomy.dir\src\gui\SelectionPanel.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\gui\SelectionPanel.cpp.obj -c E:\works\code\C\cppConomy\src\gui\SelectionPanel.cpp
 
-CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.i"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\gui\HistoryPanel.cpp > CMakeFiles\cppConomy.dir\src\gui\HistoryPanel.cpp.i
+CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\gui\SelectionPanel.cpp > CMakeFiles\cppConomy.dir\src\gui\SelectionPanel.cpp.i
 
-CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.s"
-	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\gui\HistoryPanel.cpp -o CMakeFiles\cppConomy.dir\src\gui\HistoryPanel.cpp.s
+CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\gui\SelectionPanel.cpp -o CMakeFiles\cppConomy.dir\src\gui\SelectionPanel.cpp.s
+
+CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj: CMakeFiles/cppConomy.dir/flags.make
+CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj: CMakeFiles/cppConomy.dir/includes_CXX.rsp
+CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj: E:/works/code/C/cppConomy/src/gui/CommandsPanel.cpp
+CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj: CMakeFiles/cppConomy.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj -MF CMakeFiles\cppConomy.dir\src\gui\CommandsPanel.cpp.obj.d -o CMakeFiles\cppConomy.dir\src\gui\CommandsPanel.cpp.obj -c E:\works\code\C\cppConomy\src\gui\CommandsPanel.cpp
+
+CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\works\code\C\cppConomy\src\gui\CommandsPanel.cpp > CMakeFiles\cppConomy.dir\src\gui\CommandsPanel.cpp.i
+
+CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\works\code\C\cppConomy\src\gui\CommandsPanel.cpp -o CMakeFiles\cppConomy.dir\src\gui\CommandsPanel.cpp.s
 
 # Object files for target cppConomy
 cppConomy_OBJECTS = \
 "CMakeFiles/cppConomy.dir/src/main.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/core/Person.cpp.obj" \
-"CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj" \
-"CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj" \
-"CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj" \
+"CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj" \
+"CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj" \
+"CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/core/Market.cpp.obj" \
+"CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj" \
+"CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj" \
 "CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj" \
-"CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj"
+"CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj" \
+"CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj"
 
 # External object files for target cppConomy
 cppConomy_EXTERNAL_OBJECTS =
 
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/main.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Person.cpp.obj
-cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj
-cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj
-cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj
+cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj
+cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj
+cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Market.cpp.obj
+cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj
+cppConomy.exe: CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.obj
-cppConomy.exe: CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj
+cppConomy.exe: CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj
+cppConomy.exe: CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj
 cppConomy.exe: CMakeFiles/cppConomy.dir/build.make
 cppConomy.exe: C:/msys64/ucrt64/lib/libwx_mswu_core-3.2.a
 cppConomy.exe: C:/msys64/ucrt64/lib/libwx_baseu-3.2.a
@@ -305,7 +356,7 @@ cppConomy.exe: C:/msys64/ucrt64/lib/liblzma.dll.a
 cppConomy.exe: CMakeFiles/cppConomy.dir/linkLibs.rsp
 cppConomy.exe: CMakeFiles/cppConomy.dir/objects1.rsp
 cppConomy.exe: CMakeFiles/cppConomy.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable cppConomy.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=E:\works\code\C\cppConomy\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX executable cppConomy.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\cppConomy.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

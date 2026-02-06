@@ -176,53 +176,29 @@ src/commands/CommandParser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/commands/CommandParser.cpp.s
 .PHONY : src/commands/CommandParser.cpp.s
 
-src/core/Economy.obj: src/core/Economy.cpp.obj
-.PHONY : src/core/Economy.obj
+src/core/Farmer.obj: src/core/Farmer.cpp.obj
+.PHONY : src/core/Farmer.obj
 
 # target to build an object file
-src/core/Economy.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Economy.cpp.obj
-.PHONY : src/core/Economy.cpp.obj
+src/core/Farmer.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.obj
+.PHONY : src/core/Farmer.cpp.obj
 
-src/core/Economy.i: src/core/Economy.cpp.i
-.PHONY : src/core/Economy.i
-
-# target to preprocess a source file
-src/core/Economy.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Economy.cpp.i
-.PHONY : src/core/Economy.cpp.i
-
-src/core/Economy.s: src/core/Economy.cpp.s
-.PHONY : src/core/Economy.s
-
-# target to generate assembly for a file
-src/core/Economy.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Economy.cpp.s
-.PHONY : src/core/Economy.cpp.s
-
-src/core/Firm.obj: src/core/Firm.cpp.obj
-.PHONY : src/core/Firm.obj
-
-# target to build an object file
-src/core/Firm.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Firm.cpp.obj
-.PHONY : src/core/Firm.cpp.obj
-
-src/core/Firm.i: src/core/Firm.cpp.i
-.PHONY : src/core/Firm.i
+src/core/Farmer.i: src/core/Farmer.cpp.i
+.PHONY : src/core/Farmer.i
 
 # target to preprocess a source file
-src/core/Firm.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Firm.cpp.i
-.PHONY : src/core/Firm.cpp.i
+src/core/Farmer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.i
+.PHONY : src/core/Farmer.cpp.i
 
-src/core/Firm.s: src/core/Firm.cpp.s
-.PHONY : src/core/Firm.s
+src/core/Farmer.s: src/core/Farmer.cpp.s
+.PHONY : src/core/Farmer.s
 
 # target to generate assembly for a file
-src/core/Firm.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Firm.cpp.s
-.PHONY : src/core/Firm.cpp.s
+src/core/Farmer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Farmer.cpp.s
+.PHONY : src/core/Farmer.cpp.s
 
 src/core/Government.obj: src/core/Government.cpp.obj
 .PHONY : src/core/Government.obj
@@ -272,6 +248,30 @@ src/core/Market.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Market.cpp.s
 .PHONY : src/core/Market.cpp.s
 
+src/core/Owner.obj: src/core/Owner.cpp.obj
+.PHONY : src/core/Owner.obj
+
+# target to build an object file
+src/core/Owner.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Owner.cpp.obj
+.PHONY : src/core/Owner.cpp.obj
+
+src/core/Owner.i: src/core/Owner.cpp.i
+.PHONY : src/core/Owner.i
+
+# target to preprocess a source file
+src/core/Owner.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Owner.cpp.i
+.PHONY : src/core/Owner.cpp.i
+
+src/core/Owner.s: src/core/Owner.cpp.s
+.PHONY : src/core/Owner.s
+
+# target to generate assembly for a file
+src/core/Owner.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Owner.cpp.s
+.PHONY : src/core/Owner.cpp.s
+
 src/core/Person.obj: src/core/Person.cpp.obj
 .PHONY : src/core/Person.obj
 
@@ -296,6 +296,54 @@ src/core/Person.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Person.cpp.s
 .PHONY : src/core/Person.cpp.s
 
+src/core/Simulation.obj: src/core/Simulation.cpp.obj
+.PHONY : src/core/Simulation.obj
+
+# target to build an object file
+src/core/Simulation.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.obj
+.PHONY : src/core/Simulation.cpp.obj
+
+src/core/Simulation.i: src/core/Simulation.cpp.i
+.PHONY : src/core/Simulation.i
+
+# target to preprocess a source file
+src/core/Simulation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.i
+.PHONY : src/core/Simulation.cpp.i
+
+src/core/Simulation.s: src/core/Simulation.cpp.s
+.PHONY : src/core/Simulation.s
+
+# target to generate assembly for a file
+src/core/Simulation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Simulation.cpp.s
+.PHONY : src/core/Simulation.cpp.s
+
+src/core/Worker.obj: src/core/Worker.cpp.obj
+.PHONY : src/core/Worker.obj
+
+# target to build an object file
+src/core/Worker.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Worker.cpp.obj
+.PHONY : src/core/Worker.cpp.obj
+
+src/core/Worker.i: src/core/Worker.cpp.i
+.PHONY : src/core/Worker.i
+
+# target to preprocess a source file
+src/core/Worker.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Worker.cpp.i
+.PHONY : src/core/Worker.cpp.i
+
+src/core/Worker.s: src/core/Worker.cpp.s
+.PHONY : src/core/Worker.s
+
+# target to generate assembly for a file
+src/core/Worker.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/core/Worker.cpp.s
+.PHONY : src/core/Worker.cpp.s
+
 src/gui/CommandPanel.obj: src/gui/CommandPanel.cpp.obj
 .PHONY : src/gui/CommandPanel.obj
 
@@ -319,6 +367,30 @@ src/gui/CommandPanel.s: src/gui/CommandPanel.cpp.s
 src/gui/CommandPanel.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/CommandPanel.cpp.s
 .PHONY : src/gui/CommandPanel.cpp.s
+
+src/gui/CommandsPanel.obj: src/gui/CommandsPanel.cpp.obj
+.PHONY : src/gui/CommandsPanel.obj
+
+# target to build an object file
+src/gui/CommandsPanel.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.obj
+.PHONY : src/gui/CommandsPanel.cpp.obj
+
+src/gui/CommandsPanel.i: src/gui/CommandsPanel.cpp.i
+.PHONY : src/gui/CommandsPanel.i
+
+# target to preprocess a source file
+src/gui/CommandsPanel.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.i
+.PHONY : src/gui/CommandsPanel.cpp.i
+
+src/gui/CommandsPanel.s: src/gui/CommandsPanel.cpp.s
+.PHONY : src/gui/CommandsPanel.s
+
+# target to generate assembly for a file
+src/gui/CommandsPanel.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/CommandsPanel.cpp.s
+.PHONY : src/gui/CommandsPanel.cpp.s
 
 src/gui/DashboardPanel.obj: src/gui/DashboardPanel.cpp.obj
 .PHONY : src/gui/DashboardPanel.obj
@@ -368,30 +440,6 @@ src/gui/EventLogPanel.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.s
 .PHONY : src/gui/EventLogPanel.cpp.s
 
-src/gui/HistoryPanel.obj: src/gui/HistoryPanel.cpp.obj
-.PHONY : src/gui/HistoryPanel.obj
-
-# target to build an object file
-src/gui/HistoryPanel.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.obj
-.PHONY : src/gui/HistoryPanel.cpp.obj
-
-src/gui/HistoryPanel.i: src/gui/HistoryPanel.cpp.i
-.PHONY : src/gui/HistoryPanel.i
-
-# target to preprocess a source file
-src/gui/HistoryPanel.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.i
-.PHONY : src/gui/HistoryPanel.cpp.i
-
-src/gui/HistoryPanel.s: src/gui/HistoryPanel.cpp.s
-.PHONY : src/gui/HistoryPanel.s
-
-# target to generate assembly for a file
-src/gui/HistoryPanel.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/HistoryPanel.cpp.s
-.PHONY : src/gui/HistoryPanel.cpp.s
-
 src/gui/MainFrame.obj: src/gui/MainFrame.cpp.obj
 .PHONY : src/gui/MainFrame.obj
 
@@ -415,6 +463,30 @@ src/gui/MainFrame.s: src/gui/MainFrame.cpp.s
 src/gui/MainFrame.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/MainFrame.cpp.s
 .PHONY : src/gui/MainFrame.cpp.s
+
+src/gui/SelectionPanel.obj: src/gui/SelectionPanel.cpp.obj
+.PHONY : src/gui/SelectionPanel.obj
+
+# target to build an object file
+src/gui/SelectionPanel.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.obj
+.PHONY : src/gui/SelectionPanel.cpp.obj
+
+src/gui/SelectionPanel.i: src/gui/SelectionPanel.cpp.i
+.PHONY : src/gui/SelectionPanel.i
+
+# target to preprocess a source file
+src/gui/SelectionPanel.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.i
+.PHONY : src/gui/SelectionPanel.cpp.i
+
+src/gui/SelectionPanel.s: src/gui/SelectionPanel.cpp.s
+.PHONY : src/gui/SelectionPanel.s
+
+# target to generate assembly for a file
+src/gui/SelectionPanel.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\cppConomy.dir\build.make CMakeFiles/cppConomy.dir/src/gui/SelectionPanel.cpp.s
+.PHONY : src/gui/SelectionPanel.cpp.s
 
 src/main.obj: src/main.cpp.obj
 .PHONY : src/main.obj
@@ -455,36 +527,45 @@ help:
 	@echo ... src/commands/CommandParser.obj
 	@echo ... src/commands/CommandParser.i
 	@echo ... src/commands/CommandParser.s
-	@echo ... src/core/Economy.obj
-	@echo ... src/core/Economy.i
-	@echo ... src/core/Economy.s
-	@echo ... src/core/Firm.obj
-	@echo ... src/core/Firm.i
-	@echo ... src/core/Firm.s
+	@echo ... src/core/Farmer.obj
+	@echo ... src/core/Farmer.i
+	@echo ... src/core/Farmer.s
 	@echo ... src/core/Government.obj
 	@echo ... src/core/Government.i
 	@echo ... src/core/Government.s
 	@echo ... src/core/Market.obj
 	@echo ... src/core/Market.i
 	@echo ... src/core/Market.s
+	@echo ... src/core/Owner.obj
+	@echo ... src/core/Owner.i
+	@echo ... src/core/Owner.s
 	@echo ... src/core/Person.obj
 	@echo ... src/core/Person.i
 	@echo ... src/core/Person.s
+	@echo ... src/core/Simulation.obj
+	@echo ... src/core/Simulation.i
+	@echo ... src/core/Simulation.s
+	@echo ... src/core/Worker.obj
+	@echo ... src/core/Worker.i
+	@echo ... src/core/Worker.s
 	@echo ... src/gui/CommandPanel.obj
 	@echo ... src/gui/CommandPanel.i
 	@echo ... src/gui/CommandPanel.s
+	@echo ... src/gui/CommandsPanel.obj
+	@echo ... src/gui/CommandsPanel.i
+	@echo ... src/gui/CommandsPanel.s
 	@echo ... src/gui/DashboardPanel.obj
 	@echo ... src/gui/DashboardPanel.i
 	@echo ... src/gui/DashboardPanel.s
 	@echo ... src/gui/EventLogPanel.obj
 	@echo ... src/gui/EventLogPanel.i
 	@echo ... src/gui/EventLogPanel.s
-	@echo ... src/gui/HistoryPanel.obj
-	@echo ... src/gui/HistoryPanel.i
-	@echo ... src/gui/HistoryPanel.s
 	@echo ... src/gui/MainFrame.obj
 	@echo ... src/gui/MainFrame.i
 	@echo ... src/gui/MainFrame.s
+	@echo ... src/gui/SelectionPanel.obj
+	@echo ... src/gui/SelectionPanel.i
+	@echo ... src/gui/SelectionPanel.s
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s

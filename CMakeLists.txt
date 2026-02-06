@@ -10,16 +10,18 @@ find_package(wxWidgets REQUIRED COMPONENTS core base)
 
 include(${wxWidgets_USE_FILE})
 
-# Source files
+# Source files (only .cpp files that exist)
 set(SOURCES
     src/main.cpp
     
-    # Core
+    # Core (new simplified implementation)
     src/core/Person.cpp
-    src/core/Firm.cpp
-    src/core/Government.cpp
-    src/core/Economy.cpp
+    src/core/Worker.cpp
+    src/core/Farmer.cpp
+    src/core/Owner.cpp
     src/core/Market.cpp
+    src/core/Government.cpp
+    src/core/Simulation.cpp
     
     # Commands
     src/commands/CommandParser.cpp
@@ -30,7 +32,8 @@ set(SOURCES
     src/gui/DashboardPanel.cpp
     src/gui/EventLogPanel.cpp
     src/gui/CommandPanel.cpp
-    src/gui/HistoryPanel.cpp
+    src/gui/SelectionPanel.cpp
+    src/gui/CommandsPanel.cpp
 )
 
 # Header files (for IDE support)
@@ -38,22 +41,17 @@ set(HEADERS
     # Utils
     src/utils/Config.h
     src/utils/Logger.h
-    src/utils/Statistics.h
     
-    # Core
-    src/core/Agent.h
+    # Core (New simplified structure)
+    src/core/Product.h
     src/core/Person.h
-    src/core/Firm.h
-    src/core/Government.h
-    src/core/Economy.h
+    src/core/Worker.h
+    src/core/Farmer.h
+    src/core/Owner.h
     src/core/Market.h
+    src/core/Government.h
+    src/core/Simulation.h
     
-    # Models
-    src/models/PhillipsCurve.h
-    src/models/OkunLaw.h
-    src/models/QuantityTheory.h
-    src/models/UtilityFunction.h
-    src/models/StochasticShock.h
     
     # Commands
     src/commands/CommandParser.h
@@ -64,7 +62,8 @@ set(HEADERS
     src/gui/DashboardPanel.h
     src/gui/EventLogPanel.h
     src/gui/CommandPanel.h
-    src/gui/HistoryPanel.h
+    src/gui/SelectionPanel.h
+    src/gui/CommandsPanel.h
 )
 
 add_executable(cppConomy WIN32 ${SOURCES} ${HEADERS})

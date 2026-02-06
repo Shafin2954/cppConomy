@@ -46,33 +46,32 @@ void EventLogPanel::AddEntry(const LogEntry &entry)
 {
     // Format the entry
     wxString levelStr = GetLevelString(entry.level);
-    wxString tickStr = wxString::Format("[%d]", entry.tick);
-    
+
     // Get the color for this log level
     wxColour color = GetLevelColor(entry.level);
-    
+
     // Set text color for this entry
     wxTextAttr attr;
     attr.SetTextColour(color);
-    
+
     // Get current position
     long insertPos = m_textCtrl->GetLastPosition();
-    
+
     // Build the full message with newlines preserved
     wxString message = entry.message;
-    
-    // Format: [LEVEL] [tick] message
-    wxString fullEntry = levelStr + " " + tickStr + " " + message + "\n";
-    
+
+    // Format: [LEVEL] message
+    wxString fullEntry = levelStr + " " + message + "\n";
+
     // Append the text
     m_textCtrl->AppendText(fullEntry);
-    
+
     // Apply color to the newly added text
     m_textCtrl->SetStyle(insertPos, m_textCtrl->GetLastPosition(), attr);
-    
+
     // Auto-scroll to bottom
     m_textCtrl->ShowPosition(m_textCtrl->GetLastPosition());
-    
+
     // Limit log size to prevent memory issues (keep last ~50000 characters)
     if (m_textCtrl->GetLastPosition() > 50000)
     {

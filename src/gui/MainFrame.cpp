@@ -2,49 +2,49 @@
 #include "DashboardPanel.h"
 #include "EventLogPanel.h"
 #include "CommandPanel.h"
-#include "HistoryPanel.h"
-#include "../core/Economy.h"
+#include "SelectionPanel.h"
+#include "CommandsPanel.h"
+#include "../core/Simulation.h"
 #include "../commands/CommandExecutor.h"
 #include "../utils/Config.h"
 #include "../utils/Logger.h"
 
 #include <wx/splitter.h>
+#include <cctype>
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
         EVT_TIMER(ID_TIMER_UI, MainFrame::OnTimer)
-            EVT_TIMER(ID_TIMER_SIM, MainFrame::OnSimulationTick)
-                EVT_MENU(wxID_NEW, MainFrame::OnFileNew)
-                    EVT_MENU(wxID_SAVE, MainFrame::OnFileExport)
-                        EVT_MENU(wxID_EXIT, MainFrame::OnFileExit)
-                            EVT_MENU(ID_SIM_START, MainFrame::OnSimStart)
-                                EVT_MENU(ID_SIM_PAUSE, MainFrame::OnSimPause)
-                                    EVT_MENU(ID_SIM_RESET, MainFrame::OnSimReset)
-                                        EVT_MENU(wxID_ABOUT, MainFrame::OnHelpAbout)
-                                            wxEND_EVENT_TABLE()
+            EVT_MENU(wxID_NEW, MainFrame::OnFileNew)
+                EVT_MENU(wxID_SAVE, MainFrame::OnFileExport)
+                    EVT_MENU(wxID_EXIT, MainFrame::OnFileExit)
+                        EVT_MENU(ID_SIM_RESET, MainFrame::OnSimReset)
+                            EVT_MENU(wxID_ABOUT, MainFrame::OnHelpAbout)
+                                wxEND_EVENT_TABLE()
 
-                                                MainFrame::MainFrame()
+                                    MainFrame::MainFrame()
     : wxFrame(nullptr, wxID_ANY, "CppConomy - Economic Simulator",
               wxDefaultPosition, wxSize(1200, 800)),
-      m_uiTimer(this, ID_TIMER_UI), m_simTimer(this, ID_TIMER_SIM)
+      m_uiTimer(this, ID_TIMER_UI)
 {
-    // Initialize economy
-    m_economy = std::make_unique<Economy>();
-    m_executor = std::make_unique<CommandExecutor>(*m_economy);
+    // Initialize simulation
+    m_simulation = std::make_unique<Simulation>();
+    m_executor = std::make_unique<CommandExecutor>(*m_simulation);
 
     SetupTheme();
     CreateMenuBar();
     CreatePanels();
     CreateStatusBar();
     BindEvents();
+    Bind(wxEVT_CHAR_HOOK, &MainFrame::OnGlobalKeyDown, this);
 
-    // Initialize the economy
-    m_economy->initialize(Config::INITIAL_POPULATION, Config::INITIAL_FIRMS);
+    // Initialize the simulation
+    m_simulation->Initialize(Config::INITIAL_POPULATION, Config::INITIAL_FIRMS, 0);
 
     // Update initial display
     if (m_dashboard)
     {
-        m_dashboard->UpdateStats(m_economy->getStats());
+        m_dashboard->UpdateStats(m_simulation->GetStats());
     }
 
     // Start UI update timer
@@ -56,7 +56,6 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 MainFrame::~MainFrame()
 {
     m_uiTimer.Stop();
-    m_simTimer.Stop();
 }
 
 void MainFrame::SetupTheme()
@@ -80,9 +79,6 @@ void MainFrame::CreateMenuBar()
 
     // Simulation menu
     wxMenu *simMenu = new wxMenu();
-    simMenu->Append(ID_SIM_START, "&Start\tF5", "Start simulation");
-    simMenu->Append(ID_SIM_PAUSE, "&Pause\tF6", "Pause simulation");
-    simMenu->AppendSeparator();
     simMenu->Append(ID_SIM_RESET, "&Reset\tCtrl+R", "Reset simulation");
     menuBar->Append(simMenu, "&Simulation");
 
@@ -100,7 +96,7 @@ void MainFrame::CreatePanels()
     int width = 1200; // Default width
     int height = 800; // Default height
 
-    // Main horizontal splitter (content | history)
+    // Main horizontal splitter (content | commands panel)
     wxSplitterWindow *mainSplitter = new wxSplitterWindow(this, wxID_ANY,
                                                           wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE | wxSP_3DSASH);
     mainSplitter->SetBackgroundColour(wxColour(255, 255, 255));
@@ -109,26 +105,20 @@ void MainFrame::CreatePanels()
     wxPanel *leftContainer = new wxPanel(mainSplitter);
     leftContainer->SetBackgroundColour(wxColour(255, 255, 255));
 
-    // Vertical splitter for left side (dashboard/log | command)
+    // Vertical sizer for left side
     wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
 
-    // Top section: Dashboard and Event Log
-    wxSplitterWindow *topSplitter = new wxSplitterWindow(leftContainer, wxID_ANY,
-                                                         wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE | wxSP_3DSASH);
-    topSplitter->SetBackgroundColour(wxColour(255, 255, 255));
+    // Top section: Dashboard
+    m_dashboard = new DashboardPanel(leftContainer);
+    leftSizer->Add(m_dashboard, 0, wxEXPAND | wxALL, 5);
 
-    // Dashboard panel
-    m_dashboard = new DashboardPanel(topSplitter);
+    // Middle section: Selection Panel (showing selected entities)
+    m_selectionPanel = new SelectionPanel(leftContainer);
+    leftSizer->Add(m_selectionPanel, 0, wxEXPAND | wxLEFT | wxRIGHT, 5);
 
-    // Event log panel
-    m_eventLog = new EventLogPanel(topSplitter);
-
-    // Top section takes 40% of height (dashboard gets 40% of top section)
-    int topHeight = static_cast<int>(height * 0.40);
-    topSplitter->SplitHorizontally(m_dashboard, m_eventLog, topHeight);
-    topSplitter->SetMinimumPaneSize(100);
-
-    leftSizer->Add(topSplitter, 1, wxEXPAND | wxALL, 5);
+    // Event log panel (takes remaining space)
+    m_eventLog = new EventLogPanel(leftContainer);
+    leftSizer->Add(m_eventLog, 1, wxEXPAND | wxALL, 5);
 
     // Command panel at bottom
     m_commandPanel = new CommandPanel(leftContainer, m_executor.get());
@@ -136,12 +126,13 @@ void MainFrame::CreatePanels()
 
     leftContainer->SetSizer(leftSizer);
 
-    // History panel on the right
-    m_historyPanel = new HistoryPanel(mainSplitter);
+    // Commands panel on the right (replaces history)
+    m_commandsPanel = new CommandsPanel(mainSplitter);
+    m_commandsPanel->SetCommands(m_executor->getParser().getAvailableCommands());
 
     // Right sidebar takes 20% width, so left takes 80%
     int leftWidth = static_cast<int>(width * 0.80);
-    mainSplitter->SplitVertically(leftContainer, m_historyPanel, leftWidth);
+    mainSplitter->SplitVertically(leftContainer, m_commandsPanel, leftWidth);
     mainSplitter->SetMinimumPaneSize(150);
 
     // Main sizer
@@ -152,12 +143,11 @@ void MainFrame::CreatePanels()
 
 void MainFrame::CreateStatusBar()
 {
-    wxStatusBar *statusBar = wxFrame::CreateStatusBar(3);
-    int widths[] = {-2, -1, -1};
-    statusBar->SetStatusWidths(3, widths);
+    wxStatusBar *statusBar = wxFrame::CreateStatusBar(2);
+    int widths[] = {-2, -1};
+    statusBar->SetStatusWidths(2, widths);
     statusBar->SetStatusText("Ready", 0);
     statusBar->SetStatusText("Population: 0", 1);
-    statusBar->SetStatusText("Tick: 0", 2);
 }
 
 void MainFrame::BindEvents()
@@ -172,16 +162,23 @@ void MainFrame::BindEvents()
             });
         } });
 
-    // Set up economy stats callback
-    m_economy->setStatsCallback([this](const EconomicStats &stats)
-                                { CallAfter([this, stats]()
-                                            { OnStatsUpdate(stats); }); });
+    // Set up simulation stats callback
+    m_simulation->SetStatsCallback([this](const Simulation::EconomicStats &stats)
+                                   { CallAfter([this, stats]()
+                                               { OnStatsUpdate(stats); }); });
 
     // Connect command panel events
     if (m_commandPanel)
     {
         m_commandPanel->SetCommandCallback([this](const wxString &cmd)
                                            { OnCommandExecuted(cmd); });
+    }
+
+    // Connect commands panel click callback
+    if (m_commandsPanel)
+    {
+        m_commandsPanel->SetCommandClickCallback([this](const wxString &cmd)
+                                                 { OnCommandClicked(cmd); });
     }
 
     // Set up command executor output
@@ -192,8 +189,12 @@ void MainFrame::BindEvents()
                 LogEntry entry;
                 entry.level = LogLevel::INFO;
                 entry.message = msg;
-                entry.tick = m_economy->getCurrentTick();
                 m_eventLog->AddEntry(entry);
+                
+                // Update selection panel after command execution
+                if (m_selectionPanel) {
+                    m_selectionPanel->UpdateSelection(m_simulation.get());
+                }
             });
         } });
 }
@@ -201,42 +202,80 @@ void MainFrame::BindEvents()
 void MainFrame::OnClose(wxCloseEvent &event)
 {
     m_uiTimer.Stop();
-    m_simTimer.Stop();
     event.Skip();
 }
 
 void MainFrame::OnTimer(wxTimerEvent &event)
 {
     // Update status bar
-    const auto &stats = m_economy->getStats();
-    SetStatusText(m_economy->isRunning() ? "Running" : "Paused", 0);
+    const auto &stats = m_simulation->GetStats();
+    SetStatusText("Manual", 0);
     SetStatusText(wxString::Format("Population: %d | Firms: %d",
                                    stats.population, stats.firms),
                   1);
-    SetStatusText(wxString::Format("Tick: %d (Year %d, Month %d)",
-                                   stats.currentTick,
-                                   stats.currentTick / Config::TICKS_PER_YEAR,
-                                   (stats.currentTick % Config::TICKS_PER_YEAR) + 1),
-                  2);
-}
 
-void MainFrame::OnSimulationTick(wxTimerEvent &event)
-{
-    if (m_economy && m_economy->isRunning())
+    // Update selection panel
+    if (m_selectionPanel)
     {
-        m_economy->tick();
+        m_selectionPanel->UpdateSelection(m_simulation.get());
     }
 }
 
 void MainFrame::OnCommandExecuted(const wxString &command)
 {
-    if (m_historyPanel)
+    // Update selection panel after command execution
+    if (m_selectionPanel)
     {
-        m_historyPanel->AddCommand(command);
+        m_selectionPanel->UpdateSelection(m_simulation.get());
     }
 }
 
-void MainFrame::OnStatsUpdate(const EconomicStats &stats)
+void MainFrame::OnCommandClicked(const wxString &command)
+{
+    // Insert the clicked command into the command panel
+    if (m_commandPanel)
+    {
+        m_commandPanel->SetCommandText(command);
+    }
+}
+
+void MainFrame::OnGlobalKeyDown(wxKeyEvent &event)
+{
+    if (!m_commandPanel)
+    {
+        event.Skip();
+        return;
+    }
+
+    wxTextCtrl *input = m_commandPanel->GetInputCtrl();
+    if (!input)
+    {
+        event.Skip();
+        return;
+    }
+
+    if (FindFocus() == input)
+    {
+        event.Skip();
+        return;
+    }
+
+    int keyCode = event.GetKeyCode();
+    bool printable = (keyCode >= 32 && keyCode < 127) && std::isprint(static_cast<unsigned char>(keyCode));
+    bool controlKey = (keyCode == WXK_BACK) || (keyCode == WXK_DELETE) || (keyCode == WXK_SPACE);
+
+    if (printable || controlKey)
+    {
+        input->SetFocus();
+        wxKeyEvent forwarded(event);
+        wxPostEvent(input, forwarded);
+        return;
+    }
+
+    event.Skip();
+}
+
+void MainFrame::OnStatsUpdate(const Simulation::EconomicStats &stats)
 {
     if (m_dashboard)
     {
@@ -246,16 +285,15 @@ void MainFrame::OnStatsUpdate(const EconomicStats &stats)
 
 void MainFrame::OnFileNew(wxCommandEvent &event)
 {
-    m_simTimer.Stop();
-    m_economy->reset();
-    m_economy->initialize(Config::INITIAL_POPULATION, Config::INITIAL_FIRMS);
+    m_simulation->Reset();
+    m_simulation->Initialize(Config::INITIAL_POPULATION, Config::INITIAL_FIRMS, 0);
     if (m_eventLog)
     {
         m_eventLog->Clear();
     }
-    if (m_historyPanel)
+    if (m_selectionPanel)
     {
-        m_historyPanel->Clear();
+        m_selectionPanel->UpdateSelection(m_simulation.get());
     }
 }
 
@@ -280,20 +318,6 @@ void MainFrame::OnFileExit(wxCommandEvent &event)
     Close(true);
 }
 
-void MainFrame::OnSimStart(wxCommandEvent &event)
-{
-    m_economy->setRunning(true);
-    m_simTimer.Start(Config::SIMULATION_TICK_INTERVAL);
-    LOG_INFO("Simulation started");
-}
-
-void MainFrame::OnSimPause(wxCommandEvent &event)
-{
-    m_economy->setRunning(false);
-    m_simTimer.Stop();
-    LOG_INFO("Simulation paused");
-}
-
 void MainFrame::OnSimReset(wxCommandEvent &event)
 {
     OnFileNew(event);
@@ -303,12 +327,11 @@ void MainFrame::OnHelpAbout(wxCommandEvent &event)
 {
     wxMessageBox(
         "CppConomy - Economic Simulator\n\n"
-        "A real-time object-oriented economic simulation engine.\n\n"
+        "A simplified economic simulation engine.\n\n"
         "Features:\n"
-        "• Agent-based modeling (Citizens & Firms)\n"
-        "• Phillips Curve, Okun's Law, Quantity Theory\n"
-        "• Government policy controls\n"
-        "• Stochastic economic shocks\n\n"
+        "• Person, Worker, Farmer, Owner\n"
+        "• Markets and basic policy tools\n"
+        "• Interactive commands and dashboard\n\n"
         "Built with wxWidgets and C++17",
         "About CppConomy",
         wxOK | wxICON_INFORMATION,

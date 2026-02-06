@@ -659,12 +659,6 @@ CMakeFiles/cppConomy.dir/src/gui/EventLogPanel.cpp.obj: \
  C:/msys64/ucrt64/include/wx-3.2/wx/msw/filedlg.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/mdi.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/msw/mdi.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/listctrl.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/listbase.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/itemattr.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/systhemectrl.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/withimages.h \
- C:/msys64/ucrt64/include/wx-3.2/wx/msw/listctrl.h \
  E:/works/code/C/cppConomy/src/utils/Logger.h \
  C:/msys64/ucrt64/include/c++/15.2.0/chrono \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/chrono.h \

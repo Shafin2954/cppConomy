@@ -670,4 +670,16 @@ CMakeFiles/cppConomy.dir/src/main.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/atomic_base.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/atomic_lockfree_defines.h \
  C:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
- C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h
+ C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
+ E:/works/code/C/cppConomy/src/core/Simulation.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/map \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tree.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_map.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_multimap.h \
+ E:/works/code/C/cppConomy/src/core/Person.h \
+ E:/works/code/C/cppConomy/src/core/Product.h \
+ E:/works/code/C/cppConomy/src/core/Worker.h \
+ E:/works/code/C/cppConomy/src/core/Farmer.h \
+ E:/works/code/C/cppConomy/src/core/Owner.h \
+ E:/works/code/C/cppConomy/src/core/Market.h \
+ E:/works/code/C/cppConomy/src/core/Government.h

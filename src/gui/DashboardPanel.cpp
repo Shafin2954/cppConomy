@@ -68,7 +68,7 @@ void DashboardPanel::CreateLayout()
     SetSizer(mainSizer);
 }
 
-void DashboardPanel::UpdateStats(const EconomicStats &stats)
+void DashboardPanel::UpdateStats(const Simulation::EconomicStats &stats)
 {
     // GDP
     m_lblGdp->SetLabel(FormatMoney(stats.gdp));

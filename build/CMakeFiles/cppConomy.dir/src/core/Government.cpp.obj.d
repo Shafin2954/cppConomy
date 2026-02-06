@@ -1,7 +1,6 @@
 CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: \
  E:\works\code\C\cppConomy\src\core\Government.cpp \
  E:\works\code\C\cppConomy\src\core\Government.h \
- E:/works/code/C/cppConomy/src/utils/Config.h \
  C:/msys64/ucrt64/include/c++/15.2.0/string \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/requires_hosted.h \
  C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \
@@ -100,45 +99,25 @@ CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator_args.h \
  C:/msys64/ucrt64/include/c++/15.2.0/tuple \
- E:/works/code/C/cppConomy/src/utils/Logger.h \
  C:/msys64/ucrt64/include/c++/15.2.0/vector \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_uninitialized.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_vector.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_bvector.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/vector.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/functional \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/std_function.h \
- C:/msys64/ucrt64/include/c++/15.2.0/typeinfo \
- C:/msys64/ucrt64/include/c++/15.2.0/unordered_map \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/unordered_map.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/hashtable.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/hashtable_policy.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/map \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tree.h \
  C:/msys64/ucrt64/include/c++/15.2.0/ext/aligned_buffer.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/enable_special_members.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/node_handle.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_map.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_multimap.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/erase_if.h \
- C:/msys64/ucrt64/include/c++/15.2.0/array \
- C:/msys64/ucrt64/include/c++/15.2.0/compare \
- C:/msys64/ucrt64/include/c++/15.2.0/chrono \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/chrono.h \
- C:/msys64/ucrt64/include/c++/15.2.0/ratio \
- C:/msys64/ucrt64/include/c++/15.2.0/cstdint \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
- C:/msys64/ucrt64/include/stdint.h \
- C:/msys64/ucrt64/include/c++/15.2.0/limits \
- C:/msys64/ucrt64/include/c++/15.2.0/ctime \
- C:/msys64/ucrt64/include/time.h C:/msys64/ucrt64/include/sys/timeb.h \
- C:/msys64/ucrt64/include/sec_api/sys/timeb_s.h \
- C:/msys64/ucrt64/include/_timeval.h \
- C:/msys64/ucrt64/include/pthread_time.h \
- C:/msys64/ucrt64/include/pthread_compat.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/parse_numbers.h \
  C:/msys64/ucrt64/include/c++/15.2.0/sstream \
  C:/msys64/ucrt64/include/c++/15.2.0/istream \
  C:/msys64/ucrt64/include/c++/15.2.0/ios \
  C:/msys64/ucrt64/include/c++/15.2.0/exception \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/exception_ptr.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/cxxabi_init_exception.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/typeinfo \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/nested_exception.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/ios_base.h \
  C:/msys64/ucrt64/include/c++/15.2.0/ext/atomicity.h \
@@ -149,6 +128,11 @@ CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: \
  C:/msys64/ucrt64/include/corecrt_startup.h \
  C:/msys64/ucrt64/include/signal.h \
  C:/msys64/ucrt64/include/pthread_signal.h \
+ C:/msys64/ucrt64/include/time.h C:/msys64/ucrt64/include/sys/timeb.h \
+ C:/msys64/ucrt64/include/sec_api/sys/timeb_s.h \
+ C:/msys64/ucrt64/include/_timeval.h \
+ C:/msys64/ucrt64/include/pthread_time.h \
+ C:/msys64/ucrt64/include/pthread_compat.h \
  C:/msys64/ucrt64/include/sched.h \
  C:/msys64/ucrt64/include/pthread_unistd.h \
  C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/atomic_word.h \
@@ -173,12 +157,11 @@ CMakeFiles/cppConomy.dir/src/core/Government.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.tcc \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/istream.tcc \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/sstream.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/iomanip \
- C:/msys64/ucrt64/include/c++/15.2.0/locale \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.h \
- C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/time_members.h \
- C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/messages_members.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/codecvt.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/locale_conv.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/quoted_string.h
+ C:/msys64/ucrt64/include/c++/15.2.0/algorithm \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_algo.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/algorithmfwd.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_heap.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/uniform_int_dist.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tempbuf.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_algorithm_defs.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/pstl/execution_defs.h

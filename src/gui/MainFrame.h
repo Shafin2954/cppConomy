@@ -3,13 +3,14 @@
 #include <wx/wx.h>
 #include <wx/timer.h>
 #include <memory>
+#include "../core/Simulation.h"
 
-class Economy;
 class CommandExecutor;
 class DashboardPanel;
 class EventLogPanel;
 class CommandPanel;
-class HistoryPanel;
+class SelectionPanel;
+class CommandsPanel;
 
 class MainFrame : public wxFrame
 {
@@ -27,41 +28,37 @@ private:
     // Event handlers
     void OnClose(wxCloseEvent &event);
     void OnTimer(wxTimerEvent &event);
-    void OnSimulationTick(wxTimerEvent &event);
     void OnCommandExecuted(const wxString &command);
-    void OnStatsUpdate(const struct EconomicStats &stats);
+    void OnStatsUpdate(const Simulation::EconomicStats &stats);
+    void OnCommandClicked(const wxString &command);
+    void OnGlobalKeyDown(wxKeyEvent &event);
 
     // Menu handlers
     void OnFileNew(wxCommandEvent &event);
     void OnFileExport(wxCommandEvent &event);
     void OnFileExit(wxCommandEvent &event);
-    void OnSimStart(wxCommandEvent &event);
-    void OnSimPause(wxCommandEvent &event);
     void OnSimReset(wxCommandEvent &event);
     void OnHelpAbout(wxCommandEvent &event);
 
     // Core components
-    std::unique_ptr<Economy> m_economy;
+    std::unique_ptr<Simulation> m_simulation;
     std::unique_ptr<CommandExecutor> m_executor;
 
     // GUI panels
     DashboardPanel *m_dashboard;
     EventLogPanel *m_eventLog;
     CommandPanel *m_commandPanel;
-    HistoryPanel *m_historyPanel;
+    SelectionPanel *m_selectionPanel;
+    CommandsPanel *m_commandsPanel;
 
     // Timers
     wxTimer m_uiTimer;
-    wxTimer m_simTimer;
 
     // Menu IDs
     enum
     {
-        ID_SIM_START = wxID_HIGHEST + 1,
-        ID_SIM_PAUSE,
-        ID_SIM_RESET,
-        ID_TIMER_UI,
-        ID_TIMER_SIM
+        ID_SIM_RESET = wxID_HIGHEST + 1,
+        ID_TIMER_UI
     };
 
     wxDECLARE_EVENT_TABLE();

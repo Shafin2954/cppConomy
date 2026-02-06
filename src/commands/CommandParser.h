@@ -10,8 +10,18 @@ using ParamValue = std::variant<int, double, std::string, bool>;
 
 struct Command
 {
+    enum class Type
+    {
+        Query,
+        Assignment
+    };
+
     std::string name;
     std::map<std::string, ParamValue> params;
+    std::string propertyAccess;     // For syntax like person(name='x').age or system.gdp
+    Type commandType = Type::Query; // Query or Assignment
+    std::string assignmentProperty; // Property being assigned to (for assignments)
+    ParamValue assignmentValue;     // Value being assigned
     bool valid = false;
     std::string errorMessage;
 };
@@ -45,9 +55,12 @@ public:
 
 private:
     std::string extractName(const std::string &input) const;
-    std::map<std::string, ParamValue> extractParams(const std::string &input) const;
+    std::map<std::string, ParamValue> extractParams(const std::string &input,
+                                                    const std::string &commandName) const;
     ParamValue parseValue(const std::string &value) const;
     std::string trim(const std::string &str) const;
+
+    const CommandInfo *findCommandInfo(const std::string &commandName) const;
 
     std::vector<CommandInfo> m_commands;
 };

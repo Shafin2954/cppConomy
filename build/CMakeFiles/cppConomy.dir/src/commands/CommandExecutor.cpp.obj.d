@@ -122,9 +122,7 @@ CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/cxxabi_init_exception.h \
  C:/msys64/ucrt64/include/c++/15.2.0/typeinfo \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/nested_exception.h \
- E:/works/code/C/cppConomy/src/core/Economy.h \
- E:/works/code/C/cppConomy/src/core/Person.h \
- E:/works/code/C/cppConomy/src/core/Agent.h \
+ E:/works/code/C/cppConomy/src/core/Simulation.h \
  C:/msys64/ucrt64/include/c++/15.2.0/memory \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tempbuf.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_raw_storage_iter.h \
@@ -156,53 +154,6 @@ CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
  C:/msys64/ucrt64/include/c++/15.2.0/pstl/execution_defs.h \
- E:/works/code/C/cppConomy/src/utils/Config.h \
- E:/works/code/C/cppConomy/src/utils/Statistics.h \
- C:/msys64/ucrt64/include/c++/15.2.0/cmath \
- C:/msys64/ucrt64/include/math.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/specfun.h \
- C:/msys64/ucrt64/include/c++/15.2.0/limits \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/gamma.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/special_function_util.h \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/bessel_function.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/beta_function.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/ell_integral.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/exp_integral.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/hypergeometric.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/legendre_function.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/modified_bessel_func.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_hermite.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_laguerre.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/tr1/riemann_zeta.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/numeric \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_numeric.h \
- C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
- C:/msys64/ucrt64/include/c++/15.2.0/algorithm \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_algo.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/algorithmfwd.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_heap.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/uniform_int_dist.h \
- C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_algorithm_defs.h \
- C:/msys64/ucrt64/include/c++/15.2.0/random \
- C:/msys64/ucrt64/include/c++/15.2.0/cstdint \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
- C:/msys64/ucrt64/include/stdint.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/random.h \
- C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/opt_random.h \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/xmmintrin.h \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mmintrin.h \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mwaitintrin.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/random.tcc \
- E:/works/code/C/cppConomy/src/core/Firm.h \
- E:/works/code/C/cppConomy/src/core/Government.h \
- E:/works/code/C/cppConomy/src/core/Market.h \
- C:/msys64/ucrt64/include/c++/15.2.0/queue \
- C:/msys64/ucrt64/include/c++/15.2.0/deque \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_deque.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/deque.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_queue.h \
  C:/msys64/ucrt64/include/c++/15.2.0/functional \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/std_function.h \
  C:/msys64/ucrt64/include/c++/15.2.0/unordered_map \
@@ -211,6 +162,13 @@ CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/hashtable_policy.h \
  C:/msys64/ucrt64/include/c++/15.2.0/array \
  C:/msys64/ucrt64/include/c++/15.2.0/compare \
+ E:/works/code/C/cppConomy/src/core/Person.h \
+ E:/works/code/C/cppConomy/src/core/Product.h \
+ E:/works/code/C/cppConomy/src/core/Worker.h \
+ E:/works/code/C/cppConomy/src/core/Farmer.h \
+ E:/works/code/C/cppConomy/src/core/Owner.h \
+ E:/works/code/C/cppConomy/src/core/Market.h \
+ E:/works/code/C/cppConomy/src/core/Government.h \
  C:/msys64/ucrt64/include/c++/15.2.0/sstream \
  C:/msys64/ucrt64/include/c++/15.2.0/istream \
  C:/msys64/ucrt64/include/c++/15.2.0/ios \
@@ -240,6 +198,10 @@ CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/chrono \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/chrono.h \
  C:/msys64/ucrt64/include/c++/15.2.0/ratio \
+ C:/msys64/ucrt64/include/c++/15.2.0/cstdint \
+ C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
+ C:/msys64/ucrt64/include/stdint.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/limits \
  C:/msys64/ucrt64/include/c++/15.2.0/ctime \
  C:/msys64/ucrt64/include/c++/15.2.0/iomanip \
  C:/msys64/ucrt64/include/c++/15.2.0/locale \
@@ -249,8 +211,4 @@ CMakeFiles/cppConomy.dir/src/commands/CommandExecutor.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/codecvt.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.tcc \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/locale_conv.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/quoted_string.h \
- C:/msys64/ucrt64/include/c++/15.2.0/fstream \
- C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/basic_file.h \
- C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++io.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/fstream.tcc
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/quoted_string.h

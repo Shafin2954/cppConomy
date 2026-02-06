@@ -1,14 +1,14 @@
 #pragma once
 
 #include <wx/wx.h>
-#include "../core/Economy.h"
+#include "../core/Simulation.h"
 
 class DashboardPanel : public wxPanel
 {
 public:
     DashboardPanel(wxWindow *parent);
 
-    void UpdateStats(const EconomicStats &stats);
+    void UpdateStats(const Simulation::EconomicStats &stats);
 
 private:
     void CreateLayout();

@@ -5,7 +5,6 @@ namespace Config
     // Simulation
     constexpr int INITIAL_POPULATION = 1000;
     constexpr int INITIAL_FIRMS = 50;
-    constexpr int TICKS_PER_YEAR = 12; // Monthly ticks
 
     // Economic
     constexpr double INITIAL_MONEY_SUPPLY = 1e12;
@@ -46,5 +45,4 @@ namespace Config
 
     // GUI update interval (ms)
     constexpr int GUI_UPDATE_INTERVAL = 100;
-    constexpr int SIMULATION_TICK_INTERVAL = 500;
 }

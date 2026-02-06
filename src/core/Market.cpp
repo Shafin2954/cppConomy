@@ -1,161 +1,130 @@
 #include "Market.h"
-#include "Person.h"
-#include "Firm.h"
-#include "../utils/Statistics.h"
-#include "../utils/Logger.h"
-#include <algorithm>
 #include <sstream>
+#include <algorithm>
 
-void Market::addJobOpening(Firm *firm, int positions)
+Market::Market(const std::string &product_name)
+    : m_product_name(product_name),
+      m_quantity_demanded(0.0),
+      m_quantity_supplied(0.0),
+      m_current_price(0.0),
+      m_equilibrium_price(0.0),
+      m_last_price(0.0),
+      m_shortage_surplus(0.0),
+      m_tax_rate(0.0),
+      m_subsidy_rate(0.0),
+      m_min_wage(0.0),
+      m_price_ceiling(0.0),
+      m_price_floor(0.0),
+      m_total_sales_value(0.0)
 {
-    if (!firm || positions <= 0)
-        return;
-    m_jobOpenings.push_back({firm, positions, firm->getWage()});
 }
 
-void Market::addJobSeeker(Person *person)
+void Market::FindEquilibrium()
 {
-    if (!person)
-        return;
-    // Reservation wage is 80% of average wage
-    m_jobSeekers.push_back({person, m_averageWage * 0.8});
-}
-
-void Market::clearLaborMarket()
-{
-    auto &rng = Statistics::Random::getInstance();
-
-    // Shuffle job seekers for random matching
-    std::vector<JobSeeker> shuffled = m_jobSeekers;
-    for (size_t i = shuffled.size() - 1; i > 0; --i)
+    // Simplified equilibrium: set price where demand == supply
+    if (m_quantity_demanded + m_quantity_supplied > 0)
     {
-        size_t j = rng.uniformInt(0, static_cast<int>(i));
-        std::swap(shuffled[i], shuffled[j]);
+        m_equilibrium_price = m_current_price;
     }
-
-    int hires = 0;
-
-    for (auto &seeker : shuffled)
+    else
     {
-        if (seeker.person->isEmployed())
-            continue;
+        m_equilibrium_price = 0.0;
+    }
+}
 
-        // Find a matching job
-        for (auto &opening : m_jobOpenings)
+void Market::AdjustPrice()
+{
+    m_shortage_surplus = m_quantity_demanded - m_quantity_supplied;
+
+    // Only adjust price if there's actual supply/demand activity
+    if (m_quantity_demanded > 0 || m_quantity_supplied > 0)
+    {
+        if (m_shortage_surplus > 0)
         {
-            if (opening.positions <= 0)
-                continue;
-            if (opening.wage < seeker.reservationWage)
-                continue;
-
-            // Check skill match
-            double skillLevel = seeker.person->getSkillLevel(opening.firm->getSector());
-            if (skillLevel < 0.2 && rng.uniform() > 0.3)
-                continue; // Low skill, low chance
-
-            // Hire!
-            opening.firm->hire(seeker.person);
-            opening.positions--;
-            hires++;
-            break;
+            m_current_price *= 1.02; // shortage -> price rises
+        }
+        else if (m_shortage_surplus < 0)
+        {
+            m_current_price *= 0.98; // surplus -> price falls
         }
     }
+    // If no supply/demand, price stays as set by user
 
-    // Update average wage
-    double totalWages = 0.0;
-    int wageCount = 0;
-    for (const auto &opening : m_jobOpenings)
-    {
-        totalWages += opening.wage * (opening.positions + 1);
-        wageCount += opening.positions + 1;
-    }
-    if (wageCount > 0)
-    {
-        m_averageWage = totalWages / wageCount;
-    }
-
-    if (hires > 0)
-    {
-        LOG_INFO("Labor market: " + std::to_string(hires) + " workers hired");
-    }
-
-    // Clear for next tick
-    m_jobOpenings.clear();
-    m_jobSeekers.clear();
+    if (m_current_price < 0)
+        m_current_price = 0;
 }
 
-void Market::addSupply(Firm *firm, double quantity, double price)
+void Market::ApplyTaxAndSubsidy()
 {
-    if (!firm || quantity <= 0)
-        return;
-    m_supplies.push_back({firm, quantity, price});
-    m_totalSupply += quantity;
+    // Taxes raise effective price; subsidies lower it
+    double net_effect = m_tax_rate - m_subsidy_rate;
+    if (net_effect > 0)
+        m_current_price *= (1.0 + net_effect);
+    else if (net_effect < 0)
+        m_current_price *= (1.0 + net_effect);
 }
 
-void Market::addDemand(double amount)
+void Market::EnforcePriceCeiling()
 {
-    m_totalDemand += amount;
+    if (m_price_ceiling > 0.0 && m_current_price > m_price_ceiling)
+        m_current_price = m_price_ceiling;
 }
 
-void Market::clearGoodsMarket()
+void Market::EnforcePriceFloor()
 {
-    if (m_supplies.empty() || m_totalDemand <= 0)
-    {
-        m_supplies.clear();
-        m_totalDemand = 0;
-        m_totalSupply = 0;
-        return;
-    }
-
-    // Sort by price (lowest first - competitive market)
-    std::sort(m_supplies.begin(), m_supplies.end(),
-              [](const Supply &a, const Supply &b)
-              { return a.price < b.price; });
-
-    double remainingDemand = m_totalDemand;
-    double totalValue = 0.0;
-    double totalQuantity = 0.0;
-
-    for (auto &supply : m_supplies)
-    {
-        if (remainingDemand <= 0)
-            break;
-
-        double soldQuantity = std::min(supply.quantity, remainingDemand);
-        supply.firm->sellGoods(soldQuantity, supply.price);
-
-        totalValue += soldQuantity * supply.price;
-        totalQuantity += soldQuantity;
-        remainingDemand -= soldQuantity;
-    }
-
-    // Update average price
-    if (totalQuantity > 0)
-    {
-        m_averagePrice = totalValue / totalQuantity;
-    }
-
-    // Clear for next tick
-    m_supplies.clear();
-    m_totalDemand = 0;
-    m_totalSupply = 0;
+    if (m_price_floor > 0.0 && m_current_price < m_price_floor)
+        m_current_price = m_price_floor;
 }
 
-int Market::getJobOpenings() const
+double Market::CalculatePriceElasticity(double price_change_percent,
+                                        double quantity_change_percent)
 {
-    int total = 0;
-    for (const auto &opening : m_jobOpenings)
-    {
-        total += opening.positions;
-    }
-    return total;
+    if (price_change_percent == 0)
+        return 0.0;
+
+    return quantity_change_percent / price_change_percent;
 }
 
-void Market::reset()
+void Market::ApplyElasticity(double elasticity_coefficient)
 {
-    m_jobOpenings.clear();
-    m_jobSeekers.clear();
-    m_supplies.clear();
-    m_totalDemand = 0;
-    m_totalSupply = 0;
+    // Higher elasticity => more responsive demand
+    m_quantity_demanded *= (1.0 + (elasticity_coefficient - 1.0) * 0.05);
+}
+
+void Market::AddToGDP(double transaction_value)
+{
+    m_total_sales_value += transaction_value;
+}
+
+double Market::CalculateInflation()
+{
+    if (m_last_price <= 0)
+        return 0.0;
+    return (m_current_price - m_last_price) / m_last_price;
+}
+
+void Market::RecordPrice(double price)
+{
+    m_last_price = price;
+    m_price_history.push_back(price);
+}
+
+std::string Market::GetInfoString() const
+{
+    std::ostringstream ss;
+    ss << "Market: " << m_product_name << "\n";
+    ss << "Price: " << m_current_price << ", Equilibrium: " << m_equilibrium_price << "\n";
+    ss << "Demand: " << m_quantity_demanded << ", Supply: " << m_quantity_supplied << "\n";
+    ss << "Shortage/Surplus: " << m_shortage_surplus << "\n";
+    ss << "Tax: " << m_tax_rate << ", Subsidy: " << m_subsidy_rate << "\n";
+    return ss.str();
+}
+
+std::string Market::GetEquilibriumAnalysis() const
+{
+    std::ostringstream ss;
+    ss << "Equilibrium Analysis for " << m_product_name << "\n";
+    ss << "Qd: " << m_quantity_demanded << ", Qs: " << m_quantity_supplied << "\n";
+    ss << "Price: " << m_current_price << ", Eq Price: " << m_equilibrium_price << "\n";
+    return ss.str();
 }

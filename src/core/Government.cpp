@@ -1,116 +1,136 @@
 #include "Government.h"
-#include "../utils/Logger.h"
 #include <sstream>
-#include <iomanip>
+#include <algorithm>
 
 Government::Government()
-    : m_taxRate(0.20), m_corporateTaxRate(0.21), m_interestRate(0.05), m_moneySupply(Config::INITIAL_MONEY_SUPPLY), m_budget(1e11) // 100 billion starting budget
-      ,
-      m_debt(0.0), m_spending(0.0), m_taxRevenue(0.0)
+    : m_income_tax_rate(0.1),
+      m_corporate_tax_rate(0.15),
+      m_government_spending(1000.0),
+      m_tax_revenue_collected(0.0),
+      m_government_debt(0.0),
+      m_budget_deficit(0.0),
+      m_money_supply(100000.0),
+      m_interest_rate(0.03),
+      m_minimum_wage(10.0),
+      m_nominal_gdp(0.0),
+      m_real_gdp(0.0),
+      m_inflation_rate(0.0),
+      m_unemployment_rate(0.0),
+      m_cpi(100.0),
+      m_total_population(0),
+      m_literacy_rate(80),
+      m_mortality_rate(0.01)
 {
 }
 
-void Government::adjustTax(double rate, const std::string &target)
+void Government::SetIncomeTaxRate(double rate)
 {
-    rate = std::max(0.0, std::min(1.0, rate)); // Clamp to [0, 1]
+    m_income_tax_rate = std::clamp(rate, 0.0, 1.0);
+}
 
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(1);
+void Government::SetCorporateTaxRate(double rate)
+{
+    m_corporate_tax_rate = std::clamp(rate, 0.0, 1.0);
+}
 
-    if (target == "corporate" || target == "business")
-    {
-        double oldRate = m_corporateTaxRate;
-        m_corporateTaxRate = rate;
-        ss << "Corporate tax adjusted: " << (oldRate * 100) << "% -> " << (rate * 100) << "%";
-    }
-    else if (target == "income" || target == "personal")
-    {
-        double oldRate = m_taxRate;
-        m_taxRate = rate;
-        ss << "Income tax adjusted: " << (oldRate * 100) << "% -> " << (rate * 100) << "%";
-    }
+void Government::SetGovernmentSpending(double amount)
+{
+    m_government_spending = std::max(0.0, amount);
+}
+
+void Government::CollectTaxes(double total_income, double total_profits)
+{
+    double income_tax = total_income * m_income_tax_rate;
+    double corp_tax = total_profits * m_corporate_tax_rate;
+    m_tax_revenue_collected = income_tax + corp_tax;
+}
+
+void Government::SetMoneySupply(double amount)
+{
+    m_money_supply = std::max(0.0, amount);
+}
+
+void Government::SetInterestRate(double rate)
+{
+    m_interest_rate = std::max(0.0, rate);
+}
+
+void Government::SetMinimumWage(double wage)
+{
+    m_minimum_wage = std::max(0.0, wage);
+}
+
+void Government::GrantSubsidy(const std::string &sector, double amount)
+{
+    m_subsidies[sector] = amount;
+}
+
+void Government::CalculateNominalGDP(double total_production_value)
+{
+    m_nominal_gdp = total_production_value;
+}
+
+void Government::CalculateRealGDP(double cpi_index)
+{
+    if (cpi_index <= 0)
+        m_real_gdp = m_nominal_gdp;
     else
-    {
-        // Adjust both
-        double oldIncome = m_taxRate;
-        double oldCorp = m_corporateTaxRate;
-        m_taxRate = rate;
-        m_corporateTaxRate = rate;
-        ss << "All taxes adjusted to " << (rate * 100) << "%";
-    }
-
-    LOG_SUCCESS(ss.str());
+        m_real_gdp = m_nominal_gdp / (cpi_index / 100.0);
 }
 
-void Government::setInterestRate(double rate)
+void Government::CalculateInflation(double previous_cpi, double current_cpi)
 {
-    rate = std::max(0.0, std::min(0.25, rate)); // Clamp to [0%, 25%]
-
-    double oldRate = m_interestRate;
-    m_interestRate = rate;
-
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(2);
-    ss << "Interest rate adjusted: " << (oldRate * 100) << "% -> " << (rate * 100) << "%";
-    LOG_SUCCESS(ss.str());
-}
-
-void Government::injectMoney(double amount)
-{
-    m_moneySupply += amount;
-    m_debt += amount; // Simplification: money injection increases debt
-
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(0);
-    ss << "Money supply increased by $" << amount << " (QE)";
-    LOG_SUCCESS(ss.str());
-}
-
-void Government::grantStimulus(double amount, const std::string &sector)
-{
-    if (amount > m_budget)
-    {
-        // Borrow the difference
-        double deficit = amount - m_budget;
-        m_debt += deficit;
-        m_budget = 0;
-        LOG_WARNING("Deficit spending: borrowed $" + std::to_string(static_cast<long long>(deficit)));
-    }
+    if (previous_cpi <= 0)
+        m_inflation_rate = 0.0;
     else
-    {
-        m_budget -= amount;
-    }
-
-    m_spending += amount;
-
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(0);
-    ss << "Stimulus of $" << amount << " granted";
-    if (sector != "all")
-    {
-        ss << " to " << sector << " sector";
-    }
-    LOG_SUCCESS(ss.str());
+        m_inflation_rate = (current_cpi - previous_cpi) / previous_cpi;
 }
 
-void Government::collectTaxes(double income)
+void Government::UpdateCPI(double new_cpi)
 {
-    double taxCollected = income * m_taxRate;
-    m_budget += taxCollected;
-    m_taxRevenue += taxCollected;
+    m_cpi = new_cpi;
 }
 
-void Government::spend(double amount)
+void Government::UpdateUnemploymentRate(int unemployed, int total_labor_force)
 {
-    if (amount > m_budget)
-    {
-        double deficit = amount - m_budget;
-        m_debt += deficit;
-        m_budget = 0;
-    }
+    if (total_labor_force <= 0)
+        m_unemployment_rate = 0.0;
     else
+        m_unemployment_rate = static_cast<double>(unemployed) / total_labor_force;
+}
+
+void Government::UpdateBudget()
+{
+    m_budget_deficit = m_government_spending - m_tax_revenue_collected;
+    if (m_budget_deficit > 0)
+        m_government_debt += m_budget_deficit;
+}
+
+std::vector<double> Government::CalculatePPF(double total_labor, double total_capital)
+{
+    // Simplified PPF: linear tradeoff for now
+    // Output = a * labor + b * capital
+    std::vector<double> curve;
+    int points = 10;
+    for (int i = 0; i <= points; ++i)
     {
-        m_budget -= amount;
+        double share = static_cast<double>(i) / points;
+        double rice = total_labor * (1.0 - share);
+        double ice_cream = total_capital * share;
+        curve.push_back(rice);
+        curve.push_back(ice_cream);
     }
-    m_spending += amount;
+    return curve;
+}
+
+std::string Government::GetInfoString() const
+{
+    std::ostringstream ss;
+    ss << "Government Policies\n";
+    ss << "Income Tax: " << m_income_tax_rate << ", Corporate Tax: " << m_corporate_tax_rate << "\n";
+    ss << "Spending: " << m_government_spending << ", Debt: " << m_government_debt << "\n";
+    ss << "Money Supply: " << m_money_supply << ", Interest Rate: " << m_interest_rate << "\n";
+    ss << "Minimum Wage: " << m_minimum_wage << "\n";
+    ss << "GDP: " << m_nominal_gdp << ", Inflation: " << m_inflation_rate << "\n";
+    return ss.str();
 }

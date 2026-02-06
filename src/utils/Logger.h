@@ -20,7 +20,6 @@ struct LogEntry
     LogLevel level;
     std::string message;
     std::string timestamp;
-    int tick;
 };
 
 class Logger
@@ -39,18 +38,12 @@ public:
         m_callback = callback;
     }
 
-    void setCurrentTick(int tick)
-    {
-        m_currentTick = tick;
-    }
-
     void log(LogLevel level, const std::string &message)
     {
         LogEntry entry;
         entry.level = level;
         entry.message = message;
         entry.timestamp = getCurrentTimestamp();
-        entry.tick = m_currentTick;
 
         m_entries.push_back(entry);
 
@@ -91,7 +84,7 @@ public:
     }
 
 private:
-    Logger() : m_currentTick(0) {}
+    Logger() = default;
     Logger(const Logger &) = delete;
     Logger &operator=(const Logger &) = delete;
 
@@ -106,7 +99,6 @@ private:
 
     std::vector<LogEntry> m_entries;
     LogCallback m_callback;
-    int m_currentTick;
 };
 
 // Convenience macros

@@ -659,9 +659,11 @@ CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj: \
  C:/msys64/ucrt64/include/wx-3.2/wx/msw/filedlg.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/mdi.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/msw/mdi.h \
- E:/works/code/C/cppConomy/src/core/Economy.h \
- E:/works/code/C/cppConomy/src/core/Person.h \
- E:/works/code/C/cppConomy/src/core/Agent.h \
+ E:/works/code/C/cppConomy/src/core/Simulation.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/map \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tree.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_map.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_multimap.h \
  C:/msys64/ucrt64/include/c++/15.2.0/memory \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_raw_storage_iter.h \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/align.h \
@@ -674,26 +676,13 @@ CMakeFiles/cppConomy.dir/src/gui/DashboardPanel.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/atomic_lockfree_defines.h \
  C:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:/works/code/C/cppConomy/src/utils/Config.h \
- E:/works/code/C/cppConomy/src/utils/Statistics.h \
- C:/msys64/ucrt64/include/c++/15.2.0/numeric \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_numeric.h \
- C:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
- C:/msys64/ucrt64/include/c++/15.2.0/random \
- C:/msys64/ucrt64/include/c++/15.2.0/cstdint \
- C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
- C:/msys64/ucrt64/include/stdint.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/random.h \
- C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/opt_random.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/random.tcc \
- E:/works/code/C/cppConomy/src/core/Firm.h \
- E:/works/code/C/cppConomy/src/core/Government.h \
+ E:/works/code/C/cppConomy/src/core/Person.h \
+ E:/works/code/C/cppConomy/src/core/Product.h \
+ E:/works/code/C/cppConomy/src/core/Worker.h \
+ E:/works/code/C/cppConomy/src/core/Farmer.h \
+ E:/works/code/C/cppConomy/src/core/Owner.h \
  E:/works/code/C/cppConomy/src/core/Market.h \
- C:/msys64/ucrt64/include/c++/15.2.0/queue \
- C:/msys64/ucrt64/include/c++/15.2.0/deque \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_deque.h \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/deque.tcc \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_queue.h \
+ E:/works/code/C/cppConomy/src/core/Government.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/statline.h \
  C:/msys64/ucrt64/include/wx-3.2/wx/msw/statline.h \
  C:/msys64/ucrt64/include/c++/15.2.0/sstream \
