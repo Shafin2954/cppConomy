@@ -1,3 +1,0 @@
-E:/works/code/C/cppConomy/build/CMakeFiles/cppConomy.dir
-E:/works/code/C/cppConomy/build/CMakeFiles/edit_cache.dir
-E:/works/code/C/cppConomy/build/CMakeFiles/rebuild_cache.dir
