@@ -4,7 +4,7 @@ With this cli tool we can see the effect of changing any economic variables on o
 
 Be your own government!
 
-To run:
+To download:
 
 ```
 git clone https://github.com/Shafin2954/cppConomy.git
