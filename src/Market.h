@@ -6,8 +6,6 @@
 #include "Product.h"
 #include "EconomicEquations.h"
 
-using namespace std;
-
 // ============================================================================
 // Market.h - The marketplace where transactions occur and prices are determined
 //
@@ -18,7 +16,7 @@ using namespace std;
 class Market
 {
 private:
-    string product_name; // What is traded: "rice", "cloth", etc.
+    std::string product_name; // What is traded: "rice", "cloth", etc.
 
     // ========== Supply & Demand Functions ==========
     EconomicEquations::DemandFunction demand; // Qd = a - b*P
@@ -45,8 +43,8 @@ private:
     double price_floor;   // Minimum allowed price (causes surplus if binding)
 
     // ========== Market Aggregates (for GDP & Inflation) ==========
-    double total_sales_value;     // Sum of all transactions: Σ(Price * Quantity)
-    vector<double> price_history; // Track prices over time for inflation calc
+    double total_sales_value;          // Sum of all transactions: Σ(Price * Quantity)
+    std::vector<double> price_history; // Track prices over time for inflation calc
 
     // ========== Economic Metrics ==========
     double consumer_surplus; // Area under demand curve - price paid
@@ -54,11 +52,11 @@ private:
     double deadweight_loss;  // Loss from market inefficiency
 
     // Inventory tracking
-    map<string, double> inventory;
+    std::map<std::string, double> inventory;
 
 public:
     // ========== Constructors ==========
-    Market(const string &product_name);
+    Market(const std::string &product_name);
 
     // ========== Demand & Supply Setup ==========
     // These define the shape of the demand and supply curves
@@ -84,7 +82,7 @@ public:
     const EconomicEquations::SupplyFunction &GetSupplyFunction() const { return supply; }
 
     // ========== Getters ==========
-    string GetProductName() const { return product_name; }
+    std::string GetProductName() const { return product_name; }
     double GetQuantityDemanded() const { return quantity_demanded; }
     double GetQuantitySupplied() const { return quantity_supplied; }
     double GetCurrentPrice() const { return current_price; }
@@ -163,8 +161,8 @@ public:
     void CalculateWelfare();
 
     // Display the demand and supply equations
-    string GetDemandEquation() const;
-    string GetSupplyEquation() const;
+    std::string GetDemandEquation() const;
+    std::string GetSupplyEquation() const;
 
     // ========== GDP & Inflation Calculations ==========
 
@@ -190,8 +188,8 @@ public:
     void TriggerNaturalDisaster();
 
     // ========== Display ==========
-    string GetInfoString() const;
-    string GetEquilibriumAnalysis() const;
-    string GetElasticityAnalysis() const;
-    string GetWelfareAnalysis() const;
+    std::string GetInfoString() const;
+    std::string GetEquilibriumAnalysis() const;
+    std::string GetElasticityAnalysis() const;
+    std::string GetWelfareAnalysis() const;
 };

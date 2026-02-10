@@ -7,8 +7,6 @@
 #include <cmath>
 #include <algorithm>
 
-using namespace std;
-
 // ============================================================================
 // EconomicEquations.h - Core system for economic relationships and formulas
 //
@@ -23,14 +21,14 @@ public:
     // ========== Variable Change Log Entry ==========
     struct VariableChange
     {
-        string variableName;
+        std::string variableName;
         double oldValue;
         double newValue;
         double percentChange;
-        string description;
-        vector<string> affectedVariables; // What this change impacts
+        std::string description;
+        std::vector<std::string> affectedVariables; // What this change impacts
 
-        string ToString() const;
+        std::string ToString() const;
     };
 
     // ========== Market Equilibrium & Price Discovery ==========
@@ -62,8 +60,8 @@ public:
 
     // ========== Equilibrium Solver ==========
     // Solves: Qd = Qs
-    // Returns: pair<equilibriuprice, equilibriuquantity>
-    static pair<double, double> FindEquilibrium(
+    // Returns: std::pair<equilibriuprice, equilibriuquantity>
+    static std::pair<double, double> FindEquilibrium(
         const DemandFunction &demand,
         const SupplyFunction &supply)
     {
@@ -179,7 +177,7 @@ public:
         return price * quantity;
     }
 
-    static string GetRevenueRecommendation(double elasticity, double currentPrice)
+    static std::string GetRevenueRecommendation(double elasticity, double currentPrice)
     {
         if (elasticity > 1.0)
         {
@@ -255,7 +253,7 @@ public:
             return ca;
         }
 
-        string ToString(double price) const;
+        std::string ToString(double price) const;
     };
 
     // ========== Marginal Utility & Equi-Marginal Principle ==========
@@ -375,7 +373,7 @@ public:
     // 1 = Perfect inequality
     // Formula: G = (2 * Σ(i * income_i)) / (n * Σ income_i) - (n+1)/n
 
-    static double CalculateGiniCoefficient(const vector<double> &incomes)
+    static double CalculateGiniCoefficient(const std::vector<double> &incomes)
     {
         if (incomes.empty())
             return 0;
@@ -385,7 +383,7 @@ public:
         double totalIncome = 0;
 
         // Sort incomes (in practice, from lowest to highest)
-        vector<double> sortedIncomes = incomes;
+        std::vector<double> sortedIncomes = incomes;
         sort(sortedIncomes.begin(), sortedIncomes.end());
 
         for (int i = 0; i < n; i++)

@@ -2,7 +2,6 @@
 
 #include "Consumer.h"
 
-using namespace std;
 
 // ============================================================================
 // Farmer.h - Inherits from Consumer
@@ -25,7 +24,7 @@ private:
     double weather_factor; // 1.0 = normal, 1.5 = bumper harvest, 0.2 = disaster
 
     // ========== Output & Revenue ==========
-    string crop;                     // "rice", "wheat", etc.
+    std::string crop;                     // "rice", "wheat", etc.
     double output_quantity;          // Total output this period
     double previous_output_quantity; // Previous period output (for tracking changes)
     double output_price;             // Market price for the output
@@ -48,8 +47,8 @@ private:
 
 public:
     // ========== Constructors ==========
-    Farmer(int id, const string &name, double initial_income,
-           double land, const string &crop);
+    Farmer(int id, const std::string &name, double initial_income,
+           double land, const std::string &crop);
 
     // ========== Getters ==========
     double GetLandSize() const { return land_size; }
@@ -57,7 +56,7 @@ public:
     double GetTechnologyLevel() const { return technology_level; }
     double GetFertilizerUnits() const { return fertilizer_units; }
     double GetWeatherFactor() const { return weather_factor; }
-    string GetCrop() const { return crop; }
+    std::string GetCrop() const { return crop; }
     double GetOutputQuantity() const { return output_quantity; }
     double GetRevenue() const { return revenue; }
     double GetFixedCost() const { return fixed_cost; }
@@ -76,7 +75,7 @@ public:
     void Fire(int workers);
 
     // Plant crop: prepares for harvest
-    void Plant(const string &new_crop);
+    void Plant(const std::string &new_crop);
 
     // Harvest: executes production function
     // Output = (labor_hired * technology_level) * land_size * weather_factor
@@ -138,5 +137,5 @@ public:
     void DecideInvestment();
 
     // ========== Display ==========
-    string GetInfoString() const override;
+    std::string GetInfoString() const override;
 };

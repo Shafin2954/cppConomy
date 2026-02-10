@@ -13,8 +13,6 @@
 #include "Government.h"
 #include "EconomicPropagation.h"
 
-using namespace std;
-
 // ============================================================================
 // Simulation.h - Central controller managing the entire economic simulation
 //
@@ -61,33 +59,33 @@ public:
         int firms = 0;
     };
 
-    using StatsCallback = function<void(const EconomicStats &)>;
+    using StatsCallback = std::function<void(const EconomicStats &)>;
 
 private:
     // ========== Agents (Economic Participants) ==========
-    vector<unique_ptr<Worker>> workers;
-    vector<unique_ptr<Farmer>> farmers;
-    vector<unique_ptr<Owner>> owners;
+    std::vector<std::unique_ptr<Worker>> workers;
+    std::vector<std::unique_ptr<Farmer>> farmers;
+    std::vector<std::unique_ptr<Owner>> owners;
 
     // ========== Markets (Places of Exchange) ==========
-    map<string, unique_ptr<Market>> markets; // product_name -> Market
+    std::map<std::string, std::unique_ptr<Market>> markets; // product_name -> Market
 
     // ========== Government (Policy Maker) ==========
-    unique_ptr<Government> government;
+    std::unique_ptr<Government> government;
 
     // ========== Variable Change Tracking ==========
     struct VariableRelation
     {
-        string target;
+        std::string target;
         RelationEffect effect;
     };
 
-    map<string, vector<VariableRelation>> variableRelations;
+    std::map<std::string, std::vector<VariableRelation>> variableRelations;
 
     // ========== Propagation Engine ==========
     // The core system that connects all economic variables
     // Processes events through 3 tiers: Immediate → Decisions → Delayed
-    unique_ptr<EconomicPropagation> propagator;
+    std::unique_ptr<EconomicPropagation> propagator;
 
     // Tick counter: tracks simulation time steps
     // Each Step() advances by one tick; used by propagation for delayed effects
@@ -142,31 +140,31 @@ public:
     // ========== Agent Management ==========
 
     // Add agents
-    void AddWorker(const string &name, double income, double skill);
-    void AddFarmer(const string &name, double land, const string &crop);
-    void AddOwner(const string &name, double capital,
-                  const string &product, bool is_monopoly);
+    void AddWorker(const std::string &name, double income, double skill);
+    void AddFarmer(const std::string &name, double land, const std::string &crop);
+    void AddOwner(const std::string &name, double capital,
+                  const std::string &product, bool is_monopoly);
 
     // Get agents
-    Worker *FindWorker(const string &name);
-    Farmer *FindFarmer(const string &name);
-    Owner *FindOwner(const string &name);
+    Worker *FindWorker(const std::string &name);
+    Farmer *FindFarmer(const std::string &name);
+    Owner *FindOwner(const std::string &name);
 
     // Get all agents (for iteration)
-    const vector<unique_ptr<Worker>> &GetWorkers() const { return workers; }
-    const vector<unique_ptr<Farmer>> &GetFarmers() const { return farmers; }
-    const vector<unique_ptr<Owner>> &GetOwners() const { return owners; }
+    const std::vector<std::unique_ptr<Worker>> &GetWorkers() const { return workers; }
+    const std::vector<std::unique_ptr<Farmer>> &GetFarmers() const { return farmers; }
+    const std::vector<std::unique_ptr<Owner>> &GetOwners() const { return owners; }
 
     // ========== Market Management ==========
 
     // Create market for a product
-    void CreateMarket(const string &product_name);
+    void CreateMarket(const std::string &product_name);
 
     // Get market
-    Market *FindMarket(const string &product_name);
+    Market *FindMarket(const std::string &product_name);
 
     // Get all markets
-    const map<string, unique_ptr<Market>> &GetMarkets() const
+    const std::map<std::string, std::unique_ptr<Market>> &GetMarkets() const
     {
         return markets;
     }
@@ -174,10 +172,10 @@ public:
     // ========== Selection (for UI) ==========
 
     // Select agent to display details
-    void SelectWorker(const string &name);
-    void SelectFarmer(const string &name);
-    void SelectOwner(const string &name);
-    void SelectMarket(const string &product_name);
+    void SelectWorker(const std::string &name);
+    void SelectFarmer(const std::string &name);
+    void SelectOwner(const std::string &name);
+    void SelectMarket(const std::string &product_name);
 
     // Get selected entities
     Worker *GetSelectedWorker() const { return selected_worker; }
@@ -225,19 +223,19 @@ public:
     void UpdateConsumerDemand();
 
     // Display current state
-    string GetStatusString() const;
+    std::string GetStatusString() const;
 
     // ========== Variable Relation Tracking ==========
 
-    void RegisterVariableRelation(const string &source,
-                                  const string &target,
+    void RegisterVariableRelation(const std::string &source,
+                                  const std::string &target,
                                   RelationEffect effect);
 
-    void RecordVariableChange(const string &variable,
+    void RecordVariableChange(const std::string &variable,
                               double oldValue,
                               double newValue);
 
-    void RecordVariableChange(const string &variable,
-                              const string &oldValue,
-                              const string &newValue);
+    void RecordVariableChange(const std::string &variable,
+                              const std::string &oldValue,
+                              const std::string &newValue);
 };

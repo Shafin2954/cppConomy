@@ -94,62 +94,62 @@ namespace TermColors
     }
 
     // Utility functions for styled output
-    inline string Styled(const string &text, const char *style)
+    inline std::string Styled(const std::string &text, const char *style)
     {
-        return string(style) + text + Color::Reset;
+        return std::string(style) + text + Color::Reset;
     }
 
-    // Helper to repeat a string n times
-    inline string Repeat(const string &str, size_t count)
+    // Helper to repeat a std::string n times
+    inline std::string Repeat(const std::string &str, size_t count)
     {
-        string result;
+        std::string result;
         result.reserve(str.length() * count);
         for (size_t i = 0; i < count; ++i)
             result += str;
         return result;
     }
 
-    inline string Success(const string &text)
+    inline std::string Success(const std::string &text)
     {
         return Styled("[OK] " + text, Theme::Success);
     }
 
-    inline string Error(const string &text)
+    inline std::string Error(const std::string &text)
     {
         return Styled("[X] " + text, Theme::Error);
     }
 
-    inline string Warning(const string &text)
+    inline std::string Warning(const std::string &text)
     {
         return Styled("[!] " + text, Theme::Warning);
     }
 
-    inline string Info(const string &text)
+    inline std::string Info(const std::string &text)
     {
         return Styled("[i] " + text, Theme::Info);
     }
 
-    inline string Prompt()
+    inline std::string Prompt()
     {
         return Styled("❯", Theme::Primary) + " ";
     }
 
-    inline string Header(const string &text)
+    inline std::string Header(const std::string &text)
     {
-        return Styled(text, string(Color::Bold).append(Theme::Primary).c_str());
+        return Styled(text, std::string(Color::Bold).append(Theme::Primary).c_str());
     }
 
     // Create a styled box
-    inline string BoxedText(const string &content, const string &title = "")
+    inline std::string BoxedText(const std::string &content, const std::string &title = "")
     {
-        stringstream ss;
+        std::stringstream ss;
         size_t width = 70;
 
         // Top border
         ss << Styled(Box::TopLeft, Theme::Primary);
         if (!title.empty())
         {
-            string titleStr = " " + title + " ";
+            std::string titleStr = " " + title + " ";
             ss << Styled(Repeat(Box::Horizontal, 2), Theme::Primary);
             ss << Styled(titleStr, Theme::Highlight);
             ss << Styled(Repeat(Box::Horizontal, width - titleStr.length() - 4), Theme::Primary);
@@ -161,13 +161,13 @@ namespace TermColors
         ss << Styled(Box::TopRight, Theme::Primary) << "\n";
 
         // Content
-        istringstream contentStream(content);
-        string line;
+        std::istringstream contentStream(content);
+        std::string line;
         while (getline(contentStream, line))
         {
             ss << Styled(Box::Vertical, Theme::Primary) << " "
                << line
-               << string(width - line.length() - 3, ' ')
+               << std::string(width - line.length() - 3, ' ')
                << Styled(Box::Vertical, Theme::Primary) << "\n";
         }
 
@@ -180,13 +180,13 @@ namespace TermColors
     }
 
     // Create a horizontal separator
-    inline string Separator(size_t width = 70)
+    inline std::string Separator(size_t width = 70)
     {
         return Styled(Repeat(Box::Horizontal, width), Theme::Muted);
     }
 
-    // Format a key-value pair
-    inline string KeyValue(const string &key, const string &value)
+    // Format a key-value std::pair
+    inline std::string KeyValue(const std::string &key, const std::string &value)
     {
         return Styled(key, Theme::Info) + Styled(": ", Theme::Muted) + value;
     }

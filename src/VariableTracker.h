@@ -9,8 +9,6 @@
 #include <iomanip>
 #include <ctime>
 
-using namespace std;
-
 // ============================================================================
 // VariableTracker.h - Comprehensive system for tracking variable changes
 //
@@ -28,30 +26,30 @@ public:
     // ========== Variable Record ==========
     struct VariableRecord
     {
-        string name;
-        string category; // "Market", "Macro", "Agent", "Policy", etc.
+        std::string name;
+        std::string category; // "Market", "Macro", "Agent", "Policy", etc.
         double oldValue;
         double newValue;
         double percentChange; // Percentage change
-        string timestamp;
-        string reason;             // Why did it change?
-        vector<string> affectedBy; // What caused this change
-        vector<string> affects;    // What this change impacts
-        int cascadeLevel;          // 0 = direct change, 1+ = secondary effect
+        std::string timestamp;
+        std::string reason;                  // Why did it change?
+        std::vector<std::string> affectedBy; // What caused this change
+        std::vector<std::string> affects;    // What this change impacts
+        int cascadeLevel;                    // 0 = direct change, 1+ = secondary effect
 
-        string ToString(bool showRelations = true) const;
+        std::string ToString(bool showRelations = true) const;
     };
 
     // ========== Relationship Definition ==========
     struct Relationship
     {
-        string source;   // Variable that changes
-        string target;   // Variable that is affected
-        string effect;   // "increases", "decreases", "both"
-        string equation; // Mathematical relationship (for reference)
-        double strength; // 0-1, how strong the effect is
+        std::string source;   // Variable that changes
+        std::string target;   // Variable that is affected
+        std::string effect;   // "increases", "decreases", "both"
+        std::string equation; // Mathematical relationship (for reference)
+        double strength;      // 0-1, how strong the effect is
 
-        string ToString() const;
+        std::string ToString() const;
     };
 
     // ========== Change Categories ==========
@@ -72,9 +70,9 @@ public:
     };
 
 private:
-    vector<VariableRecord> changeHistory;        // Complete log
-    map<string, Relationship> relationshipMap;   // var1->var2 relationships
-    map<string, vector<string>> dependencyGraph; // What depends on what
+    std::vector<VariableRecord> changeHistory;                       // Complete log
+    std::map<std::string, Relationship> relationshipMap;             // var1->var2 relationships
+    std::map<std::string, std::vector<std::string>> dependencyGraph; // What depends on what
 
     size_t maxHistorySize = 1000;         // Limit history to prevent memory explosion
     bool enableCascadeCalculation = true; // Automatically calculate secondary effects
@@ -87,44 +85,44 @@ public:
 
     // Record a numeric variable change
     void RecordNumericChange(
-        const string &variableName,
-        const string &category,
+        const std::string &variableName,
+        const std::string &category,
         double oldValue,
         double newValue,
-        const string &reason = "");
+        const std::string &reason = "");
 
     // Record a categorical variable change (e.g., "Rain" -> "Drought")
     void RecordCategoricalChange(
-        const string &variableName,
-        const string &category,
-        const string &oldValue,
-        const string &newValue,
-        const string &reason = "");
+        const std::string &variableName,
+        const std::string &category,
+        const std::string &oldValue,
+        const std::string &newValue,
+        const std::string &reason = "");
 
     // ========== Relationship Management ==========
 
     // Define how variables relate to each other
     // Example: RegisterRelationship("Price of Rice", "Demand for Rice", "decreases");
     void RegisterRelationship(
-        const string &sourceVar,
-        const string &targetVar,
-        const string &effect,
-        const string &equation = "",
+        const std::string &sourceVar,
+        const std::string &targetVar,
+        const std::string &effect,
+        const std::string &equation = "",
         double strength = 1.0);
 
     // Automatically calculate cascade effects when a variable changes
-    void CalculateCascadeEffects(const string &changedVariable);
+    void CalculateCascadeEffects(const std::string &changedVariable);
 
     // ========== History Access ==========
 
     // Get all changes in history
-    const vector<VariableRecord> &GetHistory() const { return changeHistory; }
+    const std::vector<VariableRecord> &GetHistory() const { return changeHistory; }
 
     // Get changes for a specific variable
-    vector<VariableRecord> GetChangesForVariable(const string &variableName) const;
+    std::vector<VariableRecord> GetChangesForVariable(const std::string &variableName) const;
 
     // Get all changes in a specific time range
-    vector<VariableRecord> GetChangesInLastNEvents(size_t n) const;
+    std::vector<VariableRecord> GetChangesInLastNEvents(size_t n) const;
 
     // Get change count
     size_t GetChangeCount() const { return changeHistory.size(); }
@@ -132,20 +130,20 @@ public:
     // ========== Analysis & Reporting ==========
 
     // Get summary of most recent changes
-    string GetRecentChangesSummary(size_t numChanges = 10) const;
+    std::string GetRecentChangesSummary(size_t numChanges = 10) const;
 
     // Get the dependency chain for a variable
     // Shows: X changed -> Y was affected -> Z was affected -> ...
-    vector<string> GetDependencyChain(const string &variable) const;
+    std::vector<std::string> GetDependencyChain(const std::string &variable) const;
 
     // Generate a visual report of recent changes
-    string GenerateChangeReport() const;
+    std::string GenerateChangeReport() const;
 
     // Get all variables that depend on a given variable
-    vector<string> GetDependents(const string &variable) const;
+    std::vector<std::string> GetDependents(const std::string &variable) const;
 
     // Get all variables that affect a given variable
-    vector<string> GetDependencies(const string &variable) const;
+    std::vector<std::string> GetDependencies(const std::string &variable) const;
 
     // ========== Configuration ==========
 
@@ -162,8 +160,8 @@ public:
     }
 
 private:
-    // Helper to get current time as string
-    string GetCurrentTimestamp() const;
+    // Helper to get current time as std::string
+    std::string GetCurrentTimestamp() const;
 
     // Helper to calculate percentage change
     double CalculatePercentChange(double oldVal, double newVal) const;

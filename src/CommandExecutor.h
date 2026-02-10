@@ -5,26 +5,24 @@
 #include <functional>
 #include <sstream>
 
-using namespace std;
-
 class CommandExecutor
 {
 public:
-    using OutputCallback = function<void(const string &)>;
+    using OutputCallback = std::function<void(const std::string &)>;
 
     CommandExecutor(Simulation &simulation);
 
     // Execute a parsed command
     bool execute(const Command &cmd);
 
-    // Execute from string input
-    bool execute(const string &input);
+    // Execute from std::string input
+    bool execute(const std::string &input);
 
     // Set output callback for results
     void setOutputCallback(OutputCallback callback) { outputCallback = callback; }
 
     // Get last error message
-    const string &getLastError() const { return lastError; }
+    const std::string &getLastError() const { return lastError; }
 
     // Get parser for command info
     const CommandParser &getParser() const { return parser; }
@@ -115,12 +113,12 @@ private:
 
     // Helper to get parameter values
     template <typename T>
-    T getParam(const Command &cmd, const string &name, T defaultValue) const;
+    T getParam(const Command &cmd, const std::string &name, T defaultValue) const;
 
-    void output(const string &message);
+    void output(const std::string &message);
 
     Simulation &simulation;
     CommandParser parser;
     OutputCallback outputCallback;
-    string lastError;
+    std::string lastError;
 };

@@ -7,8 +7,6 @@
 #include <functional>
 #include <sstream>
 
-using namespace std;
-
 // ============================================================================
 // EconomicPropagation.h - The Economic Relationship Engine
 //
@@ -44,19 +42,19 @@ class Simulation;
 // ============================================================================
 struct EconomicEvent
 {
-    string source;        // Who caused this? "farmer.Shafin", "government", "market_clearing"
-    string variable;      // Full path: "farmer.Shafin.output_quantity", "market.Rice.price"
-    double oldValue;      // Value before the change
-    double newValue;      // Value after the change
-    double changeRatio;   // newValue / oldValue (1.5 = 50% increase, 0.8 = 20% decrease)
-    int propagationLevel; // 0 = original event, 1+ = cascaded from another event
-    int tick;             // Which simulation tick this happened on
-    string description;   // Human-readable: "Bumper harvest increased output by 50%"
+    std::string source;      // Who caused this? "farmer.Shafin", "government", "market_clearing"
+    std::string variable;    // Full path: "farmer.Shafin.output_quantity", "market.Rice.price"
+    double oldValue;         // Value before the change
+    double newValue;         // Value after the change
+    double changeRatio;      // newValue / oldValue (1.5 = 50% increase, 0.8 = 20% decrease)
+    int propagationLevel;    // 0 = original event, 1+ = cascaded from another event
+    int tick;                // Which simulation tick this happened on
+    std::string description; // Human-readable: "Bumper harvest increased output by 50%"
 
-    // Format this event as a readable string for logging/display
-    string ToString() const
+    // Format this event as a readable std::string for logging/display
+    std::string ToString() const
     {
-        ostringstream ss;
+        std::ostringstream ss;
         ss << "[Tick " << tick << ", Level " << propagationLevel << "] "
            << variable << ": " << oldValue << " -> " << newValue;
         if (!description.empty())
@@ -84,15 +82,15 @@ struct PropagationRule
     // --- What triggers this rule ---
     // Pattern matching: "farmer.*.output_quantity" matches any farmer's output
     // Exact match: "government.income_tax_rate" matches only that variable
-    string trigger;
+    std::string trigger;
 
     // --- What gets affected ---
     // Comma-separated list: "market.supply,market.price" affects both
-    string targets;
+    std::string targets;
 
     // --- How to calculate the new value ---
     // Lambda: (Simulation*, triggering event, target variable name) -> new value
-    using PropagationFunction = function<double(Simulation *, const EconomicEvent &, const string &)>;
+    using PropagationFunction = std::function<double(Simulation *, const EconomicEvent &, const std::string &)>;
     PropagationFunction apply;
 
     // --- Effect modifiers ---
@@ -101,7 +99,7 @@ struct PropagationRule
     int delay;       // Number of ticks before the effect activates (0 = same tick)
 
     // --- Documentation ---
-    string description; // Human-readable explanation of this economic relationship
+    std::string description; // Human-readable explanation of this economic relationship
 };
 
 // ============================================================================
@@ -118,32 +116,32 @@ class DependencyGraph
 private:
     // trigger_pattern -> list of affected variables
     // e.g., "farmer.*.output_quantity" -> ["market.supply", "market.price"]
-    map<string, vector<string>> outgoing;
+    std::map<std::string, std::vector<std::string>> outgoing;
 
     // affected_variable -> list of triggers that cause it
     // e.g., "market.price" -> ["farmer.*.output_quantity", "government.money_supply"]
-    map<string, vector<string>> incoming;
+    std::map<std::string, std::vector<std::string>> incoming;
 
 public:
     // Register that trigger affects target
-    void AddRelation(const string &trigger, const string &target);
+    void AddRelation(const std::string &trigger, const std::string &target);
 
     // Get all variables affected by this trigger
-    vector<string> GetAffected(const string &trigger) const;
+    std::vector<std::string> GetAffected(const std::string &trigger) const;
 
     // Get all triggers that cause this variable to change
-    vector<string> GetCauses(const string &variable) const;
+    std::vector<std::string> GetCauses(const std::string &variable) const;
 
     // Print dependency chain: what affects what, recursively up to `depth` levels
     // Output example:
     //   market.Rice.price is affected by:
     //     ← farmer.*.output_quantity (supply change)
     //     ← government.money_supply (inflation)
-    void PrintChain(const string &variable, int depth = 5) const;
+    void PrintChain(const std::string &variable, int depth = 5) const;
 
     // Export the entire graph as a Graphviz DOT file
     // Can be visualized with: dot -Tpng output.dot -o output.png
-    void ExportDot(const string &filename) const;
+    void ExportDot(const std::string &filename) const;
 };
 
 // ============================================================================
@@ -169,22 +167,22 @@ private:
 
     // ========== Rule Storage ==========
     // All registered propagation rules
-    vector<PropagationRule> rules;
+    std::vector<PropagationRule> rules;
 
     // Index: trigger pattern -> list of rule indices for fast lookup
     // When an event comes in, we look up which rules match its variable name
-    map<string, vector<int>> ruleIndex;
+    std::map<std::string, std::vector<int>> ruleIndex;
 
     // ========== Event Queue ==========
     // Pending events waiting to be processed
-    queue<EconomicEvent> eventQueue;
+    std::queue<EconomicEvent> eventQueue;
 
     // Complete history of all events (for audit trail and debugging)
-    vector<EconomicEvent> eventHistory;
+    std::vector<EconomicEvent> eventHistory;
 
     // Delayed events: events scheduled for future ticks
     // Maps tick_number -> list of events to process on that tick
-    map<int, vector<EconomicEvent>> delayedEvents;
+    std::map<int, std::vector<EconomicEvent>> delayedEvents;
 
     // ========== Dependency Graph ==========
     DependencyGraph dependencyGraph;
@@ -218,10 +216,10 @@ public:
     void QueueEvent(const EconomicEvent &event);
 
     // Convenience: create and queue an event from a value change
-    void EmitChange(const string &source,
-                    const string &variable,
+    void EmitChange(const std::string &source,
+                    const std::string &variable,
                     double oldValue, double newValue,
-                    const string &description = "");
+                    const std::string &description = "");
 
     // ========== Tier Processing ==========
 
@@ -246,26 +244,26 @@ public:
     // ========== Queries ==========
 
     // Get all variables affected if this trigger fires
-    vector<string> GetAffectedVariables(const string &trigger) const;
+    std::vector<std::string> GetAffectedVariables(const std::string &trigger) const;
 
     // Get what causes a variable to change
-    vector<string> GetVariableCauses(const string &variable) const;
+    std::vector<std::string> GetVariableCauses(const std::string &variable) const;
 
     // Get event history (optionally filtered by variable)
-    const vector<EconomicEvent> &GetFullHistory() const { return eventHistory; }
-    vector<EconomicEvent> GetHistoryForVariable(const string &variable) const;
+    const std::vector<EconomicEvent> &GetFullHistory() const { return eventHistory; }
+    std::vector<EconomicEvent> GetHistoryForVariable(const std::string &variable) const;
 
     // ========== Visualization & Debugging ==========
 
     // Print the dependency chain for a variable
     // Shows: what caused it, and what it causes, recursively
-    void PrintDependencyChain(const string &variable) const;
+    void PrintDependencyChain(const std::string &variable) const;
 
     // Print all events from the current tick
-    string GetEventLog(int forTick = -1) const;
+    std::string GetEventLog(int forTick = -1) const;
 
     // Export the dependency graph as a Graphviz DOT file
-    void ExportDependencyGraph(const string &filename) const;
+    void ExportDependencyGraph(const std::string &filename) const;
 
     // Get summary stats
     int GetEventCount() const { return static_cast<int>(eventHistory.size()); }
@@ -286,9 +284,9 @@ private:
 
     // Check if an event's variable matches a rule's trigger pattern
     // Supports wildcards: "farmer.*.output_quantity" matches "farmer.Shafin.output_quantity"
-    bool MatchesTrigger(const string &eventVariable, const string &triggerPattern) const;
+    bool MatchesTrigger(const std::string &eventVariable, const std::string &triggerPattern) const;
 
     // Parse a dot-separated variable name to extract entity info
     // "farmer.Shafin.output_quantity" -> ("farmer", "Shafin", "output_quantity")
-    static vector<string> SplitVariable(const string &variable);
+    static std::vector<std::string> SplitVariable(const std::string &variable);
 };

@@ -2,7 +2,6 @@
 
 #include "Consumer.h"
 
-using namespace std;
 
 // ============================================================================
 // Owner.h - Inherits from Consumer (The Business Owner/Manufacturer)
@@ -20,7 +19,7 @@ private:
     int labor_hired;         // Number of workers
     double technology_level; // Affects productivity: higher = more output per input
 
-    string product_type;      // What they produce: "cloth", "ice_cream", etc.
+    std::string product_type;      // What they produce: "cloth", "ice_cream", etc.
     double production_output; // Current production quantity
 
     // ========== Market Power ==========
@@ -52,14 +51,14 @@ private:
 
 public:
     // ========== Constructors ==========
-    Owner(int id, const string &name, double initial_capital,
-          const string &product_type, bool is_monopoly);
+    Owner(int id, const std::string &name, double initial_capital,
+          const std::string &product_type, bool is_monopoly);
 
     // ========== Getters ==========
     double GetCapital() const { return capital_machines; }
     int GetLaborHired() const { return labor_hired; }
     double GetTechnologyLevel() const { return technology_level; }
-    string GetProductType() const { return product_type; }
+    std::string GetProductType() const { return product_type; }
     double GetProduction() const { return production_output; }
     bool IsMonopoly() const { return is_monopoly; }
     double GetPrice() const { return current_price; }
@@ -148,5 +147,5 @@ public:
     bool DecideMarketExit();
 
     // ========== Display ==========
-    string GetInfoString() const override;
+    std::string GetInfoString() const override;
 };

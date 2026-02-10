@@ -16,21 +16,21 @@ struct Command
         Assignment
     };
 
-    string name;
-    map<string, ParamValue> params;
-    string propertyAccess;          // For syntax like person.age("x") or system.gdp
+    std::string name;
+    std::map<std::string, ParamValue> params;
+    std::string propertyAccess;     // For syntax like person.age("x") or system.gdp
     Type commandType = Type::Query; // Query or Assignment
-    string assignmentProperty;      // Property being assigned to (for assignments)
+    std::string assignmentProperty; // Property being assigned to (for assignments)
     ParamValue assignmentValue;     // Value being assigned
     bool valid = false;
-    string errorMessage;
+    std::string errorMessage;
 };
 
 struct CommandInfo
 {
-    string name;
-    string description;
-    vector<pair<string, string>> parameters; // name, description
+    std::string name;
+    std::string description;
+    std::vector<std::pair<std::string, std::string>> parameters; // name, description
 };
 
 class CommandParser
@@ -38,29 +38,29 @@ class CommandParser
 public:
     CommandParser();
 
-    // Parse input string into Command struct
-    Command parse(const string &input);
+    // Parse input std::string into Command struct
+    Command parse(const std::string &input);
 
     // Get autocomplete suggestions
-    vector<string> getSuggestions(const string &partial) const;
+    std::vector<std::string> getSuggestions(const std::string &partial) const;
 
     // Get parameter hints for a command
-    string getParameterHints(const string &commandName) const;
+    std::string getParameterHints(const std::string &commandName) const;
 
     // Get all available commands
-    const vector<CommandInfo> &getAvailableCommands() const { return commands; }
+    const std::vector<CommandInfo> &getAvailableCommands() const { return commands; }
 
     // Validate command parameters
     bool validateCommand(const Command &cmd) const;
 
 private:
-    string extractName(const string &input) const;
-    map<string, ParamValue> extractParams(const string &input,
-                                          const string &commandName) const;
-    ParamValue parseValue(const string &value) const;
-    string trim(const string &str) const;
+    std::string extractName(const std::string &input) const;
+    std::map<std::string, ParamValue> extractParams(const std::string &input,
+                                                    const std::string &commandName) const;
+    ParamValue parseValue(const std::string &value) const;
+    std::string trim(const std::string &str) const;
 
-    const CommandInfo *findCommandInfo(const string &commandName) const;
+    const CommandInfo *findCommandInfo(const std::string &commandName) const;
 
-    vector<CommandInfo> commands;
+    std::vector<CommandInfo> commands;
 };

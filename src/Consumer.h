@@ -5,8 +5,6 @@
 #include <vector>
 #include "Product.h"
 
-using namespace std;
-
 // ============================================================================
 // Consumer.h - Base class for all economic agents
 //
@@ -25,7 +23,7 @@ class Consumer
 {
 protected:
     int id;
-    string name;
+    std::string name;
     int age;               // For mortality/child labor
     bool is_alive;         // For natural disasters
     double literacy_score; // 0.0 - 1.0: affects income potential
@@ -40,35 +38,35 @@ protected:
     double addiction_level; // 0.0 - 1.0: how addicted to certain goods
 
     // Preferences for different products (how much they value each)
-    map<string, double> preferences; // product_name -> preference_weight
+    std::map<std::string, double> preferences; // product_name -> preference_weight
 
     // Goods owned (for calculating consumer surplus)
-    map<string, double> goods_owned; // product_name -> quantity
+    std::map<std::string, double> goods_owned; // product_name -> quantity
 
     // Taxation
     double income_tax_paid; // Track taxes paid this period
 
     // ========== Consumer Demand Properties ==========
     // Demand curves for each product: price -> quantity demanded
-    map<string, vector<DemandPoint>> demand_curves; // product -> demand curve points
+    std::map<std::string, std::vector<DemandPoint>> demand_curves; // product -> demand curve points
 
     // Quantity demanded at current market prices
-    map<string, double> quantity_demanded; // product_name -> quantity at current price
+    std::map<std::string, double> quantity_demanded; // product_name -> quantity at current price
 
     // Substitution elasticity between products (how easily to switch)
-    map<pair<string, string>, double> substitution_ratios; // (product1, product2) -> elasticity
+    std::map<std::pair<std::string, std::string>, double> substitution_ratios; // (product1, product2) -> elasticity
 
     // Willingness to pay (max price willing to pay for each product)
-    map<string, double> willingness_to_pay; // product_name -> max_price
+    std::map<std::string, double> willingness_to_pay; // product_name -> max_price
 
 public:
     // ========== Constructors & Destructors ==========
-    Consumer(int id, const string &name, double initial_income);
+    Consumer(int id, const std::string &name, double initial_income);
     virtual ~Consumer() = default;
 
     // ========== Getters ==========
     int GetId() const { return id; }
-    string GetName() const { return name; }
+    std::string GetName() const { return name; }
     int GetAge() const { return age; }
     bool IsAlive() const { return is_alive; }
     double GetLiteracy() const { return literacy_score; }
@@ -77,40 +75,40 @@ public:
     double GetMonthlyIncome() const { return monthly_income; }
     double GetTotalUtility() const { return total_utility; }
     double GetAddictionLevel() const { return addiction_level; }
-    double GetQuantityDemanded(const string &product) const;
-    double GetWillingnessToPay(const string &product) const;
-    double GetSubstitutionRatio(const string &product1, const string &product2) const;
+    double GetQuantityDemanded(const std::string &product) const;
+    double GetWillingnessToPay(const std::string &product) const;
+    double GetSubstitutionRatio(const std::string &product1, const std::string &product2) const;
 
     // ========== Setters ==========
     void SetMonthlyIncome(double income) { monthly_income = income; }
     void SetLiteracy(double score) { literacy_score = score; }
-    void SetPreference(const string &product, double weight);
-    void SetWillingnessToPay(const string &product, double max_price);
-    void SetSubstitutionRatio(const string &product1, const string &product2, double ratio);
+    void SetPreference(const std::string &product, double weight);
+    void SetWillingnessToPay(const std::string &product, double max_price);
+    void SetSubstitutionRatio(const std::string &product1, const std::string &product2, double ratio);
 
     // ========== Demand Curve Methods ==========
 
     // Initialize demand curve for a product (linear: Qd = a - b*P)
-    void SetupDemandCurve(const string &product, double max_quantity, double price_sensitivity);
+    void SetupDemandCurve(const std::string &product, double max_quantity, double price_sensitivity);
 
     // Calculate quantity demanded at a specific price
-    double CalculateDemandAtPrice(const string &product, double price);
+    double CalculateDemandAtPrice(const std::string &product, double price);
 
     // Update quantity demanded based on current market price
-    void UpdateQuantityDemanded(const string &product, double market_price);
+    void UpdateQuantityDemanded(const std::string &product, double market_price);
 
     // ========== Economic Actions ==========
 
     // Consuming goods: demonstrates marginal utility and indifference curves
     // Implements equimarginal principle: MUx/Px = MUy/Py (choosing optimal bundle)
-    virtual void Consume(const string &product, double quantity, double price);
+    virtual void Consume(const std::string &product, double quantity, double price);
 
     // Calculate total utility from consumption bundle (indifference curve position)
     virtual void UpdateUtility();
 
     // Substitution effect: switch to cheaper alternative based on substitution ratio
-    virtual void SubstituteGood(const string &froproduct,
-                                const string &to_product,
+    virtual void SubstituteGood(const std::string &froproduct,
+                                const std::string &to_product,
                                 double quantity);
 
     // Pay taxes: reduces disposable income (shows fiscal policy effect)
@@ -120,11 +118,11 @@ public:
     virtual void AgeTick();
 
     // ========== Display ==========
-    virtual string GetInfoString() const;
+    virtual std::string GetInfoString() const;
 
 protected:
     // Helper: Calculate marginal utility for a good
-    double CalculateMarginalUtility(const string &product, double quantity);
+    double CalculateMarginalUtility(const std::string &product, double quantity);
 
     // Helper: Get budget remaining
     double GetBudgetRemaining() const { return wallet; }

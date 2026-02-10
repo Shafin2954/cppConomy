@@ -37,16 +37,16 @@ private:
     void ShowMainFrame();
 
     // Display command suggestions at bottom
-    void ShowCommandSuggestions(const string &currentInput);
+    void ShowCommandSuggestions(const std::string &currentInput);
 
     // Display help text
     void ShowHelp();
 
     // Process a single command line
-    void ProcessCommand(const string &input);
+    void ProcessCommand(const std::string &input);
 
     // Custom output callback for CommandExecutor
-    void HandleOutput(const string &message);
+    void HandleOutput(const std::string &message);
 
     // Display simulation status in a styled format
     void ShowStatus();
@@ -55,25 +55,25 @@ private:
     void ShowDashboard();
 
     // Read a line of input with command history support
-    string ReadLine();
+    std::string ReadLine();
 
     // Read a line with autocomplete support (like Claude CLI)
-    string ReadLineWithAutocomplete();
+    std::string ReadLineWithAutocomplete();
 
     // Get autocomplete suggestions for current input
-    vector<string> GetSuggestions(const string &input);
+    std::vector<std::string> GetSuggestions(const std::string &input);
 
     // Add to command history
-    void AddToHistory(const string &command);
+    void AddToHistory(const std::string &command);
 
     // Clear the screen
     void ClearScreen();
 
     // Format entity info for status box
-    string FormatEntityBox(const string &title, const string &content, int width = 20);
+    std::string FormatEntityBox(const std::string &title, const std::string &content, int width = 20);
 
     // Format a two-column layout box
-    string FormatTwoColumnBox(const string &leftContent, const string &rightContent, int totalWidth = 120);
+    std::string FormatTwoColumnBox(const std::string &leftContent, const std::string &rightContent, int totalWidth = 120);
 
     // Move cursor to input line
     void MoveCursorToInput();
@@ -81,14 +81,14 @@ private:
     // Clear input line
     void ClearInputLine();
 
-    unique_ptr<Simulation> simulation;
-    unique_ptr<CommandExecutor> executor;
-    vector<string> history;
+    std::unique_ptr<Simulation> simulation;
+    std::unique_ptr<CommandExecutor> executor;
+    std::vector<std::string> history;
     size_t historyIndex = 0;
     bool running = true;
 
     // Available commands for autocomplete
-    vector<string> availableCommands;
+    std::vector<std::string> availableCommands;
 
     // Initialize command list
     void InitializeCommands();

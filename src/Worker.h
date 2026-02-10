@@ -2,7 +2,6 @@
 
 #include "Consumer.h"
 
-using namespace std;
 
 // ============================================================================
 // Worker.h - Inherits from Consumer
@@ -18,21 +17,21 @@ private:
     double min_acceptable_wage; // Supply curve: won't work below this
     bool is_employed;           // Current employment status
     double current_wage;        // Wage offered by employer
-    string employer;            // Name of current employer (if employed)
+    std::string employer;            // Name of current employer (if employed)
 
     // For labor supply curve
     int hours_willing_to_work; // Changes with wage (labor-leisure tradeoff)
 
 public:
     // ========== Constructors ==========
-    Worker(int id, const string &name, double initial_income, double skill);
+    Worker(int id, const std::string &name, double initial_income, double skill);
 
     // ========== Getters ==========
     double GetSkillLevel() const { return skill_level; }
     double GetMinAcceptableWage() const { return min_acceptable_wage; }
     bool IsEmployed() const { return is_employed; }
     double GetCurrentWage() const { return current_wage; }
-    string GetEmployer() const { return employer; }
+    std::string GetEmployer() const { return employer; }
     int GetHoursWillingToWork() const { return hours_willing_to_work; }
 
     // ========== Setters ==========
@@ -44,10 +43,10 @@ public:
     // Offer labor to market: will work only if wage >= min_acceptable_wage
     // If wage < min_acceptable_wage: unemployment (labor supply decision)
     // If wage > min_acceptable_wage: more hours offered (backward/forward bending curve)
-    void OfferLabor(double wage_offered, const string &employer);
+    void OfferLabor(double wage_offered, const std::string &employer);
 
     // Accept job offer: sets employment status and wage
-    void AcceptJob(double wage, const string &employer);
+    void AcceptJob(double wage, const std::string &employer);
 
     // Lose job: unemployment effect
     void LoseJob();
@@ -75,5 +74,5 @@ public:
     void UpdateReservationWage();
 
     // ========== Display ==========
-    string GetInfoString() const override;
+    std::string GetInfoString() const override;
 };

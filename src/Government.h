@@ -4,8 +4,6 @@
 #include <vector>
 #include <map>
 
-using namespace std;
-
 // ============================================================================
 // Government.h - The policy maker controlling fiscal and monetary policy
 //
@@ -33,7 +31,7 @@ private:
     double minimuwage; // Wage floor: if >equilibrium, causes unemployment
 
     // Subsidies: support specific sectors
-    map<string, double> subsidies; // sector -> subsidy amount
+    std::map<std::string, double> subsidies; // sector -> subsidy amount
 
     // ========== Macroeconomic Aggregates ==========
     double nominal_gdp;       // Sum of all production values
@@ -108,7 +106,7 @@ public:
     // Grant subsidy to sector: reduces their costs
     // Shifts their supply curve right -> more supply -> lower price
     // Example: agricultural subsidy to farmers
-    void GrantSubsidy(const string &sector, double amount);
+    void GrantSubsidy(const std::string &sector, double amount);
 
     // ========== GDP & Price Level Calculation ==========
 
@@ -151,8 +149,8 @@ public:
     // If government moves resources from rice to ice cream production:
     // rice output falls, ice cream output rises
     // This demonstrates: opportunity cost, resource constraints
-    vector<double> CalculatePPF(double total_labor, double total_capital);
+    std::vector<double> CalculatePPF(double total_labor, double total_capital);
 
     // ========== Display ==========
-    string GetInfoString() const;
+    std::string GetInfoString() const;
 };

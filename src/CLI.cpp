@@ -661,9 +661,9 @@ string CLI::FormatTwoColumnBox(const string &leftContent, const string &rightCon
     }
 
     // Bottom border with color
-    result << Styled("╰" + Repeat("─", lresulteftWidth) + "┴" + Repeat("─", rightWidth) + "╯", Theme::Primary) << "\n";
+    result << Styled("╰" + Repeat("─", leftWidth) + "┴" + Repeat("─", rightWidth) + "╯", Theme::Primary) << "\n";
 
-    return .str();
+    return result.str();
 }
 
 void CLI::ShowCommandSuggestions(const string &currentInput)
