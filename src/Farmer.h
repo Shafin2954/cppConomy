@@ -1,42 +1,45 @@
 #pragma once
 
-#include "Person.h"
+#include "Consumer.h"
+
+using namespace std;
 
 // ============================================================================
-// Farmer.h - Inherits from Person
+// Farmer.h - Inherits from Consumer
 //
 // Maps to: Production Function, Diminishing Returns, PPF, Bumper Harvest,
 //          Fixed/Variable Costs, Technological Change, Agricultural Economics,
 //          Marginal Product, Total/Average/Marginal Cost curves
 // ============================================================================
 
-class Farmer : public Person
+class Farmer : public Consumer
 {
 private:
     // ========== Production Inputs ==========
-    double m_land_size;        // Acres of land (fixed input in short run)
-    int m_labor_hired;         // Number of workers (variable input)
-    double m_technology_level; // 1.0 = base technology (shifts production function)
-    double m_fertilizer_units; // Fertilizer used (variable input)
+    double land_size;        // Acres of land (fixed input in short run)
+    int labor_hired;         // Number of workers (variable input)
+    double technology_level; // 1.0 = base technology (shifts production function)
+    double fertilizer_units; // Fertilizer used (variable input)
 
     // ========== Weather & Environmental Factors ==========
-    double m_weather_factor; // 1.0 = normal, 1.5 = bumper harvest, 0.2 = disaster
+    double weather_factor; // 1.0 = normal, 1.5 = bumper harvest, 0.2 = disaster
 
     // ========== Output & Revenue ==========
-    std::string m_crop;       // "rice", "wheat", etc.
-    double m_output_quantity; // Total output this period
-    double m_output_price;    // Market price for the output
-    double m_revenue;         // Price * Quantity
+    string crop;                     // "rice", "wheat", etc.
+    double output_quantity;          // Total output this period
+    double previous_output_quantity; // Previous period output (for tracking changes)
+    double output_price;             // Market price for the output
+    double revenue;                  // Price * Quantity
 
     // ========== Cost Analysis (Cost Curves) ==========
-    double m_fixed_cost;    // TFC: land rent, equipment (doesn't change with Q)
-    double m_variable_cost; // TVC: wages, fertilizer (changes with Q)
-    double m_total_cost;    // TC = TFC + TVC
-    double m_average_cost;  // AC = TC / Q
-    double m_marginal_cost; // MC = change in TC / change in Q
+    double fixed_cost;    // TFC: land rent, equipment (doesn't change with Q)
+    double variable_cost; // TVC: wages, fertilizer (changes with Q)
+    double total_cost;    // TC = TFC + TVC
+    double average_cost;  // AC = TC / Q
+    double marginal_cost; // MC = change in TC / change in Q
 
     // Profit
-    double m_profit; // Revenue - Total Cost
+    double profit; // Revenue - Total Cost
 
     // ========== Production Function Parameters ==========
     // Output = f(Labor, Land, Technology) * Weather_Factor
@@ -45,24 +48,24 @@ private:
 
 public:
     // ========== Constructors ==========
-    Farmer(int id, const std::string &name, double initial_income,
-           double land, const std::string &crop);
+    Farmer(int id, const string &name, double initial_income,
+           double land, const string &crop);
 
     // ========== Getters ==========
-    double GetLandSize() const { return m_land_size; }
-    int GetLaborHired() const { return m_labor_hired; }
-    double GetTechnologyLevel() const { return m_technology_level; }
-    double GetFertilizerUnits() const { return m_fertilizer_units; }
-    double GetWeatherFactor() const { return m_weather_factor; }
-    std::string GetCrop() const { return m_crop; }
-    double GetOutputQuantity() const { return m_output_quantity; }
-    double GetRevenue() const { return m_revenue; }
-    double GetFixedCost() const { return m_fixed_cost; }
-    double GetVariableCost() const { return m_variable_cost; }
-    double GetTotalCost() const { return m_total_cost; }
-    double GetAverageCost() const { return m_average_cost; }
-    double GetMarginalCost() const { return m_marginal_cost; }
-    double GetProfit() const { return m_profit; }
+    double GetLandSize() const { return land_size; }
+    int GetLaborHired() const { return labor_hired; }
+    double GetTechnologyLevel() const { return technology_level; }
+    double GetFertilizerUnits() const { return fertilizer_units; }
+    double GetWeatherFactor() const { return weather_factor; }
+    string GetCrop() const { return crop; }
+    double GetOutputQuantity() const { return output_quantity; }
+    double GetRevenue() const { return revenue; }
+    double GetFixedCost() const { return fixed_cost; }
+    double GetVariableCost() const { return variable_cost; }
+    double GetTotalCost() const { return total_cost; }
+    double GetAverageCost() const { return average_cost; }
+    double GetMarginalCost() const { return marginal_cost; }
+    double GetProfit() const { return profit; }
 
     // ========== Production Actions ==========
 
@@ -73,7 +76,7 @@ public:
     void Fire(int workers);
 
     // Plant crop: prepares for harvest
-    void Plant(const std::string &new_crop);
+    void Plant(const string &new_crop);
 
     // Harvest: executes production function
     // Output = (labor_hired * technology_level) * land_size * weather_factor
@@ -113,6 +116,27 @@ public:
     // Marginal Product of Fertilizer
     double GetMarginalProductOfFertilizer() const;
 
+    // ========== Economic Decision Methods (for Propagation Engine) ==========
+
+    // Get previous period's output (for tracking changes in propagation events)
+    double GetPreviousOutputQuantity() const { return previous_output_quantity; }
+
+    // Decide next period's production target based on profit signals
+    // Low profit → reduce output, high profit → increase output
+    // This is the core microeconomic response: firms adjust production to maximize profit
+    void DecideNextOutputLevel();
+
+    // Decide labor hiring/firing based on profitability
+    // Implements the MR > MC hiring rule:
+    //   If marginal revenue of additional worker > wage, hire
+    //   If profit negative, fire workers to cut costs
+    void DecideLaborDemand();
+
+    // Decide investment in technology upgrades
+    // High sustained profits → invest in better technology
+    // This demonstrates long-run growth through productivity improvements
+    void DecideInvestment();
+
     // ========== Display ==========
-    std::string GetInfoString() const override;
+    string GetInfoString() const override;
 };

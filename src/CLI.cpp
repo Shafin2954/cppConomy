@@ -14,6 +14,8 @@
 #endif
 
 using namespace TermColors;
+using namespace std;
+
 
 CLI::CLI()
 {
@@ -21,16 +23,16 @@ CLI::CLI()
     TermColors::Init();
 
     // Create simulation and executor
-    m_simulation = std::make_unique<Simulation>();
-    m_executor = std::make_unique<CommandExecutor>(*m_simulation);
+    simulation = make_unique<Simulation>();
+    executor = make_unique<CommandExecutor>(*simulation);
 
     // Set up output callback
-    m_executor->setOutputCallback([this](const std::string &msg)
-                                  { HandleOutput(msg); });
+    executor->setOutputCallback([this](const string &msg)
+                                { HandleOutput(msg); });
 
     // Initialize simulation with default entities
-    m_simulation->Initialize(2, 1, 1);
-    m_simulation->RefreshStats();
+    simulation->Initialize(2, 1, 1);
+    simulation->RefreshStats();
 
     // Initialize command list for autocomplete
     InitializeCommands();
@@ -41,22 +43,22 @@ void CLI::Run()
     ClearScreen();
     ShowStickyHeader();
 
-    while (m_running)
+    while (running)
     {
         // Print separator and prompt
-        std::cout << Styled(Repeat("─", 88), Theme::Muted) << "\n";
-        std::cout << Prompt();
-        std::cout << std::flush;
+        cout << Styled(Repeat("─", 88), Theme::Muted) << "\n";
+        cout << Prompt();
+        cout << flush;
 
         // Read input with autocomplete
-        std::string input = ReadLineWithAutocomplete();
-        std::cout << "\n"; // Newline after input
+        string input = ReadLineWithAutocomplete();
+        cout << "\n"; // Newline after input
 
         // Clear suggestion line
-        std::cout << "\r" << std::string(88, ' ') << "\r";
+        cout << "\r" << string(88, ' ') << "\r";
 
         // Print bottom separator
-        std::cout << Styled(Repeat("─", 88), Theme::Muted) << "\n";
+        cout << Styled(Repeat("─", 88), Theme::Muted) << "\n";
 
         // Trim whitespace
         input.erase(0, input.find_first_not_of(" \t\n\r"));
@@ -74,8 +76,8 @@ void CLI::Run()
         // Check for special commands
         if (input == "exit" || input == "quit")
         {
-            std::cout << Styled("\n  Goodbye!\n", Theme::Success);
-            m_running = false;
+            cout << Styled("\n  Goodbye!\n", Theme::Success);
+            running = false;
             break;
         }
         else if (input == "clear" || input == "cls")
@@ -86,7 +88,7 @@ void CLI::Run()
         }
         else if (input == "dashboard")
         {
-            std::cout << "\n";
+            cout << "\n";
             ShowDashboard();
             continue;
         }
@@ -98,11 +100,11 @@ void CLI::Run()
         }
 
         // Process command
-        std::cout << "\n";
+        cout << "\n";
         ProcessCommand(input);
 
         // Refresh header after commands that might change selections
-        if (input.find("select") != std::string::npos)
+        if (input.find("select") != string::npos)
         {
             ClearScreen();
             ShowStickyHeader();
@@ -112,7 +114,7 @@ void CLI::Run()
 
 void CLI::ShowBanner()
 {
-    std::stringstream banner;
+    stringstream banner;
     banner << R"(
    ____            ____                                 
   / ___|_ __  _ __/ ___|___  _ __   ___  _ __ ___  _   _ 
@@ -122,15 +124,15 @@ void CLI::ShowBanner()
        |_|   |_|                                      |___/ 
 )";
 
-    std::cout << Styled(banner.str(), Theme::Primary);
-    std::cout << Styled("  Economic Simulation Engine", std::string(Color::Bold).append(Theme::Highlight).c_str()) << "\n";
-    std::cout << Styled("  Version 2.0-CLI", Theme::Muted) << "\n\n";
+    cout << Styled(banner.str(), Theme::Primary);
+    cout << Styled("  Economic Simulation Engine", string(Color::Bold).append(Theme::Highlight).c_str()) << "\n";
+    cout << Styled("  Version 2.0-CLI", Theme::Muted) << "\n\n";
 }
 
 void CLI::ShowStickyHeader()
 {
     // Two-column header box
-    std::stringstream left, right;
+    stringstream left, right;
 
     //   _____          _____
     //  / ___/__  ___  / ___/__  ___  ___  __ _  __ __
@@ -158,163 +160,163 @@ void CLI::ShowStickyHeader()
     right << "select     - Select entities   \n";
     right << "                               \n";
 
-    std::cout << FormatTwoColumnBox(left.str(), right.str(), 90);
+    cout << FormatTwoColumnBox(left.str(), right.str(), 90);
 
     // Entity status boxes
-    Worker *selWorker = m_simulation->GetSelectedWorker();
-    Farmer *selFarmer = m_simulation->GetSelectedFarmer();
-    Owner *selOwner = m_simulation->GetSelectedOwner();
-    Market *selMarket = m_simulation->GetSelectedMarket();
+    Worker *selWorker = simulation->GetSelectedWorker();
+    Farmer *selFarmer = simulation->GetSelectedFarmer();
+    Owner *selOwner = simulation->GetSelectedOwner();
+    Market *selMarket = simulation->GetSelectedMarket();
 
-    std::string farmerBox = FormatEntityBox("FARMER",
-                                            selFarmer ? selFarmer->GetName() + "\nLand: " + std::to_string((int)selFarmer->GetLandSize()) + " acres" : "None selected");
+    string farmerBox = FormatEntityBox("FARMER",
+                                       selFarmer ? selFarmer->GetName() + "\nLand: " + to_string((int)selFarmer->GetLandSize()) + " acres" : "None selected");
 
-    std::string workerBox = FormatEntityBox("WORKER",
-                                            selWorker ? selWorker->GetName() + "\nIncome: $" + std::to_string((int)selWorker->GetMonthlyIncome()) : "None selected");
+    string workerBox = FormatEntityBox("WORKER",
+                                       selWorker ? selWorker->GetName() + "\nIncome: $" + to_string((int)selWorker->GetMonthlyIncome()) : "None selected");
 
-    std::string ownerBox = FormatEntityBox("OWNER",
-                                           selOwner ? selOwner->GetName() + "\nCapital: $" + std::to_string((int)selOwner->GetCapital()) : "None selected");
+    string ownerBox = FormatEntityBox("OWNER",
+                                      selOwner ? selOwner->GetName() + "\nCapital: $" + to_string((int)selOwner->GetCapital()) : "None selected");
 
-    std::string marketBox = FormatEntityBox("MARKET",
-                                            selMarket ? selMarket->GetProductName() + "\nPrice: $" + std::to_string((int)selMarket->GetCurrentPrice()) : "None selected");
+    string marketBox = FormatEntityBox("MARKET",
+                                       selMarket ? selMarket->GetProductName() + "\nPrice: $" + to_string((int)selMarket->GetCurrentPrice()) : "None selected");
 
     // Split boxes into lines for side-by-side display
-    auto splitLines = [](const std::string &text)
+    auto splitLines = [](const string &text)
     {
-        std::vector<std::string> lines;
-        std::stringstream ss(text);
-        std::string line;
-        while (std::getline(ss, line))
+        vector<string> lines;
+        stringstream ss(text);
+        string line;
+        while (getline(ss, line))
         {
             lines.push_back(line);
         }
         return lines;
     };
 
-    std::vector<std::string> farmerLines = splitLines(farmerBox);
-    std::vector<std::string> workerLines = splitLines(workerBox);
-    std::vector<std::string> ownerLines = splitLines(ownerBox);
-    std::vector<std::string> marketLines = splitLines(marketBox);
+    vector<string> farmerLines = splitLines(farmerBox);
+    vector<string> workerLines = splitLines(workerBox);
+    vector<string> ownerLines = splitLines(ownerBox);
+    vector<string> marketLines = splitLines(marketBox);
 
-    size_t maxLines = std::max({farmerLines.size(), workerLines.size(), ownerLines.size(), marketLines.size()});
+    size_t maxLines = max(farmerLines.size(), max(workerLines.size(), max(ownerLines.size(), marketLines.size())));
 
     for (size_t i = 0; i < maxLines; ++i)
     {
-        std::cout << (i < farmerLines.size() ? farmerLines[i] : std::string(23, ' '));
-        std::cout << (i < workerLines.size() ? workerLines[i] : std::string(22, ' '));
-        std::cout << (i < ownerLines.size() ? ownerLines[i] : std::string(22, ' '));
-        std::cout << (i < marketLines.size() ? marketLines[i] : "");
-        std::cout << "\n";
+        cout << (i < farmerLines.size() ? farmerLines[i] : string(23, ' '));
+        cout << (i < workerLines.size() ? workerLines[i] : string(22, ' '));
+        cout << (i < ownerLines.size() ? ownerLines[i] : string(22, ' '));
+        cout << (i < marketLines.size() ? marketLines[i] : "");
+        cout << "\n";
     }
 
-    std::cout << "\n";
+    cout << "\n";
 }
 
 void CLI::ShowHelp()
 {
-    std::cout << Styled("Available Commands:", Theme::Highlight) << "\n";
-    std::cout << "\n"
-              << Styled("Entity Listing:", Theme::Highlight) << "\n";
-    std::cout << "  " << Styled("persons", Theme::Info) << ", " << Styled("workers", Theme::Info) << ", " << Styled("farmers", Theme::Info) << ", " << Styled("owners", Theme::Info) << ", " << Styled("markets", Theme::Info) << "\n";
+    cout << Styled("Available Commands:", Theme::Highlight) << "\n";
+    cout << "\n"
+         << Styled("Entity Listing:", Theme::Highlight) << "\n";
+    cout << "  " << Styled("persons", Theme::Info) << ", " << Styled("workers", Theme::Info) << ", " << Styled("farmers", Theme::Info) << ", " << Styled("owners", Theme::Info) << ", " << Styled("markets", Theme::Info) << "\n";
 
-    std::cout << "\n"
-              << Styled("Entity Details:", Theme::Highlight) << "\n";
-    std::cout << "  " << Styled("person", Theme::Info) << "  - Get person details by name\n";
-    std::cout << "  " << Styled("worker", Theme::Info) << "  - Get worker details by name\n";
-    std::cout << "  " << Styled("farmer", Theme::Info) << "  - Get farmer details by name\n";
-    std::cout << "  " << Styled("owner", Theme::Info) << "   - Get owner details by name\n";
-    std::cout << "  " << Styled("market", Theme::Info) << "  - Get market details by name\n";
+    cout << "\n"
+         << Styled("Entity Details:", Theme::Highlight) << "\n";
+    cout << "  " << Styled("person", Theme::Info) << "  - Get person details by name\n";
+    cout << "  " << Styled("worker", Theme::Info) << "  - Get worker details by name\n";
+    cout << "  " << Styled("farmer", Theme::Info) << "  - Get farmer details by name\n";
+    cout << "  " << Styled("owner", Theme::Info) << "   - Get owner details by name\n";
+    cout << "  " << Styled("market", Theme::Info) << "  - Get market details by name\n";
 
-    std::cout << "\n"
-              << Styled("Entity Creation:", Theme::Highlight) << "\n";
-    std::cout << "  " << Styled("add_worker", Theme::Info) << "  - Add a worker\n";
-    std::cout << "  " << Styled("add_farmer", Theme::Info) << "  - Add a farmer\n";
-    std::cout << "  " << Styled("add_owner", Theme::Info) << "   - Add a business owner\n";
-    std::cout << "  " << Styled("add_market", Theme::Info) << "  - Add a market\n";
+    cout << "\n"
+         << Styled("Entity Creation:", Theme::Highlight) << "\n";
+    cout << "  " << Styled("add_worker", Theme::Info) << "  - Add a worker\n";
+    cout << "  " << Styled("add_farmer", Theme::Info) << "  - Add a farmer\n";
+    cout << "  " << Styled("add_owner", Theme::Info) << "   - Add a business owner\n";
+    cout << "  " << Styled("add_market", Theme::Info) << "  - Add a market\n";
 
-    std::cout << "\n"
-              << Styled("Actions:", Theme::Highlight) << "\n";
-    std::cout << "  " << Styled("select", Theme::Info) << "         - Select entities to show\n";
-    std::cout << "  " << Styled("clear_selection", Theme::Info) << " - Clear selection\n";
-    std::cout << "  " << Styled("buy", Theme::Info) << "            - Worker buys product\n";
-    std::cout << "  " << Styled("harvest", Theme::Info) << "        - Harvest crops\n";
-    std::cout << "  " << Styled("reset", Theme::Info) << "         - Reset simulation\n";
+    cout << "\n"
+         << Styled("Actions:", Theme::Highlight) << "\n";
+    cout << "  " << Styled("select", Theme::Info) << "         - Select entities to show\n";
+    cout << "  " << Styled("clear_selection", Theme::Info) << " - Clear selection\n";
+    cout << "  " << Styled("buy", Theme::Info) << "            - Worker buys product\n";
+    cout << "  " << Styled("harvest", Theme::Info) << "        - Harvest crops\n";
+    cout << "  " << Styled("reset", Theme::Info) << "         - Reset simulation\n";
 
-    std::cout << "\n"
-              << Styled("System:", Theme::Highlight) << "\n";
-    std::cout << "  " << Styled("help", Theme::Info) << "      - Show this help\n";
-    std::cout << "  " << Styled("status", Theme::Info) << "    - Show simulation status\n";
-    std::cout << "  " << Styled("dashboard", Theme::Info) << " - View economic dashboard\n";
-    std::cout << "  " << Styled("refresh", Theme::Info) << "   - Refresh screen\n";
-    std::cout << "  " << Styled("clear", Theme::Info) << "     - Clear screen\n";
-    std::cout << "  " << Styled("exit/quit", Theme::Info) << " - Exit program\n";
+    cout << "\n"
+         << Styled("System:", Theme::Highlight) << "\n";
+    cout << "  " << Styled("help", Theme::Info) << "      - Show this help\n";
+    cout << "  " << Styled("status", Theme::Info) << "    - Show simulation status\n";
+    cout << "  " << Styled("dashboard", Theme::Info) << " - View economic dashboard\n";
+    cout << "  " << Styled("refresh", Theme::Info) << "   - Refresh screen\n";
+    cout << "  " << Styled("clear", Theme::Info) << "     - Clear screen\n";
+    cout << "  " << Styled("exit/quit", Theme::Info) << " - Exit program\n";
 }
 
-void CLI::ProcessCommand(const std::string &input)
+void CLI::ProcessCommand(const string &input)
 {
-    bool success = m_executor->execute(input);
+    bool success = executor->execute(input);
 
-    if (!success && !m_executor->getLastError().empty())
+    if (!success && !executor->getLastError().empty())
     {
-        std::cout << Error("Command failed: " + m_executor->getLastError()) << "\n";
+        cout << Error("Command failed: " + executor->getLastError()) << "\n";
     }
 
-    std::cout << "\n";
+    cout << "\n";
 }
 
-void CLI::HandleOutput(const std::string &message)
+void CLI::HandleOutput(const string &message)
 {
     // Check if it's an error message
     if (message.find("Error:") == 0)
     {
-        std::cout << Error(message.substr(7)) << "\n";
+        cout << Error(message.substr(7)) << "\n";
     }
     // Check if it's a success/added message
-    else if (message.find("Added") == 0 || message.find("complete") != std::string::npos ||
-             message.find("cleared") != std::string::npos || message.find("updated") != std::string::npos)
+    else if (message.find("Added") == 0 || message.find("complete") != string::npos ||
+             message.find("cleared") != string::npos || message.find("updated") != string::npos)
     {
-        std::cout << Success(message) << "\n";
+        cout << Success(message) << "\n";
     }
     // Check if it's a list or detailed output
-    else if (message.find(":\n") != std::string::npos || message.find("---") != std::string::npos)
+    else if (message.find(":\n") != string::npos || message.find("---") != string::npos)
     {
         // Format as info box for structured data
-        std::cout << Styled(message, Color::Reset) << "\n";
+        cout << Styled(message, Color::Reset) << "\n";
     }
     else
     {
-        std::cout << message << "\n";
+        cout << message << "\n";
     }
 }
 
 void CLI::ShowStatus()
 {
-    std::string status = m_simulation->GetStatusString();
-    std::cout << BoxedText(status, "Simulation Status") << "\n";
+    string status = simulation->GetStatusString();
+    cout << BoxedText(status, "Simulation Status") << "\n";
 }
 
 void CLI::ShowDashboard()
 {
-    auto stats = m_simulation->GetStats();
+    auto stats = simulation->GetStats();
 
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(2);
+    stringstream ss;
+    ss << fixed << setprecision(2);
 
     // Economic Indicators
     ss << Styled("ECONOMIC INDICATORS", Theme::Highlight) << "\n";
     ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-    ss << KeyValue("GDP", Styled("$" + std::to_string((int)stats.gdp), Theme::Success)) << "\n";
-    ss << KeyValue("GDP Growth", Styled(std::to_string(stats.gdpGrowth) + "%", Theme::Info)) << "\n";
-    ss << KeyValue("Inflation", Styled(std::to_string(stats.inflation) + "%", Theme::Warning)) << "\n";
-    ss << KeyValue("CPI", std::to_string(stats.cpi)) << "\n";
+    ss << KeyValue("GDP", Styled("$" + to_string((int)stats.gdp), Theme::Success)) << "\n";
+    ss << KeyValue("GDP Growth", Styled(to_string(stats.gdpGrowth) + "%", Theme::Info)) << "\n";
+    ss << KeyValue("Inflation", Styled(to_string(stats.inflation) + "%", Theme::Warning)) << "\n";
+    ss << KeyValue("CPI", to_string(stats.cpi)) << "\n";
     ss << "\n";
 
     // Labor Market
     ss << Styled("LABOR MARKET", Theme::Highlight) << "\n";
     ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-    ss << KeyValue("Population", Styled(std::to_string(stats.population), Theme::Info)) << "\n";
-    ss << KeyValue("Employed", Styled(std::to_string(stats.employed), Theme::Success)) << "\n";
-    ss << KeyValue("Unemployment Rate", Styled(std::to_string(stats.unemployment) + "%",
+    ss << KeyValue("Population", Styled(to_string(stats.population), Theme::Info)) << "\n";
+    ss << KeyValue("Employed", Styled(to_string(stats.employed), Theme::Success)) << "\n";
+    ss << KeyValue("Unemployment Rate", Styled(to_string(stats.unemployment) + "%",
                                                stats.unemployment > 10 ? Theme::Error : Theme::Info))
        << "\n";
     ss << "\n";
@@ -322,32 +324,32 @@ void CLI::ShowDashboard()
     // Government & Finance
     ss << Styled("GOVERNMENT & FINANCE", Theme::Highlight) << "\n";
     ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-    ss << KeyValue("Money Supply", Styled("$" + std::to_string((int)stats.moneySupply), Theme::Success)) << "\n";
-    ss << KeyValue("Interest Rate", Styled(std::to_string(stats.interestRate) + "%", Theme::Info)) << "\n";
-    ss << KeyValue("Budget", Styled("$" + std::to_string((int)stats.budget), Theme::Info)) << "\n";
-    ss << KeyValue("Public Debt", Styled("$" + std::to_string((int)stats.debt), Theme::Warning)) << "\n";
+    ss << KeyValue("Money Supply", Styled("$" + to_string((int)stats.moneySupply), Theme::Success)) << "\n";
+    ss << KeyValue("Interest Rate", Styled(to_string(stats.interestRate) + "%", Theme::Info)) << "\n";
+    ss << KeyValue("Budget", Styled("$" + to_string((int)stats.budget), Theme::Info)) << "\n";
+    ss << KeyValue("Public Debt", Styled("$" + to_string((int)stats.debt), Theme::Warning)) << "\n";
     ss << "\n";
 
     // Inequality
     ss << Styled("INEQUALITY", Theme::Highlight) << "\n";
     ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-    ss << KeyValue("Gini Coefficient", Styled(std::to_string(stats.giniCoefficient), Theme::Info)) << "\n";
-    ss << KeyValue("Number of Firms", Styled(std::to_string(stats.firms), Theme::Info)) << "\n";
+    ss << KeyValue("Gini Coefficient", Styled(to_string(stats.giniCoefficient), Theme::Info)) << "\n";
+    ss << KeyValue("Number of Firms", Styled(to_string(stats.firms), Theme::Info)) << "\n";
 
-    std::cout << "\n"
-              << BoxedText(ss.str(), "Economic Dashboard") << "\n";
+    cout << "\n"
+         << BoxedText(ss.str(), "Economic Dashboard") << "\n";
 }
 
-std::string CLI::ReadLine()
+string CLI::ReadLine()
 {
-    std::string input;
-    std::getline(std::cin, input);
+    string input;
+    getline(cin, input);
     return input;
 }
 
 void CLI::InitializeCommands()
 {
-    m_availableCommands = {
+    availableCommands = {
         // CLI-specific commands
         "help", "exit", "quit", "clear", "cls", "refresh", "dashboard", "status",
         // Entity listing commands
@@ -364,15 +366,15 @@ void CLI::InitializeCommands()
         "buy", "harvest", "reset"};
 }
 
-std::vector<std::string> CLI::GetSuggestions(const std::string &input)
+vector<string> CLI::GetSuggestions(const string &input)
 {
-    std::vector<std::string> suggestions;
+    vector<string> suggestions;
 
     if (input.empty())
         return suggestions;
 
     // Find commands that start with the input
-    for (const auto &cmd : m_availableCommands)
+    for (const auto &cmd : availableCommands)
     {
         if (cmd.find(input) == 0) // Starts with input
         {
@@ -383,11 +385,11 @@ std::vector<std::string> CLI::GetSuggestions(const std::string &input)
     return suggestions;
 }
 
-std::string CLI::ReadLineWithAutocomplete()
+string CLI::ReadLineWithAutocomplete()
 {
-    std::string input;
-    std::vector<std::string> suggestions;
-    int historyPos = m_history.size();
+    string input;
+    vector<string> suggestions;
+    int historyPos = history.size();
 
 #ifdef _WIN32
     char ch;
@@ -406,19 +408,19 @@ std::string CLI::ReadLineWithAutocomplete()
             if (!input.empty())
             {
                 input.pop_back();
-                std::cout << "\b \b"; // Erase character
+                cout << "\b \b"; // Erase character
 
                 // Clear any previous suggestion text
-                std::cout << "\033[K"; // Clear from cursor to end of line
+                cout << "\033[K"; // Clear from cursor to end of line
 
                 // Update and show suggestions
                 suggestions = GetSuggestions(input);
                 if (!suggestions.empty() && !input.empty())
                 {
-                    std::string remaining = suggestions[0].substr(input.length());
-                    std::cout << "\033[s"; // Save cursor
-                    std::cout << Styled(remaining, Color::Dim);
-                    std::cout << "\033[u"; // Restore cursor
+                    string remaining = suggestions[0].substr(input.length());
+                    cout << "\033[s"; // Save cursor
+                    cout << Styled(remaining, Color::Dim);
+                    cout << "\033[u"; // Restore cursor
                 }
             }
         }
@@ -430,10 +432,10 @@ std::string CLI::ReadLineWithAutocomplete()
             {
                 // Clear current input on screen
                 for (size_t i = 0; i < input.length(); ++i)
-                    std::cout << "\b \b";
+                    cout << "\b \b";
 
                 input = suggestions[0];
-                std::cout << input;
+                cout << input;
             }
         }
         // Arrow keys
@@ -442,35 +444,35 @@ std::string CLI::ReadLineWithAutocomplete()
             ch = _getch(); // Get actual arrow key code
 
             // Up arrow (72) - previous command
-            if (ch == 72 && !m_history.empty())
+            if (ch == 72 && !history.empty())
             {
                 if (historyPos > 0)
                     historyPos--;
 
                 // Clear current input
                 for (size_t i = 0; i < input.length(); ++i)
-                    std::cout << "\b \b";
+                    cout << "\b \b";
 
-                if (historyPos < m_history.size())
+                if (historyPos < history.size())
                 {
-                    input = m_history[historyPos];
-                    std::cout << input;
+                    input = history[historyPos];
+                    cout << input;
                 }
             }
             // Down arrow (80) - next command
-            else if (ch == 80 && !m_history.empty())
+            else if (ch == 80 && !history.empty())
             {
-                if (historyPos < m_history.size())
+                if (historyPos < history.size())
                     historyPos++;
 
                 // Clear current input
                 for (size_t i = 0; i < input.length(); ++i)
-                    std::cout << "\b \b";
+                    cout << "\b \b";
 
-                if (historyPos < m_history.size())
+                if (historyPos < history.size())
                 {
-                    input = m_history[historyPos];
-                    std::cout << input;
+                    input = history[historyPos];
+                    cout << input;
                 }
                 else
                 {
@@ -482,35 +484,35 @@ std::string CLI::ReadLineWithAutocomplete()
         else if (ch >= 32 && ch <= 126)
         {
             input += ch;
-            std::cout << ch;
+            cout << ch;
 
             // Clear any previous suggestion text
-            std::cout << "\033[K"; // Clear from cursor to end of line
+            cout << "\033[K"; // Clear from cursor to end of line
 
             // Show suggestion in gray
             suggestions = GetSuggestions(input);
             if (!suggestions.empty())
             {
-                std::string remaining = suggestions[0].substr(input.length());
-                std::cout << "\033[s"; // Save cursor
-                std::cout << Styled(remaining, Color::Dim);
-                std::cout << "\033[u"; // Restore cursor
+                string remaining = suggestions[0].substr(input.length());
+                cout << "\033[s"; // Save cursor
+                cout << Styled(remaining, Color::Dim);
+                cout << "\033[u"; // Restore cursor
             }
         }
     }
 #else
     // Fallback for non-Windows
-    std::getline(std::cin, input);
+    getline(cin, input);
     return input;
 #endif
 }
 
-void CLI::AddToHistory(const std::string &command)
+void CLI::AddToHistory(const string &command)
 {
-    if (!command.empty() && (m_history.empty() || m_history.back() != command))
+    if (!command.empty() && (history.empty() || history.back() != command))
     {
-        m_history.push_back(command);
-        m_historyIndex = m_history.size();
+        history.push_back(command);
+        historyIndex = history.size();
     }
 }
 
@@ -523,9 +525,9 @@ void CLI::ClearScreen()
 #endif
 }
 
-std::string CLI::FormatEntityBox(const std::string &title, const std::string &content, int width)
+string CLI::FormatEntityBox(const string &title, const string &content, int width)
 {
-    std::stringstream box;
+    stringstream box;
 
     // Safety check for width
     if (width < 10)
@@ -545,17 +547,17 @@ std::string CLI::FormatEntityBox(const std::string &title, const std::string &co
         rightPad = 0;
 
     box << "\n"
-        << Styled("│", Theme::Primary) << std::string(padding, ' ') << Styled(title, Theme::Highlight)
-        << std::string(rightPad, ' ') << Styled("│", Theme::Primary);
+        << Styled("│", Theme::Primary) << string(padding, ' ') << Styled(title, Theme::Highlight)
+        << string(rightPad, ' ') << Styled("│", Theme::Primary);
 
     // Separator with color
     box << "\n"
         << Styled("├" + Repeat("─", width) + "┤", Theme::Primary);
 
     // Content lines (split by newline)
-    std::stringstream ss(content);
-    std::string line;
-    while (std::getline(ss, line))
+    stringstream ss(content);
+    string line;
+    while (getline(ss, line))
     {
         // Truncate if too long
         if (line.length() > (size_t)(width - 2))
@@ -566,14 +568,14 @@ std::string CLI::FormatEntityBox(const std::string &title, const std::string &co
             linePad = 0;
 
         box << "\n"
-            << Styled("│", Theme::Primary) << " " << Styled(line, Color::BrightWhite) << std::string(linePad, ' ') << Styled("│", Theme::Primary);
+            << Styled("│", Theme::Primary) << " " << Styled(line, Color::BrightWhite) << string(linePad, ' ') << Styled("│", Theme::Primary);
     }
 
     // Add empty line if only one content line
-    if (content.find('\n') == std::string::npos)
+    if (content.find('\n') == string::npos)
     {
         box << "\n"
-            << Styled("│", Theme::Primary) << std::string(width, ' ') << Styled("│", Theme::Primary);
+            << Styled("│", Theme::Primary) << string(width, ' ') << Styled("│", Theme::Primary);
     }
 
     // Bottom border with color
@@ -583,37 +585,37 @@ std::string CLI::FormatEntityBox(const std::string &title, const std::string &co
     return box.str();
 }
 
-std::string CLI::FormatTwoColumnBox(const std::string &leftContent, const std::string &rightContent, int totalWidth)
+string CLI::FormatTwoColumnBox(const string &leftContent, const string &rightContent, int totalWidth)
 {
-    std::stringstream result;
+    stringstream result;
 
     // Ensure minimum width
     if (totalWidth < 20)
         totalWidth = 20;
 
     // Split content into lines
-    auto splitLines = [](const std::string &text)
+    auto splitLines = [](const string &text)
     {
-        std::vector<std::string> lines;
-        std::stringstream ss(text);
-        std::string line;
-        while (std::getline(ss, line))
+        vector<string> lines;
+        stringstream ss(text);
+        string line;
+        while (getline(ss, line))
         {
             lines.push_back(line);
         }
         return lines;
     };
 
-    std::vector<std::string> leftLines = splitLines(leftContent);
-    std::vector<std::string> rightLines = splitLines(rightContent);
+    vector<string> leftLines = splitLines(leftContent);
+    vector<string> rightLines = splitLines(rightContent);
 
     // Compute max line lengths (for dynamic sizing)
     size_t leftMax = 0;
     for (const auto &l : leftLines)
-        leftMax = std::max(leftMax, l.size());
+        leftMax = max(leftMax, l.size());
     size_t rightMax = 0;
     for (const auto &r : rightLines)
-        rightMax = std::max(rightMax, r.size());
+        rightMax = max(rightMax, r.size());
 
     // Prefer a wider left column, but keep right column usable
     int leftWidth = static_cast<int>(leftMax + 3);
@@ -632,10 +634,10 @@ std::string CLI::FormatTwoColumnBox(const std::string &leftContent, const std::s
     result << Styled("╭" + Repeat("─", leftWidth) + "┬" + Repeat("─", rightWidth) + "╮", Theme::Primary) << "\n";
 
     // Content lines
-    for (size_t i = 0; i < std::max(leftLines.size(), rightLines.size()); ++i)
+    for (size_t i = 0; i < max(leftLines.size(), rightLines.size()); ++i)
     {
-        std::string left = i < leftLines.size() ? leftLines[i] : "";
-        std::string right = i < rightLines.size() ? rightLines[i] : "";
+        string left = i < leftLines.size() ? leftLines[i] : "";
+        string right = i < rightLines.size() ? rightLines[i] : "";
 
         // Pad or truncate - ensure we don't go negative
         int leftPad = leftWidth - left.length() - 1;
@@ -654,22 +656,22 @@ std::string CLI::FormatTwoColumnBox(const std::string &leftContent, const std::s
         if (rightPad < 0)
             rightPad = 0;
 
-        result << Styled("│", Theme::Primary) << " " << Styled(left, Theme::Highlight) << std::string(leftPad, ' ');
-        result << Styled("│", Theme::Primary) << " " << right << std::string(rightPad, ' ') << Styled("│", Theme::Primary) << "\n";
+        result << Styled("│", Theme::Primary) << " " << Styled(left, Theme::Highlight) << string(leftPad, ' ');
+        result << Styled("│", Theme::Primary) << " " << right << string(rightPad, ' ') << Styled("│", Theme::Primary) << "\n";
     }
 
     // Bottom border with color
-    result << Styled("╰" + Repeat("─", leftWidth) + "┴" + Repeat("─", rightWidth) + "╯", Theme::Primary) << "\n";
+    result << Styled("╰" + Repeat("─", lresulteftWidth) + "┴" + Repeat("─", rightWidth) + "╯", Theme::Primary) << "\n";
 
-    return result.str();
+    return .str();
 }
 
-void CLI::ShowCommandSuggestions(const std::string &currentInput)
+void CLI::ShowCommandSuggestions(const string &currentInput)
 {
-    std::vector<std::string> suggestions = GetSuggestions(currentInput);
+    vector<string> suggestions = GetSuggestions(currentInput);
 
     // Filter out exact matches (don't show suggestion if user typed it exactly)
-    std::vector<std::string> filtered;
+    vector<string> filtered;
     for (const auto &s : suggestions)
     {
         if (s != currentInput)
@@ -678,13 +680,13 @@ void CLI::ShowCommandSuggestions(const std::string &currentInput)
 
     if (!filtered.empty() && !currentInput.empty())
     {
-        // std::cout << Styled("  Suggestions: ", Theme::Muted);
-        for (size_t i = 0; i < std::min(filtered.size(), size_t(3)); ++i)
+        // cout << Styled("  Suggestions: ", Theme::Muted);
+        for (size_t i = 0; i < min(filtered.size(), size_t(3)); ++i)
         {
-            std::cout << Styled(filtered[i], Theme::Info);
-            if (i < std::min(filtered.size(), size_t(3)) - 1)
-                std::cout << Styled(" | ", Theme::Muted);
+            cout << Styled(filtered[i], Theme::Info);
+            if (i < min(filtered.size(), size_t(3)) - 1)
+                cout << Styled(" | ", Theme::Muted);
         }
     }
-    std::cout << "\n";
+    cout << "\n";
 }

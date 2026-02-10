@@ -26,7 +26,7 @@ namespace TermColors
         GetConsoleMode(hOut, &dwMode);
         dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
         SetConsoleMode(hOut, dwMode);
-        
+
         // Set console to UTF-8
         SetConsoleOutputCP(CP_UTF8);
         SetConsoleCP(CP_UTF8);
@@ -94,62 +94,62 @@ namespace TermColors
     }
 
     // Utility functions for styled output
-    inline std::string Styled(const std::string &text, const char *style)
+    inline string Styled(const string &text, const char *style)
     {
-        return std::string(style) + text + Color::Reset;
+        return string(style) + text + Color::Reset;
     }
-    
+
     // Helper to repeat a string n times
-    inline std::string Repeat(const std::string &str, size_t count)
+    inline string Repeat(const string &str, size_t count)
     {
-        std::string result;
+        string result;
         result.reserve(str.length() * count);
         for (size_t i = 0; i < count; ++i)
             result += str;
         return result;
     }
 
-    inline std::string Success(const std::string &text)
+    inline string Success(const string &text)
     {
         return Styled("[OK] " + text, Theme::Success);
     }
 
-    inline std::string Error(const std::string &text)
+    inline string Error(const string &text)
     {
         return Styled("[X] " + text, Theme::Error);
     }
 
-    inline std::string Warning(const std::string &text)
+    inline string Warning(const string &text)
     {
         return Styled("[!] " + text, Theme::Warning);
     }
 
-    inline std::string Info(const std::string &text)
+    inline string Info(const string &text)
     {
         return Styled("[i] " + text, Theme::Info);
     }
 
-    inline std::string Prompt()
+    inline string Prompt()
     {
         return Styled("❯", Theme::Primary) + " ";
     }
 
-    inline std::string Header(const std::string &text)
+    inline string Header(const string &text)
     {
-        return Styled(text, std::string(Color::Bold).append(Theme::Primary).c_str());
+        return Styled(text, string(Color::Bold).append(Theme::Primary).c_str());
     }
 
     // Create a styled box
-    inline std::string BoxedText(const std::string &content, const std::string &title = "")
+    inline string BoxedText(const string &content, const string &title = "")
     {
-        std::stringstream ss;
+        stringstream ss;
         size_t width = 70;
 
         // Top border
         ss << Styled(Box::TopLeft, Theme::Primary);
         if (!title.empty())
         {
-            std::string titleStr = " " + title + " ";
+            string titleStr = " " + title + " ";
             ss << Styled(Repeat(Box::Horizontal, 2), Theme::Primary);
             ss << Styled(titleStr, Theme::Highlight);
             ss << Styled(Repeat(Box::Horizontal, width - titleStr.length() - 4), Theme::Primary);
@@ -161,13 +161,13 @@ namespace TermColors
         ss << Styled(Box::TopRight, Theme::Primary) << "\n";
 
         // Content
-        std::istringstream contentStream(content);
-        std::string line;
-        while (std::getline(contentStream, line))
+        istringstream contentStream(content);
+        string line;
+        while (getline(contentStream, line))
         {
             ss << Styled(Box::Vertical, Theme::Primary) << " "
                << line
-               << std::string(width - line.length() - 3, ' ')
+               << string(width - line.length() - 3, ' ')
                << Styled(Box::Vertical, Theme::Primary) << "\n";
         }
 
@@ -180,13 +180,13 @@ namespace TermColors
     }
 
     // Create a horizontal separator
-    inline std::string Separator(size_t width = 70)
+    inline string Separator(size_t width = 70)
     {
         return Styled(Repeat(Box::Horizontal, width), Theme::Muted);
     }
 
     // Format a key-value pair
-    inline std::string KeyValue(const std::string &key, const std::string &value)
+    inline string KeyValue(const string &key, const string &value)
     {
         return Styled(key, Theme::Info) + Styled(": ", Theme::Muted) + value;
     }

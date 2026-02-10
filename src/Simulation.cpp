@@ -2,21 +2,25 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include <cmath>
 #include "Logger.h"
 
+using namespace std;
+
 Simulation::Simulation()
-    : m_government(std::make_unique<Government>()),
-      m_selected_worker(nullptr),
-      m_selected_farmer(nullptr),
-      m_selected_owner(nullptr),
-      m_selected_market(nullptr)
+    : government(make_unique<Government>()),
+      propagator(make_unique<EconomicPropagation>(this)),
+      selected_worker(nullptr),
+      selected_farmer(nullptr),
+      selected_owner(nullptr),
+      selected_market(nullptr)
 {
-    m_stats.moneySupply = m_government->GetMoneySupply();
-    m_stats.interestRate = m_government->GetInterestRate();
+    stats.moneySupply = government->GetMoneySupply();
+    stats.interestRate = government->GetInterestRate();
 
     // Default variable relations (can be expanded later)
     RegisterVariableRelation("government.income_tax_rate", "person.wallet", RelationEffect::Decreases);
-    RegisterVariableRelation("government.minimum_wage", "worker.employment", RelationEffect::Decreases);
+    RegisterVariableRelation("government.minimuwage", "worker.employment", RelationEffect::Decreases);
     RegisterVariableRelation("worker.monthly_income", "worker.wallet", RelationEffect::Increases);
     RegisterVariableRelation("market.price", "market.quantity_demanded", RelationEffect::Decreases);
     RegisterVariableRelation("market.price", "market.revenue", RelationEffect::Changes);
@@ -24,18 +28,18 @@ Simulation::Simulation()
     RegisterVariableRelation("farmer.output_quantity", "market.price", RelationEffect::Decreases);
 }
 
-void Simulation::Initialize(int num_workers, int num_farmers, int num_owners)
+void Simulation::Initialize(int nuworkers, int nufarmers, int nuowners)
 {
     Reset();
 
     // Create some default entities for testing
-    AddFarmer("Shafin", 50.0, "corn");
-    AddOwner("Soron", 20000.0, "cloth", false);
+    AddFarmer("Shafin", 50.0, "Corn");
+    AddOwner("Soron", 20000.0, "Cloth", false);
     AddWorker("Jabir", 500.0, 0.7);
 
     // Create default markets
-    CreateMarket("rice");
-    CreateMarket("cloth");
+    CreateMarket("Rice");
+    CreateMarket("Cloth");
 
     // Initialize stats
     RefreshStats();
@@ -43,45 +47,47 @@ void Simulation::Initialize(int num_workers, int num_farmers, int num_owners)
 
 void Simulation::Reset()
 {
-    m_workers.clear();
-    m_farmers.clear();
-    m_owners.clear();
-    m_markets.clear();
-    m_selected_worker = nullptr;
-    m_selected_farmer = nullptr;
-    m_selected_owner = nullptr;
-    m_selected_market = nullptr;
-    m_stats = EconomicStats();
-    m_prevStats = EconomicStats();
+    workers.clear();
+    farmers.clear();
+    owners.clear();
+    markets.clear();
+    selected_worker = nullptr;
+    selected_farmer = nullptr;
+    selected_owner = nullptr;
+    selected_market = nullptr;
+    stats = EconomicStats();
+    prevStats = EconomicStats();
+    currentTick = 0;
+    propagator = make_unique<EconomicPropagation>(this);
 }
 
-void Simulation::AddWorker(const std::string &name, double income, double skill)
+void Simulation::AddWorker(const string &name, double income, double skill)
 {
-    int id = static_cast<int>(m_workers.size()) + 1;
-    m_workers.push_back(std::make_unique<Worker>(id, name, income, skill));
+    int id = static_cast<int>(workers.size()) + 1;
+    workers.push_back(make_unique<Worker>(id, name, income, skill));
     // Auto-select the newly created worker
-    m_selected_worker = m_workers.back().get();
+    selected_worker = workers.back().get();
 }
 
-void Simulation::AddFarmer(const std::string &name, double land, const std::string &crop)
+void Simulation::AddFarmer(const string &name, double land, const string &crop)
 {
-    int id = static_cast<int>(m_farmers.size()) + 1;
-    m_farmers.push_back(std::make_unique<Farmer>(id, name, 1000.0, land, crop));
+    int id = static_cast<int>(farmers.size()) + 1;
+    farmers.push_back(make_unique<Farmer>(id, name, 1000.0, land, crop));
     // Auto-select the newly created farmer
-    m_selected_farmer = m_farmers.back().get();
+    selected_farmer = farmers.back().get();
 }
 
-void Simulation::AddOwner(const std::string &name, double capital, const std::string &product, bool is_monopoly)
+void Simulation::AddOwner(const string &name, double capital, const string &product, bool is_monopoly)
 {
-    int id = static_cast<int>(m_owners.size()) + 1;
-    m_owners.push_back(std::make_unique<Owner>(id, name, capital, product, is_monopoly));
+    int id = static_cast<int>(owners.size()) + 1;
+    owners.push_back(make_unique<Owner>(id, name, capital, product, is_monopoly));
     // Auto-select the newly created owner
-    m_selected_owner = m_owners.back().get();
+    selected_owner = owners.back().get();
 }
 
-Worker *Simulation::FindWorker(const std::string &name)
+Worker *Simulation::FindWorker(const string &name)
 {
-    for (auto &w : m_workers)
+    for (auto &w : workers)
     {
         if (w->GetName() == name)
             return w.get();
@@ -89,9 +95,9 @@ Worker *Simulation::FindWorker(const std::string &name)
     return nullptr;
 }
 
-Farmer *Simulation::FindFarmer(const std::string &name)
+Farmer *Simulation::FindFarmer(const string &name)
 {
-    for (auto &f : m_farmers)
+    for (auto &f : farmers)
     {
         if (f->GetName() == name)
             return f.get();
@@ -99,9 +105,9 @@ Farmer *Simulation::FindFarmer(const std::string &name)
     return nullptr;
 }
 
-Owner *Simulation::FindOwner(const std::string &name)
+Owner *Simulation::FindOwner(const string &name)
 {
-    for (auto &o : m_owners)
+    for (auto &o : owners)
     {
         if (o->GetName() == name)
             return o.get();
@@ -109,78 +115,78 @@ Owner *Simulation::FindOwner(const std::string &name)
     return nullptr;
 }
 
-void Simulation::CreateMarket(const std::string &product_name)
+void Simulation::CreateMarket(const string &product_name)
 {
-    m_markets[product_name] = std::make_unique<Market>(product_name);
+    markets[product_name] = make_unique<Market>(product_name);
     // Auto-select the newly created market
-    m_selected_market = m_markets[product_name].get();
+    selected_market = markets[product_name].get();
 }
 
-Market *Simulation::FindMarket(const std::string &product_name)
+Market *Simulation::FindMarket(const string &product_name)
 {
-    auto it = m_markets.find(product_name);
-    if (it != m_markets.end())
+    auto it = markets.find(product_name);
+    if (it != markets.end())
         return it->second.get();
     return nullptr;
 }
 
-void Simulation::SelectWorker(const std::string &name)
+void Simulation::SelectWorker(const string &name)
 {
-    m_selected_worker = FindWorker(name);
+    selected_worker = FindWorker(name);
 }
 
-void Simulation::SelectFarmer(const std::string &name)
+void Simulation::SelectFarmer(const string &name)
 {
-    m_selected_farmer = FindFarmer(name);
+    selected_farmer = FindFarmer(name);
 }
 
-void Simulation::SelectOwner(const std::string &name)
+void Simulation::SelectOwner(const string &name)
 {
-    m_selected_owner = FindOwner(name);
+    selected_owner = FindOwner(name);
 }
 
-void Simulation::SelectMarket(const std::string &product_name)
+void Simulation::SelectMarket(const string &product_name)
 {
-    m_selected_market = FindMarket(product_name);
+    selected_market = FindMarket(product_name);
 }
 
 void Simulation::ClearSelection()
 {
-    m_selected_worker = nullptr;
-    m_selected_farmer = nullptr;
-    m_selected_owner = nullptr;
-    m_selected_market = nullptr;
+    selected_worker = nullptr;
+    selected_farmer = nullptr;
+    selected_owner = nullptr;
+    selected_market = nullptr;
 }
 
 double Simulation::CalculateTotalProduction()
 {
     double total = 0.0;
-    for (const auto &f : m_farmers)
+    for (const auto &f : farmers)
         total += f->GetOutputQuantity();
-    for (const auto &o : m_owners)
+    for (const auto &o : owners)
         total += o->GetProduction();
     return total;
 }
 
 double Simulation::CalculateUnemploymentRate()
 {
-    if (m_workers.empty())
+    if (workers.empty())
         return 0.0;
     int unemployed = 0;
-    for (const auto &w : m_workers)
+    for (const auto &w : workers)
     {
         if (!w->IsEmployed())
             unemployed++;
     }
-    return static_cast<double>(unemployed) / m_workers.size();
+    return static_cast<double>(unemployed) / workers.size();
 }
 
-std::string Simulation::GetStatusString() const
+string Simulation::GetStatusString() const
 {
-    std::ostringstream ss;
-    ss << "Workers: " << m_workers.size() << ", Farmers: " << m_farmers.size()
-       << ", Owners: " << m_owners.size() << "\n";
-    ss << "Markets: " << m_markets.size() << "\n";
+    ostringstream ss;
+    ss << "Workers: " << workers.size() << ", Farmers: " << farmers.size()
+       << ", Owners: " << owners.size() << "\n";
+    ss << "Markets: " << markets.size() << "\n";
     return ss.str();
 }
 
@@ -188,44 +194,44 @@ void Simulation::RefreshStats()
 {
     // Update government aggregates
     double total_production = CalculateTotalProduction();
-    m_government->CalculateNominalGDP(total_production);
+    government->CalculateNominalGDP(total_production);
 
     // Update stats snapshot
-    m_prevStats = m_stats;
-    m_stats.gdp = m_government->GetNominalGDP();
-    m_stats.inflation = m_government->GetInflationRate();
-    m_stats.cpi = m_government->GetCPI();
-    m_stats.population = static_cast<int>(m_workers.size() + m_farmers.size() + m_owners.size());
-    m_stats.firms = static_cast<int>(m_owners.size());
-    m_stats.employed = 0;
-    for (const auto &w : m_workers)
+    prevStats = stats;
+    stats.gdp = government->GetNominalGDP();
+    stats.inflation = government->GetInflationRate();
+    stats.cpi = government->GetCPI();
+    stats.population = static_cast<int>(workers.size() + farmers.size() + owners.size());
+    stats.firms = static_cast<int>(owners.size());
+    stats.employed = 0;
+    for (const auto &w : workers)
     {
         if (w->IsEmployed())
-            m_stats.employed++;
+            stats.employed++;
     }
-    m_stats.unemployment = CalculateUnemploymentRate();
-    m_stats.moneySupply = m_government->GetMoneySupply();
-    m_stats.interestRate = m_government->GetInterestRate();
-    m_stats.debt = m_government->GetGovDebt();
-    m_stats.budget = -m_government->GetBudgetDeficit();
+    stats.unemployment = CalculateUnemploymentRate();
+    stats.moneySupply = government->GetMoneySupply();
+    stats.interestRate = government->GetInterestRate();
+    stats.debt = government->GetGovDebt();
+    stats.budget = -government->GetBudgetDeficit();
 
-    if (m_prevStats.gdp > 0.0)
-        m_stats.gdpGrowth = (m_stats.gdp - m_prevStats.gdp) / m_prevStats.gdp;
+    if (prevStats.gdp > 0.0)
+        stats.gdpGrowth = (stats.gdp - prevStats.gdp) / prevStats.gdp;
     else
-        m_stats.gdpGrowth = 0.0;
+        stats.gdpGrowth = 0.0;
 
-    if (m_statsCallback)
-        m_statsCallback(m_stats);
+    if (statsCallback)
+        statsCallback(stats);
 }
 
-void Simulation::RegisterVariableRelation(const std::string &source,
-                                          const std::string &target,
+void Simulation::RegisterVariableRelation(const string &source,
+                                          const string &target,
                                           RelationEffect effect)
 {
-    m_variableRelations[source].push_back({target, effect});
+    variableRelations[source].push_back({target, effect});
 }
 
-static std::string effectToString(Simulation::RelationEffect effect)
+static string effectToString(Simulation::RelationEffect effect)
 {
     switch (effect)
     {
@@ -238,28 +244,28 @@ static std::string effectToString(Simulation::RelationEffect effect)
     }
 }
 
-void Simulation::RecordVariableChange(const std::string &variable,
+void Simulation::RecordVariableChange(const string &variable,
                                       double oldValue,
                                       double newValue)
 {
-    std::string changeType = "unchanged";
+    string changeType = "unchanged";
     if (newValue > oldValue)
         changeType = "increased";
     else if (newValue < oldValue)
         changeType = "decreased";
 
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "Change: " << variable << " " << changeType << " from "
-       << std::fixed << std::setprecision(3) << oldValue << " to " << newValue;
+       << fixed << setprecision(3) << oldValue << " to " << newValue;
     LOG_INFO(ss.str());
 
-    auto it = m_variableRelations.find(variable);
-    if (it == m_variableRelations.end())
+    auto it = variableRelations.find(variable);
+    if (it == variableRelations.end())
         return;
 
     for (const auto &relation : it->second)
     {
-        std::string expected = "change";
+        string expected = "change";
         if (changeType == "unchanged")
         {
             expected = "unchanged";
@@ -277,33 +283,257 @@ void Simulation::RecordVariableChange(const std::string &variable,
             expected = effectToString(relation.effect);
         }
 
-        std::ostringstream rel;
+        ostringstream rel;
         rel << "Relation: " << variable << " " << changeType
             << " -> " << relation.target << " expected to " << expected;
         LOG_INFO(rel.str());
     }
 }
 
-void Simulation::RecordVariableChange(const std::string &variable,
-                                      const std::string &oldValue,
-                                      const std::string &newValue)
+void Simulation::RecordVariableChange(const string &variable,
+                                      const string &oldValue,
+                                      const string &newValue)
 {
-    std::string changeType = (oldValue == newValue) ? "unchanged" : "changed";
+    string changeType = (oldValue == newValue) ? "unchanged" : "changed";
 
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "Change: " << variable << " " << changeType << " from "
        << oldValue << " to " << newValue;
     LOG_INFO(ss.str());
 
-    auto it = m_variableRelations.find(variable);
-    if (it == m_variableRelations.end())
+    auto it = variableRelations.find(variable);
+    if (it == variableRelations.end())
         return;
 
     for (const auto &relation : it->second)
     {
-        std::ostringstream rel;
+        ostringstream rel;
         rel << "Relation: " << variable << " changed -> " << relation.target
             << " expected to " << effectToString(relation.effect);
         LOG_INFO(rel.str());
     }
+}
+// ========== Harvest & Market Operations ==========
+
+void Simulation::UpdateMarketFromHarvest(Farmer *farmer)
+{
+    if (!farmer || farmer->GetOutputQuantity() <= 0.0)
+        return;
+
+    // Get or create market for farmer's crop
+    Market *market = FindMarket(farmer->GetCrop());
+    if (!market)
+    {
+        CreateMarket(farmer->GetCrop());
+        market = FindMarket(farmer->GetCrop());
+    }
+
+    if (market)
+    {
+        // Add harvest output as supply to the market
+        double oldSupply = market->GetQuantitySupplied();
+        market->SetSupply(market->GetQuantitySupplied() + farmer->GetOutputQuantity());
+
+        RecordVariableChange("farmer." + farmer->GetName() + ".harvest_output",
+                             0.0, farmer->GetOutputQuantity());
+        RecordVariableChange("market." + farmer->GetCrop() + ".supply",
+                             oldSupply, market->GetQuantitySupplied());
+
+        if (propagator)
+        {
+            propagator->EmitChange("market.update_froharvest",
+                                   "market." + farmer->GetCrop() + ".supply",
+                                   oldSupply,
+                                   market->GetQuantitySupplied(),
+                                   "Harvest added to market supply");
+        }
+    }
+}
+
+void Simulation::UpdateConsumerDemand()
+{
+    // Update quantity demanded for all consumers (workers, farmers, owners) at current market prices
+    for (auto &worker : workers)
+    {
+        for (const auto &[product, market_ptr] : markets)
+        {
+            if (market_ptr)
+            {
+                worker->UpdateQuantityDemanded(product, market_ptr->GetCurrentPrice());
+            }
+        }
+    }
+
+    for (auto &farmer : farmers)
+    {
+        for (const auto &[product, market_ptr] : markets)
+        {
+            if (market_ptr)
+            {
+                farmer->UpdateQuantityDemanded(product, market_ptr->GetCurrentPrice());
+            }
+        }
+    }
+
+    for (auto &owner : owners)
+    {
+        for (const auto &[product, market_ptr] : markets)
+        {
+            if (market_ptr)
+            {
+                owner->UpdateQuantityDemanded(product, market_ptr->GetCurrentPrice());
+            }
+        }
+    }
+}
+
+void Simulation::RecalculateMarketEquilibria()
+{
+    // First update all consumer demand at current prices
+    UpdateConsumerDemand();
+
+    // Then calculate equilibrium for each market
+    for (auto &[product_name, market] : markets)
+    {
+        if (market)
+        {
+            // Aggregate consumer demand (sum all demand at current price)
+            double totalDemand = 0.0;
+            for (const auto &worker : workers)
+                totalDemand += worker->GetQuantityDemanded(product_name);
+            for (const auto &farmer : farmers)
+                totalDemand += farmer->GetQuantityDemanded(product_name);
+            for (const auto &owner : owners)
+                totalDemand += owner->GetQuantityDemanded(product_name);
+
+            // Update market demand
+            market->SetDemand(totalDemand);
+
+            // Find new equilibrium
+            market->FindEquilibrium();
+
+            RecordVariableChange("market." + product_name + ".equilibriuprice",
+                                 market->GetCurrentPrice(), market->GetCurrentPrice());
+        }
+    }
+}
+
+void Simulation::Step()
+{
+    // =====================================================================
+    // Phase 1: Agent actions (production/harvest)
+    // =====================================================================
+    for (auto &farmer : farmers)
+    {
+        double oldOutput = farmer->GetOutputQuantity();
+        farmer->Harvest();
+
+        if (propagator)
+        {
+            propagator->EmitChange("farmer." + farmer->GetName(),
+                                   "farmer." + farmer->GetName() + ".output_quantity",
+                                   oldOutput,
+                                   farmer->GetOutputQuantity(),
+                                   "Farmer harvested");
+        }
+
+        UpdateMarketFromHarvest(farmer.get());
+    }
+
+    for (auto &owner : owners)
+    {
+        double oldProduction = owner->GetProduction();
+        owner->Produce();
+
+        if (propagator)
+        {
+            propagator->EmitChange("owner." + owner->GetName(),
+                                   "owner." + owner->GetName() + ".production",
+                                   oldProduction,
+                                   owner->GetProduction(),
+                                   "Owner production updated");
+        }
+    }
+
+    // =====================================================================
+    // Phase 2: Market clearing (equilibrium recalculation)
+    // =====================================================================
+    UpdateConsumerDemand();
+
+    for (auto &[product_name, market] : markets)
+    {
+        if (!market)
+            continue;
+
+        double oldPrice = market->GetCurrentPrice();
+
+        double totalDemand = 0.0;
+        for (const auto &worker : workers)
+            totalDemand += worker->GetQuantityDemanded(product_name);
+        for (const auto &farmer : farmers)
+            totalDemand += farmer->GetQuantityDemanded(product_name);
+        for (const auto &owner : owners)
+            totalDemand += owner->GetQuantityDemanded(product_name);
+
+        market->SetDemand(totalDemand);
+        market->FindEquilibrium();
+
+        double newPrice = market->GetCurrentPrice();
+        if (propagator && abs(newPrice - oldPrice) > 1e-6)
+        {
+            propagator->EmitChange("market_clearing",
+                                   "market." + product_name + ".price",
+                                   oldPrice,
+                                   newPrice,
+                                   "Equilibrium price recalculated");
+        }
+    }
+
+    // =====================================================================
+    // Phase 3: Propagation (immediate → decision → delayed effects)
+    // =====================================================================
+    if (propagator)
+    {
+        propagator->ProcessTier1();
+        propagator->ProcessTier2();
+        propagator->ProcessTier3();
+    }
+
+    // =====================================================================
+    // Phase 4: Government accounting (taxes, unemployment, budget)
+    // =====================================================================
+    if (government)
+    {
+        double totalIncome = 0.0;
+        double totalProfits = 0.0;
+
+        int totalLabor = static_cast<int>(workers.size());
+        int unemployed = 0;
+
+        for (const auto &worker : workers)
+        {
+            totalIncome += worker->GetMonthlyIncome();
+            if (!worker->IsEmployed())
+                unemployed++;
+        }
+
+        for (const auto &farmer : farmers)
+            totalProfits += max(0.0, farmer->GetProfit());
+        for (const auto &owner : owners)
+            totalProfits += max(0.0, owner->GetProfit());
+
+        government->CollectTaxes(totalIncome, totalProfits);
+        government->UpdateUnemploymentRate(unemployed, totalLabor);
+        government->UpdateBudget();
+    }
+
+    // =====================================================================
+    // Phase 5: Statistics refresh
+    // =====================================================================
+    RefreshStats();
+
+    // Advance time for delayed effects
+    if (propagator)
+        propagator->AdvanceTick();
+    currentTick++;
 }

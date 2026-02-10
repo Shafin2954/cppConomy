@@ -1,79 +1,81 @@
 #pragma once
 
-#include "Person.h"
+#include "Consumer.h"
+
+using namespace std;
 
 // ============================================================================
-// Owner.h - Inherits from Person (The Business Owner/Manufacturer)
+// Owner.h - Inherits from Consumer (The Business Owner/Manufacturer)
 //
 // Maps to: Production Function, Cost Curves, Monopoly, Shutdown Condition,
 //          Marginal Cost, Marginal Revenue, Profit Maximization,
 //          Returns to Scale, Market Power
 // ============================================================================
 
-class Owner : public Person
+class Owner : public Consumer
 {
 private:
     // ========== Production Inputs (Factors of Production) ==========
-    double m_capital_machines; // Capital stock (machinery, equipment)
-    int m_labor_hired;         // Number of workers
-    double m_technology_level; // Affects productivity: higher = more output per input
+    double capital_machines; // Capital stock (machinery, equipment)
+    int labor_hired;         // Number of workers
+    double technology_level; // Affects productivity: higher = more output per input
 
-    std::string m_product_type; // What they produce: "cloth", "ice_cream", etc.
-    double m_production_output; // Current production quantity
+    string product_type;      // What they produce: "cloth", "ice_cream", etc.
+    double production_output; // Current production quantity
 
     // ========== Market Power ==========
-    bool m_is_monopoly;     // If true: sets own price (price maker)
-                            // If false: takes market price (price taker)
-    double m_current_price; // Price they charge (or market price if competitive)
-    double m_revenue;       // Price * Quantity
+    bool is_monopoly;     // If true: sets own price (price maker)
+                          // If false: takes market price (price taker)
+    double current_price; // Price they charge (or market price if competitive)
+    double revenue;       // Price * Quantity
 
     // ========== Cost Structure (Cost Curves) ==========
     // Shows: Total Cost, Average Cost, Marginal Cost curves
-    double m_total_fixed_cost;      // TFC: machinery rent, overhead (doesn't change with output)
-    double m_total_variable_cost;   // TVC: wages, materials (changes with output)
-    double m_total_cost;            // TC = TFC + TVC
-    double m_average_fixed_cost;    // AFC = TFC / Q
-    double m_average_variable_cost; // AVC = TVC / Q
-    double m_average_cost;          // AC = TC / Q
-    double m_marginal_cost;         // MC = change in TC / change in Q
+    double total_fixed_cost;      // TFC: machinery rent, overhead (doesn't change with output)
+    double total_variable_cost;   // TVC: wages, materials (changes with output)
+    double total_cost;            // TC = TFC + TVC
+    double average_fixed_cost;    // AFC = TFC / Q
+    double average_variable_cost; // AVC = TVC / Q
+    double average_cost;          // AC = TC / Q
+    double marginal_cost;         // MC = change in TC / change in Q
 
     // ========== Revenue Analysis ==========
-    double m_marginal_revenue; // MR = change in TR / change in Q
+    double marginal_revenue; // MR = change in TR / change in Q
 
     // Profit
-    double m_profit; // TR - TC (or can be negative = loss)
+    double profit; // TR - TC (or can be negative = loss)
 
     // ========== Shutdown Decision ==========
     // Short run: produce if Price >= AVC (covers variable costs)
     // Long run: produce if Price >= AC (covers all costs)
-    bool m_is_operating; // False if price too low -> shutdown
+    bool is_operating; // False if price too low -> shutdown
 
 public:
     // ========== Constructors ==========
-    Owner(int id, const std::string &name, double initial_capital,
-          const std::string &product_type, bool is_monopoly);
+    Owner(int id, const string &name, double initial_capital,
+          const string &product_type, bool is_monopoly);
 
     // ========== Getters ==========
-    double GetCapital() const { return m_capital_machines; }
-    int GetLaborHired() const { return m_labor_hired; }
-    double GetTechnologyLevel() const { return m_technology_level; }
-    std::string GetProductType() const { return m_product_type; }
-    double GetProduction() const { return m_production_output; }
-    bool IsMonopoly() const { return m_is_monopoly; }
-    double GetPrice() const { return m_current_price; }
-    double GetRevenue() const { return m_revenue; }
-    double GetTotalFixedCost() const { return m_total_fixed_cost; }
-    double GetTotalVariableCost() const { return m_total_variable_cost; }
-    double GetTotalCost() const { return m_total_cost; }
-    double GetAverageCost() const { return m_average_cost; }
-    double GetAverageVariableCost() const { return m_average_variable_cost; }
-    double GetMarginalCost() const { return m_marginal_cost; }
-    double GetMarginalRevenue() const { return m_marginal_revenue; }
-    double GetProfit() const { return m_profit; }
-    bool IsOperating() const { return m_is_operating; }
+    double GetCapital() const { return capital_machines; }
+    int GetLaborHired() const { return labor_hired; }
+    double GetTechnologyLevel() const { return technology_level; }
+    string GetProductType() const { return product_type; }
+    double GetProduction() const { return production_output; }
+    bool IsMonopoly() const { return is_monopoly; }
+    double GetPrice() const { return current_price; }
+    double GetRevenue() const { return revenue; }
+    double GetTotalFixedCost() const { return total_fixed_cost; }
+    double GetTotalVariableCost() const { return total_variable_cost; }
+    double GetTotalCost() const { return total_cost; }
+    double GetAverageCost() const { return average_cost; }
+    double GetAverageVariableCost() const { return average_variable_cost; }
+    double GetMarginalCost() const { return marginal_cost; }
+    double GetMarginalRevenue() const { return marginal_revenue; }
+    double GetProfit() const { return profit; }
+    bool IsOperating() const { return is_operating; }
 
     // ========== Setters ==========
-    void SetPrice(double price) { m_current_price = price; }
+    void SetPrice(double price) { current_price = price; }
 
     // ========== Production Decisions ==========
 
@@ -127,6 +129,24 @@ public:
     // Demonstrates deadweight loss, consumer surplus extraction
     void SetMonopolyPrice();
 
+    // ========== Economic Decision Methods (for Propagation Engine) ==========
+
+    // Decide production level based on profitability and market conditions
+    // Implements profit maximization: produce where MR = MC
+    // Low profit → reduce output, high profit → expand output
+    void DecideProduction();
+
+    // Decide capital investment based on expected returns
+    // High profit → invest in capital (expand capacity)
+    // This drives long-run economic growth through capital accumulation
+    void DecideInvestment();
+
+    // Decide whether to exit the market (shutdown decision)
+    // Short run: exit if P < AVC (can't cover variable costs)
+    // Long run: exit if P < AC (can't cover total costs)
+    // Returns true if firm shuts down
+    bool DecideMarketExit();
+
     // ========== Display ==========
-    std::string GetInfoString() const override;
+    string GetInfoString() const override;
 };

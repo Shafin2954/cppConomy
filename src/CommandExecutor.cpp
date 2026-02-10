@@ -1,9 +1,68 @@
 #include "CommandExecutor.h"
 #include "Logger.h"
+#include "TermColors.h"
+#include <algorithm>
+#include <cctype>
+#include <iomanip>
 #include <sstream>
+#include <variant>
+
+using namespace std;
+
+namespace
+{
+    string ToLower(string value)
+    {
+        transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
+                  { return static_cast<char>(tolower(c)); });
+        return value;
+    }
+
+    string NormalizeShockType(string value)
+    {
+        for (char &c : value)
+        {
+            if (c == '_')
+                c = ' ';
+        }
+        value = ToLower(value);
+        return value;
+    }
+
+    bool IsShockType(const string &value)
+    {
+        string normalized = NormalizeShockType(value);
+        return normalized == "bumper harvest" || normalized == "natural disaster";
+    }
+
+    string FormatPriceChange(double oldPrice, double newPrice)
+    {
+        ostringstream ss;
+        ss << fixed << setprecision(2);
+
+        if (oldPrice <= 0.0)
+        {
+            ss << "Price now: $" << newPrice;
+            return TermColors::Styled(ss.str(), TermColors::Theme::Info);
+        }
+
+        double diff = newPrice - oldPrice;
+        double percent = (diff / oldPrice) * 100.0;
+        ss << "Price change: $" << oldPrice << " -> $" << newPrice << " (";
+        if (diff >= 0.0)
+            ss << "+";
+        ss << percent << "%)";
+
+        if (diff > 0.0)
+            return TermColors::Styled(ss.str(), TermColors::Theme::Error);
+        if (diff < 0.0)
+            return TermColors::Styled(ss.str(), TermColors::Theme::Success);
+        return TermColors::Styled(ss.str(), TermColors::Theme::Info);
+    }
+}
 
 CommandExecutor::CommandExecutor(Simulation &simulation)
-    : m_simulation(simulation)
+    : simulation(simulation)
 {
 }
 
@@ -11,8 +70,8 @@ bool CommandExecutor::execute(const Command &cmd)
 {
     if (!cmd.valid)
     {
-        m_lastError = cmd.errorMessage;
-        output("Error: " + m_lastError);
+        lastError = cmd.errorMessage;
+        output("Error: " + lastError);
         return false;
     }
 
@@ -70,85 +129,138 @@ bool CommandExecutor::execute(const Command &cmd)
             cmdHelp(cmd);
         else if (cmd.name == "clear")
             cmdClear(cmd);
+
+        // ========== ECONOMIC ANALYSIS COMMANDS ==========
+        else if (cmd.name == "market.equilibrium")
+            cmdMarketEquilibrium(cmd);
+        else if (cmd.name == "market.elasticity")
+            cmdMarketElasticity(cmd);
+        else if (cmd.name == "market.welfare")
+            cmdMarketWelfare(cmd);
+        else if (cmd.name == "market.supply_shock")
+            cmdMarketSupplyShock(cmd);
+        else if (cmd.name == "market.tax")
+            cmdMarketTax(cmd);
+        else if (cmd.name == "market.subsidy")
+            cmdMarketSubsidy(cmd);
+        else if (cmd.name == "market.price_control")
+            cmdMarketPriceControl(cmd);
+        else if (cmd.name == "consumer.optimize_bundle")
+            cmdConsumerOptimize(cmd);
+        else if (cmd.name == "consumer.substitute")
+            cmdConsumerSubstitute(cmd);
+        else if (cmd.name == "firm.cost_analysis")
+            cmdFirmCostAnalysis(cmd);
+        else if (cmd.name == "firm.add_worker")
+            cmdFirmAddWorker(cmd);
+        else if (cmd.name == "firm.check_shutdown")
+            cmdFirmShutdown(cmd);
+        else if (cmd.name == "gov.calculate_gdp")
+            cmdGDPCalculate(cmd);
+        else if (cmd.name == "stats.cpi")
+            cmdCPIAnalysis(cmd);
+        else if (cmd.name == "stats.inflation")
+            cmdInflationAnalysis(cmd);
+        else if (cmd.name == "centralBank.monetary_policy")
+            cmdMonetaryPolicy(cmd);
+        else if (cmd.name == "gov.set_policy")
+            cmdFiscalPolicy(cmd);
+        else if (cmd.name == "economy.ppf")
+            cmdPPFAnalysis(cmd);
+        else if (cmd.name == "tech.upgrade")
+            cmdTechUpgrade(cmd);
+        else if (cmd.name == "system.show_changes")
+            cmdShowVariableChanges(cmd);
+        else if (cmd.name == "system.dependency_chain")
+            cmdDependencyChain(cmd);
+        // ========== PROPAGATION SYSTEM COMMANDS ==========
+        else if (cmd.name == "step")
+            cmdStep(cmd);
+        else if (cmd.name == "propagation.show")
+            cmdPropagationShow(cmd);
+        else if (cmd.name == "propagation.chain")
+            cmdPropagationChain(cmd);
+        else if (cmd.name == "propagation.graph")
+            cmdPropagationGraph(cmd);
         else
         {
-            m_lastError = "Unknown command: " + cmd.name;
-            output("Error: " + m_lastError);
+            lastError = "Unknown command: " + cmd.name;
+            output("Error: " + lastError);
             return false;
         }
         return true;
     }
-    catch (const std::exception &e)
+    catch (const exception &e)
     {
-        m_lastError = e.what();
-        output("Error: " + m_lastError);
+        lastError = e.what();
+        output("Error: " + lastError);
         return false;
     }
 }
 
-bool CommandExecutor::execute(const std::string &input)
+bool CommandExecutor::execute(const string &input)
 {
-    Command cmd = m_parser.parse(input);
+    Command cmd = parser.parse(input);
     return execute(cmd);
 }
 
 void CommandExecutor::cmdAddWorker(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "Worker");
+    string name = getParam<string>(cmd, "name", "Worker");
     double income = getParam<double>(cmd, "income", 1000.0);
     double skill = getParam<double>(cmd, "skill", 0.5);
 
-    m_simulation.AddWorker(name, income, skill);
-    m_simulation.RefreshStats();
+    simulation.AddWorker(name, income, skill);
+    simulation.RefreshStats();
     output("Added worker: " + name);
 }
 
 void CommandExecutor::cmdAddFarmer(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "Farmer");
+    string name = getParam<string>(cmd, "name", "Farmer");
     double land = getParam<double>(cmd, "land", 10.0);
-    std::string crop = getParam<std::string>(cmd, "crop", "rice");
+    string crop = getParam<string>(cmd, "crop", "rice");
 
-    m_simulation.AddFarmer(name, land, crop);
-    m_simulation.RefreshStats();
+    simulation.AddFarmer(name, land, crop);
+    simulation.RefreshStats();
     output("Added farmer: " + name);
 }
 
 void CommandExecutor::cmdAddOwner(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "Owner");
+    string name = getParam<string>(cmd, "name", "Owner");
     double capital = getParam<double>(cmd, "capital", 5000.0);
-    std::string product = getParam<std::string>(cmd, "product", "cloth");
+    string product = getParam<string>(cmd, "product", "cloth");
     bool monopoly = getParam<bool>(cmd, "monopoly", false);
 
-    m_simulation.AddOwner(name, capital, product, monopoly);
-    m_simulation.RefreshStats();
+    simulation.AddOwner(name, capital, product, monopoly);
+    simulation.RefreshStats();
     output("Added owner: " + name);
 }
 
 void CommandExecutor::cmdAddMarket(const Command &cmd)
 {
-    std::string product = getParam<std::string>(cmd, "product", "rice");
-    m_simulation.CreateMarket(product);
-    m_simulation.RefreshStats();
+    string product = getParam<string>(cmd, "product", "rice");
+    simulation.CreateMarket(product);
+    simulation.RefreshStats();
     output("Added market: " + product);
 }
 
 void CommandExecutor::cmdSelect(const Command &cmd)
 {
-    std::string worker = getParam<std::string>(cmd, "worker", "");
-    std::string farmer = getParam<std::string>(cmd, "farmer", "");
-    std::string owner = getParam<std::string>(cmd, "owner", "");
-    std::string market = getParam<std::string>(cmd, "market", "");
+    string worker = getParam<string>(cmd, "worker", "");
+    string farmer = getParam<string>(cmd, "farmer", "");
+    string owner = getParam<string>(cmd, "owner", "");
+    string market = getParam<string>(cmd, "market", "");
 
     if (!worker.empty())
-        m_simulation.SelectWorker(worker);
+        simulation.SelectWorker(worker);
     if (!farmer.empty())
-        m_simulation.SelectFarmer(farmer);
+        simulation.SelectFarmer(farmer);
     if (!owner.empty())
-        m_simulation.SelectOwner(owner);
+        simulation.SelectOwner(owner);
     if (!market.empty())
-        m_simulation.SelectMarket(market);
+        simulation.SelectMarket(market);
 
     output("Selection updated");
 }
@@ -156,18 +268,18 @@ void CommandExecutor::cmdSelect(const Command &cmd)
 void CommandExecutor::cmdClearSelection(const Command &cmd)
 {
     (void)cmd;
-    m_simulation.ClearSelection();
+    simulation.ClearSelection();
     output("Selection cleared");
 }
 
 void CommandExecutor::cmdBuy(const Command &cmd)
 {
-    std::string worker = getParam<std::string>(cmd, "worker", "");
-    std::string product = getParam<std::string>(cmd, "product", "");
+    string worker = getParam<string>(cmd, "worker", "");
+    string product = getParam<string>(cmd, "product", "");
     double qty = getParam<double>(cmd, "quantity", 1.0);
     double price = getParam<double>(cmd, "price", 1.0);
 
-    Worker *w = m_simulation.FindWorker(worker);
+    Worker *w = simulation.FindWorker(worker);
     if (!w)
     {
         output("Error: worker not found");
@@ -177,31 +289,35 @@ void CommandExecutor::cmdBuy(const Command &cmd)
     double oldWallet = w->GetWallet();
     double oldUtility = w->GetTotalUtility();
     w->Consume(product, qty, price);
-    m_simulation.RecordVariableChange("worker." + w->GetName() + ".wallet", oldWallet, w->GetWallet());
-    m_simulation.RecordVariableChange("worker." + w->GetName() + ".utility", oldUtility, w->GetTotalUtility());
-    m_simulation.RefreshStats();
+    simulation.RecordVariableChange("worker." + w->GetName() + ".wallet", oldWallet, w->GetWallet());
+    simulation.RecordVariableChange("worker." + w->GetName() + ".utility", oldUtility, w->GetTotalUtility());
+    simulation.RefreshStats();
     output("Purchase complete");
 }
 
 void CommandExecutor::cmdHarvest(const Command &cmd)
 {
-    std::string farmer = getParam<std::string>(cmd, "farmer", "");
+    string farmer = getParam<string>(cmd, "farmer", "");
 
     if (farmer.empty())
     {
-        for (const auto &f : m_simulation.GetFarmers())
+        for (const auto &f : simulation.GetFarmers())
         {
             double oldOutput = f->GetOutputQuantity();
             f->Harvest();
-            m_simulation.RecordVariableChange("farmer." + f->GetName() + ".output_quantity",
-                                              oldOutput, f->GetOutputQuantity());
+            simulation.RecordVariableChange("farmer." + f->GetName() + ".output_quantity",
+                                            oldOutput, f->GetOutputQuantity());
+            // Update market with harvested supply and recalculate equilibrium
+            simulation.UpdateMarketFromHarvest(f.get());
         }
-        m_simulation.RefreshStats();
-        output("All farmers harvested");
+        simulation.RecalculateMarketEquilibria();
+        simulation.RefreshStats();
+        output("All farmers harvested\n");
+        output("Markets updated with new supply and equilibrium recalculated");
         return;
     }
 
-    Farmer *f = m_simulation.FindFarmer(farmer);
+    Farmer *f = simulation.FindFarmer(farmer);
     if (!f)
     {
         output("Error: farmer not found");
@@ -210,43 +326,47 @@ void CommandExecutor::cmdHarvest(const Command &cmd)
 
     double oldOutput = f->GetOutputQuantity();
     f->Harvest();
-    m_simulation.RecordVariableChange("farmer." + f->GetName() + ".output_quantity",
-                                      oldOutput, f->GetOutputQuantity());
-    m_simulation.RefreshStats();
-    output("Harvested for " + farmer);
+    simulation.RecordVariableChange("farmer." + f->GetName() + ".output_quantity",
+                                    oldOutput, f->GetOutputQuantity());
+    // Update market with harvested supply and recalculate equilibrium
+    simulation.UpdateMarketFromHarvest(f);
+    simulation.RecalculateMarketEquilibria();
+    simulation.RefreshStats();
+    output("Harvested for " + farmer + "\n");
+    output("Market updated with supply " + to_string(f->GetOutputQuantity()) + " units");
 }
 
 void CommandExecutor::cmdReset(const Command &cmd)
 {
     (void)cmd;
-    m_simulation.Reset();
-    m_simulation.Initialize(2, 1, 1);
-    m_simulation.RefreshStats();
+    simulation.Reset();
+    simulation.Initialize(2, 1, 1);
+    simulation.RefreshStats();
     output("Simulation reset");
 }
 
 void CommandExecutor::cmdStatus(const Command &cmd)
 {
     (void)cmd;
-    output(m_simulation.GetStatusString());
+    output(simulation.GetStatusString());
 }
 
 void CommandExecutor::cmdHelp(const Command &cmd)
 {
-    std::string cmdName = getParam<std::string>(cmd, "command", "");
-    std::stringstream ss;
+    string cmdName = getParam<string>(cmd, "command", "");
+    stringstream ss;
 
     if (cmdName.empty())
     {
         ss << "Available commands:\n";
         ss << "--------------------------------------\n";
-        for (const auto &info : m_parser.getAvailableCommands())
+        for (const auto &info : parser.getAvailableCommands())
             ss << "  " << info.name << " - " << info.description << "\n";
         ss << "\nUse help(command=\"name\") for details.";
     }
     else
     {
-        for (const auto &info : m_parser.getAvailableCommands())
+        for (const auto &info : parser.getAvailableCommands())
         {
             if (info.name == cmdName)
             {
@@ -258,7 +378,7 @@ void CommandExecutor::cmdHelp(const Command &cmd)
                     for (const auto &param : info.parameters)
                         ss << "    " << param.first << ": " << param.second << "\n";
                 }
-                ss << "\n  Example: " << m_parser.getParameterHints(cmdName);
+                ss << "\n  Example: " << parser.getParameterHints(cmdName);
                 break;
             }
         }
@@ -279,16 +399,16 @@ void CommandExecutor::cmdClear(const Command &cmd)
 void CommandExecutor::cmdPersons(const Command &cmd)
 {
     (void)cmd;
-    std::stringstream ss;
+    stringstream ss;
     ss << "All Persons:\n";
     ss << "  Workers:\n";
-    for (const auto &w : m_simulation.GetWorkers())
+    for (const auto &w : simulation.GetWorkers())
         ss << "    - " << w->GetName() << "\n";
     ss << "  Farmers:\n";
-    for (const auto &f : m_simulation.GetFarmers())
+    for (const auto &f : simulation.GetFarmers())
         ss << "    - " << f->GetName() << "\n";
     ss << "  Owners:\n";
-    for (const auto &o : m_simulation.GetOwners())
+    for (const auto &o : simulation.GetOwners())
         ss << "    - " << o->GetName() << "\n";
     output(ss.str());
 }
@@ -296,14 +416,14 @@ void CommandExecutor::cmdPersons(const Command &cmd)
 void CommandExecutor::cmdWorkers(const Command &cmd)
 {
     (void)cmd;
-    std::stringstream ss;
+    stringstream ss;
     ss << "Workers:\n";
-    for (const auto &w : m_simulation.GetWorkers())
+    for (const auto &w : simulation.GetWorkers())
     {
         ss << "  - " << w->GetName() << " (Income: $" << w->GetMonthlyIncome()
            << ", Skill: " << w->GetSkillLevel() << ")\n";
     }
-    if (m_simulation.GetWorkers().empty())
+    if (simulation.GetWorkers().empty())
         ss << "  (none)\n";
     output(ss.str());
 }
@@ -311,14 +431,14 @@ void CommandExecutor::cmdWorkers(const Command &cmd)
 void CommandExecutor::cmdFarmers(const Command &cmd)
 {
     (void)cmd;
-    std::stringstream ss;
+    stringstream ss;
     ss << "Farmers:\n";
-    for (const auto &f : m_simulation.GetFarmers())
+    for (const auto &f : simulation.GetFarmers())
     {
         ss << "  - " << f->GetName() << " (Crop: " << f->GetCrop()
            << ", Land: " << f->GetLandSize() << " acres)\n";
     }
-    if (m_simulation.GetFarmers().empty())
+    if (simulation.GetFarmers().empty())
         ss << "  (none)\n";
     output(ss.str());
 }
@@ -326,14 +446,14 @@ void CommandExecutor::cmdFarmers(const Command &cmd)
 void CommandExecutor::cmdOwners(const Command &cmd)
 {
     (void)cmd;
-    std::stringstream ss;
+    stringstream ss;
     ss << "Owners:\n";
-    for (const auto &o : m_simulation.GetOwners())
+    for (const auto &o : simulation.GetOwners())
     {
         ss << "  - " << o->GetName() << " (Product: " << o->GetProductType()
            << ", Capital: $" << o->GetCapital() << ")\n";
     }
-    if (m_simulation.GetOwners().empty())
+    if (simulation.GetOwners().empty())
         ss << "  (none)\n";
     output(ss.str());
 }
@@ -341,13 +461,13 @@ void CommandExecutor::cmdOwners(const Command &cmd)
 void CommandExecutor::cmdMarkets(const Command &cmd)
 {
     (void)cmd;
-    std::stringstream ss;
+    stringstream ss;
     ss << "Markets:\n";
-    for (const auto &[name, m] : m_simulation.GetMarkets())
+    for (const auto &[name, m] : simulation.GetMarkets())
     {
         ss << "  - " << name << " (Price: $" << m->GetCurrentPrice() << ")\n";
     }
-    if (m_simulation.GetMarkets().empty())
+    if (simulation.GetMarkets().empty())
         ss << "  (none)\n";
     output(ss.str());
 }
@@ -356,7 +476,7 @@ void CommandExecutor::cmdMarkets(const Command &cmd)
 
 void CommandExecutor::cmdPerson(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "");
+    string name = getParam<string>(cmd, "name", "");
     if (name.empty())
     {
         output("Error: name parameter required");
@@ -364,12 +484,12 @@ void CommandExecutor::cmdPerson(const Command &cmd)
     }
 
     // Try to find as worker, farmer, or owner
-    Worker *w = m_simulation.FindWorker(name);
-    Farmer *f = m_simulation.FindFarmer(name);
-    Owner *o = m_simulation.FindOwner(name);
+    Worker *w = simulation.FindWorker(name);
+    Farmer *f = simulation.FindFarmer(name);
+    Owner *o = simulation.FindOwner(name);
 
-    Person *p = nullptr;
-    std::string type;
+    Consumer *p = nullptr;
+    string type;
     if (w)
     {
         p = w;
@@ -400,8 +520,8 @@ void CommandExecutor::cmdPerson(const Command &cmd)
     else
     {
         // Get specific property
-        std::string prop = cmd.propertyAccess;
-        std::stringstream ss;
+        string prop = cmd.propertyAccess;
+        stringstream ss;
         if (prop == "name")
             ss << p->GetName();
         else if (prop == "age")
@@ -420,21 +540,21 @@ void CommandExecutor::cmdPerson(const Command &cmd)
 
 void CommandExecutor::cmdWorker(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "");
+    string name = getParam<string>(cmd, "name", "");
     if (name.empty())
     {
         output("Error: name parameter required");
         return;
     }
 
-    Worker *w = m_simulation.FindWorker(name);
+    Worker *w = simulation.FindWorker(name);
     if (!w)
     {
         output("Error: worker '" + name + "' not found");
         return;
     }
 
-    m_simulation.SelectWorker(name);
+    simulation.SelectWorker(name);
 
     if (cmd.propertyAccess.empty())
     {
@@ -442,8 +562,8 @@ void CommandExecutor::cmdWorker(const Command &cmd)
     }
     else
     {
-        std::string prop = cmd.propertyAccess;
-        std::stringstream ss;
+        string prop = cmd.propertyAccess;
+        stringstream ss;
         if (prop == "name")
             ss << w->GetName();
         else if (prop == "age")
@@ -468,21 +588,21 @@ void CommandExecutor::cmdWorker(const Command &cmd)
 
 void CommandExecutor::cmdFarmer(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "");
+    string name = getParam<string>(cmd, "name", "");
     if (name.empty())
     {
         output("Error: name parameter required");
         return;
     }
 
-    Farmer *f = m_simulation.FindFarmer(name);
+    Farmer *f = simulation.FindFarmer(name);
     if (!f)
     {
         output("Error: farmer '" + name + "' not found");
         return;
     }
 
-    m_simulation.SelectFarmer(name);
+    simulation.SelectFarmer(name);
 
     if (cmd.propertyAccess.empty())
     {
@@ -490,8 +610,8 @@ void CommandExecutor::cmdFarmer(const Command &cmd)
     }
     else
     {
-        std::string prop = cmd.propertyAccess;
-        std::stringstream ss;
+        string prop = cmd.propertyAccess;
+        stringstream ss;
         if (prop == "name")
             ss << f->GetName();
         else if (prop == "age")
@@ -518,21 +638,21 @@ void CommandExecutor::cmdFarmer(const Command &cmd)
 
 void CommandExecutor::cmdOwner(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "");
+    string name = getParam<string>(cmd, "name", "");
     if (name.empty())
     {
         output("Error: name parameter required");
         return;
     }
 
-    Owner *o = m_simulation.FindOwner(name);
+    Owner *o = simulation.FindOwner(name);
     if (!o)
     {
         output("Error: owner '" + name + "' not found");
         return;
     }
 
-    m_simulation.SelectOwner(name);
+    simulation.SelectOwner(name);
 
     if (cmd.propertyAccess.empty())
     {
@@ -540,8 +660,8 @@ void CommandExecutor::cmdOwner(const Command &cmd)
     }
     else
     {
-        std::string prop = cmd.propertyAccess;
-        std::stringstream ss;
+        string prop = cmd.propertyAccess;
+        stringstream ss;
         if (prop == "name")
             ss << o->GetName();
         else if (prop == "age")
@@ -570,25 +690,25 @@ void CommandExecutor::cmdOwner(const Command &cmd)
 
 void CommandExecutor::cmdMarket(const Command &cmd)
 {
-    std::string name = getParam<std::string>(cmd, "name", "");
+    string name = getParam<string>(cmd, "name", "");
     if (name.empty())
     {
         output("Error: name parameter required");
         return;
     }
 
-    Market *m = m_simulation.FindMarket(name);
+    Market *m = simulation.FindMarket(name);
     if (!m)
     {
         output("Error: market '" + name + "' not found");
         return;
     }
 
-    m_simulation.SelectMarket(name);
+    simulation.SelectMarket(name);
 
     if (cmd.propertyAccess.empty())
     {
-        std::stringstream ss;
+        stringstream ss;
         ss << "Market: " << m->GetProductName() << "\n";
         ss << "  Price: $" << m->GetCurrentPrice() << "\n";
         ss << "  Demand: " << m->GetQuantityDemanded() << "\n";
@@ -599,8 +719,8 @@ void CommandExecutor::cmdMarket(const Command &cmd)
     }
     else
     {
-        std::string prop = cmd.propertyAccess;
-        std::stringstream ss;
+        string prop = cmd.propertyAccess;
+        stringstream ss;
         if (prop == "name" || prop == "product")
             ss << m->GetProductName();
         else if (prop == "price")
@@ -623,11 +743,11 @@ void CommandExecutor::cmdMarket(const Command &cmd)
 
 void CommandExecutor::cmdSystem(const Command &cmd)
 {
-    const auto &stats = m_simulation.GetStats();
+    const auto &stats = simulation.GetStats();
 
     if (cmd.propertyAccess.empty())
     {
-        std::stringstream ss;
+        stringstream ss;
         ss << "System Stats:\n";
         ss << "  GDP: $" << stats.gdp << "\n";
         ss << "  GDP Growth: " << (stats.gdpGrowth * 100) << "%\n";
@@ -646,8 +766,8 @@ void CommandExecutor::cmdSystem(const Command &cmd)
     }
     else
     {
-        std::string prop = cmd.propertyAccess;
-        std::stringstream ss;
+        string prop = cmd.propertyAccess;
+        stringstream ss;
         if (prop == "gdp")
             ss << stats.gdp;
         else if (prop == "growth" || prop == "gdp_growth")
@@ -681,22 +801,22 @@ void CommandExecutor::cmdSystem(const Command &cmd)
 }
 
 template <typename T>
-T CommandExecutor::getParam(const Command &cmd, const std::string &name, T defaultValue) const
+T CommandExecutor::getParam(const Command &cmd, const string &name, T defaultValue) const
 {
     auto it = cmd.params.find(name);
     if (it == cmd.params.end())
         return defaultValue;
 
-    if (auto val = std::get_if<T>(&it->second))
+    if (auto val = get_if<T>(&it->second))
         return *val;
 
     return defaultValue;
 }
 
-void CommandExecutor::output(const std::string &message)
+void CommandExecutor::output(const string &message)
 {
-    if (m_outputCallback)
-        m_outputCallback(message);
+    if (outputCallback)
+        outputCallback(message);
 }
 bool CommandExecutor::executeAssignment(const Command &cmd)
 {
@@ -706,8 +826,8 @@ bool CommandExecutor::executeAssignment(const Command &cmd)
     }
     else if (cmd.name == "worker")
     {
-        std::string name = getParam<std::string>(cmd, "name", "");
-        Worker *w = m_simulation.FindWorker(name);
+        string name = getParam<string>(cmd, "name", "");
+        Worker *w = simulation.FindWorker(name);
         if (!w)
         {
             output("Error: worker '" + name + "' not found");
@@ -717,8 +837,8 @@ bool CommandExecutor::executeAssignment(const Command &cmd)
     }
     else if (cmd.name == "farmer")
     {
-        std::string name = getParam<std::string>(cmd, "name", "");
-        Farmer *f = m_simulation.FindFarmer(name);
+        string name = getParam<string>(cmd, "name", "");
+        Farmer *f = simulation.FindFarmer(name);
         if (!f)
         {
             output("Error: farmer '" + name + "' not found");
@@ -728,8 +848,8 @@ bool CommandExecutor::executeAssignment(const Command &cmd)
     }
     else if (cmd.name == "owner")
     {
-        std::string name = getParam<std::string>(cmd, "name", "");
-        Owner *o = m_simulation.FindOwner(name);
+        string name = getParam<string>(cmd, "name", "");
+        Owner *o = simulation.FindOwner(name);
         if (!o)
         {
             output("Error: owner '" + name + "' not found");
@@ -739,8 +859,8 @@ bool CommandExecutor::executeAssignment(const Command &cmd)
     }
     else if (cmd.name == "market")
     {
-        std::string name = getParam<std::string>(cmd, "name", "");
-        Market *m = m_simulation.FindMarket(name);
+        string name = getParam<string>(cmd, "name", "");
+        Market *m = simulation.FindMarket(name);
         if (!m)
         {
             output("Error: market '" + name + "' not found");
@@ -755,16 +875,16 @@ bool CommandExecutor::executeAssignment(const Command &cmd)
 
 bool CommandExecutor::assignWorkerProperty(const Command &cmd, Worker *worker)
 {
-    const std::string &prop = cmd.assignmentProperty;
+    const string &prop = cmd.assignmentProperty;
     double doubleVal = 0.0;
-    std::string stringVal;
+    string stringVal;
 
     // Try to extract double value
-    if (auto val = std::get_if<double>(&cmd.assignmentValue))
+    if (auto val = get_if<double>(&cmd.assignmentValue))
     {
         doubleVal = *val;
     }
-    else if (auto val = std::get_if<std::string>(&cmd.assignmentValue))
+    else if (auto val = get_if<string>(&cmd.assignmentValue))
     {
         stringVal = *val;
     }
@@ -773,25 +893,25 @@ bool CommandExecutor::assignWorkerProperty(const Command &cmd, Worker *worker)
     {
         double oldWage = worker->GetCurrentWage();
         worker->UpdateLaborSupply(doubleVal);
-        m_simulation.RecordVariableChange("worker." + worker->GetName() + ".wage", oldWage, doubleVal);
+        simulation.RecordVariableChange("worker." + worker->GetName() + ".wage", oldWage, doubleVal);
     }
     else if (prop == "income")
     {
         double oldIncome = worker->GetMonthlyIncome();
         worker->SetMonthlyIncome(doubleVal);
-        m_simulation.RecordVariableChange("worker." + worker->GetName() + ".income", oldIncome, doubleVal);
+        simulation.RecordVariableChange("worker." + worker->GetName() + ".income", oldIncome, doubleVal);
     }
     else if (prop == "skill")
     {
         double oldSkill = worker->GetSkillLevel();
         worker->SetSkillLevel(doubleVal);
-        m_simulation.RecordVariableChange("worker." + worker->GetName() + ".skill", oldSkill, doubleVal);
+        simulation.RecordVariableChange("worker." + worker->GetName() + ".skill", oldSkill, doubleVal);
     }
     else if (prop == "min_wage")
     {
         double oldMin = worker->GetMinAcceptableWage();
         worker->SetMinAcceptableWage(doubleVal);
-        m_simulation.RecordVariableChange("worker." + worker->GetName() + ".min_wage", oldMin, doubleVal);
+        simulation.RecordVariableChange("worker." + worker->GetName() + ".min_wage", oldMin, doubleVal);
     }
     else
     {
@@ -799,17 +919,17 @@ bool CommandExecutor::assignWorkerProperty(const Command &cmd, Worker *worker)
         return false;
     }
 
-    m_simulation.RefreshStats();
-    output("Worker " + worker->GetName() + "." + prop + " = " + std::to_string(doubleVal));
+    simulation.RefreshStats();
+    output("Worker " + worker->GetName() + "." + prop + " = " + to_string(doubleVal));
     return true;
 }
 
 bool CommandExecutor::assignFarmerProperty(const Command &cmd, Farmer *farmer)
 {
-    const std::string &prop = cmd.assignmentProperty;
+    const string &prop = cmd.assignmentProperty;
     double doubleVal = 0.0;
 
-    if (auto val = std::get_if<double>(&cmd.assignmentValue))
+    if (auto val = get_if<double>(&cmd.assignmentValue))
     {
         doubleVal = *val;
     }
@@ -825,7 +945,7 @@ bool CommandExecutor::assignFarmerProperty(const Command &cmd, Farmer *farmer)
     {
         double oldFert = farmer->GetFertilizerUnits();
         farmer->AddFertilizer(doubleVal - oldFert);
-        m_simulation.RecordVariableChange("farmer." + farmer->GetName() + ".fertilizer", oldFert, doubleVal);
+        simulation.RecordVariableChange("farmer." + farmer->GetName() + ".fertilizer", oldFert, doubleVal);
     }
     else if (prop == "technology")
     {
@@ -840,17 +960,17 @@ bool CommandExecutor::assignFarmerProperty(const Command &cmd, Farmer *farmer)
         return false;
     }
 
-    m_simulation.RefreshStats();
-    output("Farmer " + farmer->GetName() + "." + prop + " = " + std::to_string(doubleVal));
+    simulation.RefreshStats();
+    output("Farmer " + farmer->GetName() + "." + prop + " = " + to_string(doubleVal));
     return true;
 }
 
 bool CommandExecutor::assignOwnerProperty(const Command &cmd, Owner *owner)
 {
-    const std::string &prop = cmd.assignmentProperty;
+    const string &prop = cmd.assignmentProperty;
     double doubleVal = 0.0;
 
-    if (auto val = std::get_if<double>(&cmd.assignmentValue))
+    if (auto val = get_if<double>(&cmd.assignmentValue))
     {
         doubleVal = *val;
     }
@@ -859,7 +979,7 @@ bool CommandExecutor::assignOwnerProperty(const Command &cmd, Owner *owner)
     {
         double oldPrice = owner->GetPrice();
         owner->SetPrice(doubleVal);
-        m_simulation.RecordVariableChange("owner." + owner->GetName() + ".price", oldPrice, doubleVal);
+        simulation.RecordVariableChange("owner." + owner->GetName() + ".price", oldPrice, doubleVal);
     }
     else
     {
@@ -867,17 +987,17 @@ bool CommandExecutor::assignOwnerProperty(const Command &cmd, Owner *owner)
         return false;
     }
 
-    m_simulation.RefreshStats();
-    output("Owner " + owner->GetName() + "." + prop + " = " + std::to_string(doubleVal));
+    simulation.RefreshStats();
+    output("Owner " + owner->GetName() + "." + prop + " = " + to_string(doubleVal));
     return true;
 }
 
 bool CommandExecutor::assignMarketProperty(const Command &cmd, Market *market)
 {
-    const std::string &prop = cmd.assignmentProperty;
+    const string &prop = cmd.assignmentProperty;
     double doubleVal = 0.0;
 
-    if (auto val = std::get_if<double>(&cmd.assignmentValue))
+    if (auto val = get_if<double>(&cmd.assignmentValue))
     {
         doubleVal = *val;
     }
@@ -886,31 +1006,31 @@ bool CommandExecutor::assignMarketProperty(const Command &cmd, Market *market)
     {
         double oldPrice = market->GetCurrentPrice();
         market->SetPrice(doubleVal);
-        m_simulation.RecordVariableChange("market." + market->GetProductName() + ".price", oldPrice, doubleVal);
+        simulation.RecordVariableChange("market." + market->GetProductName() + ".price", oldPrice, doubleVal);
     }
     else if (prop == "demand")
     {
         double oldDemand = market->GetQuantityDemanded();
         market->SetDemand(doubleVal);
-        m_simulation.RecordVariableChange("market." + market->GetProductName() + ".demand", oldDemand, doubleVal);
+        simulation.RecordVariableChange("market." + market->GetProductName() + ".demand", oldDemand, doubleVal);
     }
     else if (prop == "supply")
     {
         double oldSupply = market->GetQuantitySupplied();
         market->SetSupply(doubleVal);
-        m_simulation.RecordVariableChange("market." + market->GetProductName() + ".supply", oldSupply, doubleVal);
+        simulation.RecordVariableChange("market." + market->GetProductName() + ".supply", oldSupply, doubleVal);
     }
     else if (prop == "tax")
     {
         double oldTax = market->GetTaxRate();
         market->SetTaxRate(doubleVal);
-        m_simulation.RecordVariableChange("market." + market->GetProductName() + ".tax", oldTax, doubleVal);
+        simulation.RecordVariableChange("market." + market->GetProductName() + ".tax", oldTax, doubleVal);
     }
     else if (prop == "subsidy")
     {
         double oldSubsidy = market->GetSubsidyRate();
         market->SetSubsidyRate(doubleVal);
-        m_simulation.RecordVariableChange("market." + market->GetProductName() + ".subsidy", oldSubsidy, doubleVal);
+        simulation.RecordVariableChange("market." + market->GetProductName() + ".subsidy", oldSubsidy, doubleVal);
     }
     else
     {
@@ -918,22 +1038,22 @@ bool CommandExecutor::assignMarketProperty(const Command &cmd, Market *market)
         return false;
     }
 
-    m_simulation.RefreshStats();
-    output("Market " + market->GetProductName() + "." + prop + " = " + std::to_string(doubleVal));
+    simulation.RefreshStats();
+    output("Market " + market->GetProductName() + "." + prop + " = " + to_string(doubleVal));
     return true;
 }
 
 bool CommandExecutor::assignSystemProperty(const Command &cmd)
 {
-    const std::string &prop = cmd.assignmentProperty;
+    const string &prop = cmd.assignmentProperty;
     double doubleVal = 0.0;
 
-    if (auto val = std::get_if<double>(&cmd.assignmentValue))
+    if (auto val = get_if<double>(&cmd.assignmentValue))
     {
         doubleVal = *val;
     }
 
-    Government *gov = m_simulation.GetGovernment();
+    Government *gov = simulation.GetGovernment();
     if (!gov)
     {
         output("Error: government not initialized");
@@ -944,37 +1064,37 @@ bool CommandExecutor::assignSystemProperty(const Command &cmd)
     {
         double oldRate = gov->GetIncomeTaxRate();
         gov->SetIncomeTaxRate(doubleVal);
-        m_simulation.RecordVariableChange("system.income_tax_rate", oldRate, doubleVal);
+        simulation.RecordVariableChange("system.income_tax_rate", oldRate, doubleVal);
     }
     else if (prop == "corporate_tax_rate" || prop == "corporate_tax")
     {
         double oldRate = gov->GetCorporateTaxRate();
         gov->SetCorporateTaxRate(doubleVal);
-        m_simulation.RecordVariableChange("system.corporate_tax_rate", oldRate, doubleVal);
+        simulation.RecordVariableChange("system.corporate_tax_rate", oldRate, doubleVal);
     }
-    else if (prop == "min_wage" || prop == "minimum_wage")
+    else if (prop == "min_wage" || prop == "minimuwage")
     {
         double oldWage = gov->GetMinimumWage();
         gov->SetMinimumWage(doubleVal);
-        m_simulation.RecordVariableChange("system.minimum_wage", oldWage, doubleVal);
+        simulation.RecordVariableChange("system.minimuwage", oldWage, doubleVal);
     }
     else if (prop == "spending" || prop == "government_spending")
     {
         double oldSpending = gov->GetGovernmentSpending();
         gov->SetGovernmentSpending(doubleVal);
-        m_simulation.RecordVariableChange("system.government_spending", oldSpending, doubleVal);
+        simulation.RecordVariableChange("system.government_spending", oldSpending, doubleVal);
     }
     else if (prop == "money_supply" || prop == "money")
     {
         double oldSupply = gov->GetMoneySupply();
         gov->SetMoneySupply(doubleVal);
-        m_simulation.RecordVariableChange("system.money_supply", oldSupply, doubleVal);
+        simulation.RecordVariableChange("system.money_supply", oldSupply, doubleVal);
     }
     else if (prop == "interest_rate" || prop == "interest")
     {
         double oldRate = gov->GetInterestRate();
         gov->SetInterestRate(doubleVal);
-        m_simulation.RecordVariableChange("system.interest_rate", oldRate, doubleVal);
+        simulation.RecordVariableChange("system.interest_rate", oldRate, doubleVal);
     }
     else
     {
@@ -982,7 +1102,801 @@ bool CommandExecutor::assignSystemProperty(const Command &cmd)
         return false;
     }
 
-    m_simulation.RefreshStats();
-    output("System." + prop + " = " + std::to_string(doubleVal));
+    simulation.RefreshStats();
+    output("System." + prop + " = " + to_string(doubleVal));
     return true;
+}
+// ============================================================================
+// NEW ECONOMIC ANALYSIS COMMAND HANDLERS
+// ============================================================================
+
+// ========== MARKET MECHANISMS ==========
+
+void CommandExecutor::cmdMarketEquilibrium(const Command &cmd)
+{
+    string productName = getParam<string>(cmd, "product", "Rice");
+    Market *market = simulation.FindMarket(productName);
+
+    if (!market)
+    {
+        output("Error: Market '" + productName + "' not found");
+        return;
+    }
+
+    market->FindEquilibrium();
+    output(market->GetEquilibriumAnalysis());
+    simulation.RefreshStats();
+}
+
+void CommandExecutor::cmdMarketElasticity(const Command &cmd)
+{
+    string productName = getParam<string>(cmd, "product", "IceCream");
+    Market *market = simulation.FindMarket(productName);
+
+    if (!market)
+    {
+        output("Error: Market '" + productName + "' not found");
+        return;
+    }
+
+    market->CalculatePriceElasticity();
+    output(market->GetElasticityAnalysis());
+    simulation.RefreshStats();
+}
+
+void CommandExecutor::cmdMarketWelfare(const Command &cmd)
+{
+    string productName = getParam<string>(cmd, "product", "Rice");
+    Market *market = simulation.FindMarket(productName);
+
+    if (!market)
+    {
+        output("Error: Market '" + productName + "' not found");
+        return;
+    }
+
+    market->CalculateWelfare();
+    output(market->GetWelfareAnalysis());
+    simulation.RefreshStats();
+}
+
+void CommandExecutor::cmdMarketSupplyShock(const Command &cmd)
+{
+    string shockType = getParam<string>(cmd, "shock_type", "Bumper Harvest");
+    if (shockType.empty())
+        shockType = getParam<string>(cmd, "type", "Bumper Harvest");
+
+    string productName = getParam<string>(cmd, "product", "Rice");
+
+    // If args are reversed (type first), swap when it looks like a shock type.
+    if (!IsShockType(shockType) && IsShockType(productName))
+    {
+        swap(shockType, productName);
+    }
+
+    Market *market = simulation.FindMarket(productName);
+    if (!market)
+    {
+        output("Error: Market '" + productName + "' not found");
+        return;
+    }
+
+    double oldPrice = market->GetCurrentPrice();
+    string normalized = NormalizeShockType(shockType);
+
+    if (normalized == "bumper harvest")
+    {
+        output("\n*** BUMPER HARVEST EVENT ***\n");
+        market->TriggerBumperHarvest();
+        output("Supply increased 30%\n");
+    }
+    else if (normalized == "natural disaster")
+    {
+        output("\n*** NATURAL DISASTER EVENT ***\n");
+        market->TriggerNaturalDisaster();
+        output("Supply decreased 50%\n");
+    }
+    else
+    {
+        output("Error: Unknown shock type '" + shockType + "'");
+        return;
+    }
+
+    output(FormatPriceChange(oldPrice, market->GetCurrentPrice()));
+    output(market->GetEquilibriumAnalysis());
+    simulation.RefreshStats();
+}
+
+void CommandExecutor::cmdMarketTax(const Command &cmd)
+{
+    string productName = getParam<string>(cmd, "product", "Rice");
+    double taxRate = getParam<double>(cmd, "tax_rate", 0.15);
+    if (taxRate == 0.15)
+        taxRate = getParam<double>(cmd, "rate", 0.15);
+
+    Market *market = simulation.FindMarket(productName);
+    if (!market)
+    {
+        output("Error: Market '" + productName + "' not found");
+        return;
+    }
+
+    double oldPrice = market->GetCurrentPrice();
+    market->SetTaxRate(taxRate);
+    market->ApplyTaxAndSubsidy();
+    output("Tax of " + to_string(taxRate * 100) + "% applied to " + productName + "\n");
+    output(FormatPriceChange(oldPrice, market->GetCurrentPrice()));
+    output(market->GetEquilibriumAnalysis());
+    simulation.RefreshStats();
+}
+
+void CommandExecutor::cmdMarketSubsidy(const Command &cmd)
+{
+    string productName = getParam<string>(cmd, "product", "IceCream");
+    double subsidyRate = getParam<double>(cmd, "subsidy_rate", 0.20);
+    if (subsidyRate == 0.20)
+        subsidyRate = getParam<double>(cmd, "rate", 0.20);
+
+    Market *market = simulation.FindMarket(productName);
+    if (!market)
+    {
+        output("Error: Market '" + productName + "' not found");
+        return;
+    }
+
+    double oldPrice = market->GetCurrentPrice();
+    market->SetSubsidyRate(subsidyRate);
+    market->ApplyTaxAndSubsidy();
+    output("Subsidy of " + to_string(subsidyRate * 100) + "% applied to " + productName + "\n");
+    output(FormatPriceChange(oldPrice, market->GetCurrentPrice()));
+    output(market->GetEquilibriumAnalysis());
+    simulation.RefreshStats();
+}
+
+void CommandExecutor::cmdMarketPriceControl(const Command &cmd)
+{
+    string controlType = getParam<string>(cmd, "control_type", "ceiling");
+    if (controlType == "ceiling")
+        controlType = getParam<string>(cmd, "type", "ceiling");
+    string productName = getParam<string>(cmd, "product", "Rice");
+    double price = getParam<double>(cmd, "control_price", 25.0);
+    if (price == 25.0)
+        price = getParam<double>(cmd, "price", 25.0);
+
+    Market *market = simulation.FindMarket(productName);
+    if (!market)
+    {
+        output("Error: Market '" + productName + "' not found");
+        return;
+    }
+
+    double oldPrice = market->GetCurrentPrice();
+    if (controlType == "ceiling")
+    {
+        market->SetPriceCeiling(price);
+        market->EnforcePriceCeiling();
+        output("Price ceiling of $" + to_string(price) + " set for " + productName + "\n");
+    }
+    else if (controlType == "floor")
+    {
+        market->SetPriceFloor(price);
+        market->EnforcePriceFloor();
+        output("Price floor of $" + to_string(price) + " set for " + productName + "\n");
+    }
+    else
+    {
+        output("Error: Unknown control type. Use 'ceiling' or 'floor'");
+        return;
+    }
+
+    output(FormatPriceChange(oldPrice, market->GetCurrentPrice()));
+    output(market->GetWelfareAnalysis());
+    simulation.RefreshStats();
+}
+
+// ========== CONSUMER BEHAVIOR ==========
+
+void CommandExecutor::cmdConsumerOptimize(const Command &cmd)
+{
+    double budget = getParam<double>(cmd, "budget", 100.0);
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║   OPTIMAL CONSUMPTION BUNDLE (Equi-Marginal)   ║\n");
+    output("║             Budget: $" + to_string(budget) + "              ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    // Simplified example with Rice and Cloth
+    double riceMU = 50, ricePrice = 5;
+    double clothMU = 20, clothPrice = 4;
+
+    output("RICE:\n");
+    output("  Marginal Utility: " + to_string(riceMU) + "\n");
+    output("  Price: $" + to_string(ricePrice) + "\n");
+    output("  MU/Price: " + to_string(riceMU / ricePrice) + "\n\n");
+
+    output("CLOTH:\n");
+    output("  Marginal Utility: " + to_string(clothMU) + "\n");
+    output("  Price: $" + to_string(clothPrice) + "\n");
+    output("  MU/Price: " + to_string(clothMU / clothPrice) + "\n\n");
+
+    output("ANALYSIS:\n");
+    if (riceMU / ricePrice > clothMU / clothPrice)
+    {
+        output("  Rice has HIGHER MU/Price ratio!\n");
+        output("  Decision: Buy more Rice until ratios equalize\n\n");
+    }
+
+    double riceQty = (budget * 0.6) / ricePrice;
+    double clothQty = (budget * 0.4) / clothPrice;
+
+    output("OPTIMAL CHOICE:\n");
+    output("  Buy " + to_string(riceQty) + " Rice ($" + to_string(riceQty * ricePrice) + ")\n");
+    output("  Buy " + to_string(clothQty) + " Cloth ($" + to_string(clothQty * clothPrice) + ")\n");
+    output("  Total spending: $" + to_string(budget) + "\n\n");
+
+    output("ECONOMIC PRINCIPLE: Equi-Marginal Principle\n");
+    output("  Consumer maximizes utility when last dollar spent\n");
+    output("  on each good gives equal satisfaction (MU/P ratios equal)\n");
+}
+
+void CommandExecutor::cmdConsumerSubstitute(const Command &cmd)
+{
+    string good1 = getParam<string>(cmd, "good1", "Curd");
+    string good2 = getParam<string>(cmd, "good2", "IceCream");
+    double priceChange = getParam<double>(cmd, "price_change", 0.25);
+
+    output("\n╔════════════════════════════════════════╗\n");
+    output("║    SUBSTITUTE GOODS ANALYSIS           ║\n");
+    output("╚════════════════════════════════════════╝\n\n");
+
+    output("EVENT: Price of " + good1 + " increased by " + to_string(priceChange * 100) + "%\n\n");
+
+    output("CROSS-PRICE ELASTICITY: +0.60 (Substitutes)\n");
+    output("  * Positive means they're substitutes\n");
+    output("  * When one gets expensive, demand shifts to other\n\n");
+
+    double oldQty1 = 50, oldQty2 = 40;
+    double newQty1 = oldQty1 * (1 - priceChange * 0.6);
+    double newQty2 = oldQty2 * (1 + priceChange * 0.75);
+
+    output("DEMAND CHANGES:\n");
+    output("  " + good1 + ": " + to_string(oldQty1) + " → " + to_string(newQty1) + " units (↓ -30%)\n");
+    output("    * Law of Demand: Higher price → Lower quantity\n");
+    output("  " + good2 + ": " + to_string(oldQty2) + " → " + to_string(newQty2) + " units (↑ +45%)\n");
+    output("    * Substitute effect: Demand switches to alternative\n");
+}
+
+// ========== FIRM ANALYSIS ==========
+
+void CommandExecutor::cmdFirmCostAnalysis(const Command &cmd)
+{
+    string firmName = getParam<string>(cmd, "firm", "RiceFarm");
+    double quantity = getParam<double>(cmd, "quantity", 100.0);
+    double price = getParam<double>(cmd, "price", 15.0);
+
+    double TFC = 500.0;
+    double TVC = quantity * 8.0;
+
+    EconomicEquations::CostAnalysis ca = EconomicEquations::CostAnalysis::Calculate(TFC, TVC, quantity);
+    output(ca.ToString(price));
+    simulation.RefreshStats();
+}
+
+void CommandExecutor::cmdFirmAddWorker(const Command &cmd)
+{
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║      DIMINISHING RETURNS IN ACTION             ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    vector<int> mpList = {10, 12, 8, 3};
+    int totalOutput = 0;
+
+    for (size_t i = 0; i < mpList.size(); i++)
+    {
+        int oldOutput = totalOutput;
+        int mp = mpList[i];
+        totalOutput += mp;
+
+        output("Worker " + to_string(i + 1) + " added:\n");
+        output("  Output: " + to_string(oldOutput) + " → " + to_string(totalOutput) + " units\n");
+        output("  Marginal Product: " + to_string(mp) + " units\n");
+
+        if (i == 0)
+            output("  Status: INCREASING RETURNS\n");
+        else if (i == 1)
+            output("  Status: INCREASING RETURNS (Peak)\n");
+        else if (i == 2)
+            output("  Status: DIMINISHING RETURNS STARTED\n");
+        else
+            output("  Status: SEVERE DIMINISHING RETURNS\n");
+        output("\n");
+    }
+
+    output("CONCLUSION:\n");
+    output("  Optimal workers to hire: 2\n");
+    output("  At 3+ workers, would be better to hire capital equipment\n");
+}
+
+void CommandExecutor::cmdFirmShutdown(const Command &cmd)
+{
+    double currentPrice = 4.0;
+    double AVC = 5.0;
+    double AFC = 2.0;
+    double ATC = AVC + AFC;
+    double quantity = 100.0;
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║           SHUTDOWN ANALYSIS                    ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output("Current Market Price: $" + to_string(currentPrice) + "\n");
+    output("Average Variable Cost: $" + to_string(AVC) + "\n");
+    output("Average Total Cost: $" + to_string(ATC) + "\n\n");
+
+    if (currentPrice < AVC)
+    {
+        output("RESULT: SHUT DOWN IMMEDIATELY ✗\n\n");
+        output("Reasoning:\n");
+        output("  * Price ($" + to_string(currentPrice) + ") < AVC ($" + to_string(AVC) + ")\n");
+        output("  * You lose $" + to_string(AVC - currentPrice) + " per unit produced\n");
+        output("  * Better to close and pay only fixed costs\n\n");
+
+        double operatingLoss = (AVC - currentPrice) * quantity;
+        double fixedCost = AFC * quantity;
+        output("If you operated:\n");
+        output("  Loss per period: $" + to_string(operatingLoss) + "\n");
+        output("By shutting down:\n");
+        output("  Fixed costs still paid: $" + to_string(fixedCost) + "\n");
+        output("  Better outcome by $" + to_string(operatingLoss - fixedCost) + "\n");
+    }
+    else
+    {
+        output("RESULT: CONTINUE OPERATING ✓\n\n");
+        output("Price ($" + to_string(currentPrice) + ") > AVC ($" + to_string(AVC) + ")\n");
+        output("Firm is covering variable costs and contributing to fixed costs.\n");
+    }
+}
+
+// ========== MACROECONOMICS ==========
+
+void CommandExecutor::cmdGDPCalculate(const Command &cmd)
+{
+    double C = 500.0;
+    double I = 200.0;
+    double G = 300.0;
+    double X = 100.0;
+    double M = 150.0;
+
+    double GDP = EconomicEquations::CalculateGDP(C, I, G, X, M);
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║         GDP CALCULATION                        ║\n");
+    output("║      (Expenditure Approach)                    ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output("Consumption (C)           : $" + to_string(C) + "\n");
+    output("  * Household spending on goods/services\n\n");
+    output("Investment (I)            : $" + to_string(I) + "\n");
+    output("  * Business investment, home construction\n\n");
+    output("Government Spending (G)   : $" + to_string(G) + "\n");
+    output("  * Government purchases, services\n\n");
+    output("Exports (X)               : $" + to_string(X) + "\n");
+    output("  * Goods sold to foreign countries\n\n");
+    output("Imports (M)               : $" + to_string(M) + "\n");
+    output("  * Goods bought from foreign countries\n\n");
+    output("Net Exports (X - M)       : $" + to_string(X - M) + "\n\n");
+
+    output("================================\n");
+    output("GDP = C + I + G + (X-M)\n");
+    output("GDP = $" + to_string(C) + " + $" + to_string(I) + " + $" + to_string(G) + " + ($" + to_string(X - M) + ")\n");
+    output("GDP = $" + to_string(GDP) + "\n");
+    output("================================\n");
+}
+
+void CommandExecutor::cmdCPIAnalysis(const Command &cmd)
+{
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║      CONSUMER PRICE INDEX (CPI)                ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output("Basket of Goods (Base Year):\n");
+    output("  Rice (5 lbs)    : $10.00\n");
+    output("  Bread (2 loaves): $4.00\n");
+    output("  Milk (1 gallon) : $3.50\n");
+    output("  Eggs (1 dozen)  : $2.50\n");
+    output("  Total: $20.00\n\n");
+
+    output("Current Year:\n");
+    output("  Rice (5 lbs)    : $11.00 (+10%)\n");
+    output("  Bread (2 loaves): $4.20 (+5%)\n");
+    output("  Milk (1 gallon) : $3.85 (+10%)\n");
+    output("  Eggs (1 dozen)  : $2.40 (-4%)\n");
+    output("  Total: $21.45\n\n");
+
+    output("CPI = (Current / Base) × 100\n");
+    output("CPI = ($21.45 / $20.00) × 100 = 107.25\n\n");
+
+    output("Purchasing Power Impact:\n");
+    output("  $1,000 last year → Buys only $931.84 today\n");
+    output("  Savers lost 6.76% of purchasing power\n");
+}
+
+void CommandExecutor::cmdInflationAnalysis(const Command &cmd)
+{
+    double lastCPI = 100.0;
+    double currentCPI = 107.25;
+    double inflation = EconomicEquations::CalculateInflation(currentCPI, lastCPI);
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║         INFLATION ANALYSIS                     ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output("Last Period CPI: " + to_string(lastCPI) + "\n");
+    output("Current Period CPI: " + to_string(currentCPI) + "\n\n");
+
+    output("Inflation Rate = (Current CPI - Last CPI) / Last CPI × 100%\n");
+    output("Inflation Rate = (" + to_string(currentCPI) + " - " + to_string(lastCPI) + ") / " + to_string(lastCPI) + " × 100%\n");
+    output("Inflation Rate = " + to_string(inflation) + "%\n\n");
+
+    output("Economic Effects:\n");
+    if (inflation > 0)
+    {
+        output("  ✗ Prices RISING (Inflation detected)\n");
+        output("  ✗ Purchasing power falling\n");
+        output("  ✓ Borrowers benefit (repay with cheaper dollars)\n");
+        output("  ✗ Savers lose (savings worth less)\n");
+    }
+    else
+    {
+        output("  ✓ Prices FALLING (Deflation detected)\n");
+        output("  ✓ Purchasing power rising\n");
+    }
+}
+
+void CommandExecutor::cmdMonetaryPolicy(const Command &cmd)
+{
+    string policyType = getParam<string>(cmd, "type", "Expansionary");
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║     " + policyType + " MONETARY POLICY            ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    if (policyType == "Expansionary")
+    {
+        output("Money Supply Increase: +20%\n");
+        output("Interest Rate Change: 5% → 2%\n\n");
+        output("CHAIN REACTION:\n");
+        output("  1. Interest Rates Down → Borrowing cheaper\n");
+        output("  2. Investment Up → Businesses expand\n");
+        output("  3. Consumption Up → Households spend more\n");
+        output("  4. Aggregate Demand Up → Total spending increases\n");
+        output("  5. OUTPUT EXPANSION → GDP grows, employment rises\n");
+        output("  6. INFLATION PRESSURE → Prices start rising over time\n\n");
+        output("SHORT TERM: More jobs, higher output\n");
+        output("LONG TERM: Rising inflation\n");
+    }
+    else if (policyType == "Contractionary")
+    {
+        output("Money Supply Decrease: -15%\n");
+        output("Interest Rate Change: 5% → 8%\n\n");
+        output("CHAIN REACTION:\n");
+        output("  1. Interest Rates Up → Borrowing expensive\n");
+        output("  2. Investment Down → Businesses pull back\n");
+        output("  3. Consumption Down → Households spend less\n");
+        output("  4. Aggregate Demand Down → Total spending falls\n");
+        output("  5. OUTPUT CONTRACTION → GDP falls, unemployment rises\n");
+        output("  6. INFLATION DROPS → Prices stabilize\n\n");
+        output("SHORT TERM: Job losses, recession risk\n");
+        output("LONG TERM: Lower inflation\n");
+    }
+}
+
+void CommandExecutor::cmdFiscalPolicy(const Command &cmd)
+{
+    string policyName = getParam<string>(cmd, "policy", "spending");
+    double value = getParam<double>(cmd, "value", 500.0);
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║         FISCAL POLICY EFFECT                   ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    if (policyName == "GovernmentSpending" || policyName == "spending")
+    {
+        output("Government Spending Increase: +67%\n");
+        output("New Government Spending: $" + to_string(value) + "\n\n");
+        output("MULTIPLIER EFFECT:\n");
+        output("  Initial spending increase: $200\n");
+        output("  Multiplier = 2.5x\n");
+        output("  Total economic impact: $500\n\n");
+        output("AGGREGATE DEMAND EFFECT:\n");
+        output("  GDP increases, employment rises\n");
+        output("  Deficit increases (spending > tax revenue)\n");
+    }
+    else if (policyName == "IncomeTaxRate" || policyName == "tax")
+    {
+        output("Income Tax Increase: " + to_string(value * 100) + "%\n\n");
+        output("EFFECT:\n");
+        output("  Workers have less disposable income\n");
+        output("  Consumption falls → Aggregate Demand falls\n");
+        output("  GDP falls → Unemployment rises\n");
+    }
+}
+
+// ========== PPF AND GROWTH ==========
+
+void CommandExecutor::cmdPPFAnalysis(const Command &cmd)
+{
+    string good1 = getParam<string>(cmd, "good1", "Rice");
+    string good2 = getParam<string>(cmd, "good2", "Cloth");
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║  PRODUCTION POSSIBILITY FRONTIER               ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output("Resources Available:\n");
+    output("  * 100 workers\n");
+    output("  * 1,000 acres of land\n");
+    output("  * Technology Level: 1.0\n\n");
+
+    output("PRODUCTION POSSIBILITIES:\n\n");
+    output("100% " + good1 + ", 0% " + good2 + ":\n  " + good1 + ": 500 units,  " + good2 + ": 0 units\n\n");
+    output("75% " + good1 + ", 25% " + good2 + ":\n  " + good1 + ": 375 units,  " + good2 + ": 100 units\n\n");
+    output("50% " + good1 + ", 50% " + good2 + ":\n  " + good1 + ": 250 units,  " + good2 + ": 200 units\n\n");
+    output("25% " + good1 + ", 75% " + good2 + ":\n  " + good1 + ": 125 units,  " + good2 + ": 300 units\n\n");
+    output("0% " + good1 + ", 100% " + good2 + ":\n  " + good1 + ": 0 units,  " + good2 + ": 400 units\n\n");
+
+    output("OPPORTUNITY COST:\n");
+    output("  To produce 1 more unit of " + good2 + "\n");
+    output("  Must give up: 1.25 units of " + good1 + "\n\n");
+
+    output("CURRENT PRODUCTION:\n");
+    output("  " + good1 + ": 300 units\n");
+    output("  " + good2 + ": 150 units\n");
+    output("  Status: INSIDE frontier (Inefficient!)\n");
+    output("  * Could produce more with same resources\n");
+    output("  * 50 workers are unemployed\n\n");
+
+    output("RECOMMENDATION:\n");
+    output("  Move to frontier to be productively efficient\n");
+}
+
+void CommandExecutor::cmdTechUpgrade(const Command &cmd)
+{
+    string sector = getParam<string>(cmd, "sector", "Agriculture");
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║  TECHNOLOGICAL UPGRADE: " + sector + "          ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output("Technology Level: 1.0 → 1.5 (+50%)\n\n");
+
+    output("PPF SHIFT:\n");
+    output("  Old Maximum Production:\n");
+    output("    Max Rice: 500 units\n");
+    output("    Max Cloth: 400 units\n\n");
+    output("  New Maximum Production:\n");
+    output("    Max Rice: 750 units (+50%)\n");
+    output("    Max Cloth: 400 units (unchanged)\n\n");
+
+    output("EFFECT:\n");
+    output("  * Farmers now produce 50% more " + sector + " with same effort\n");
+    output("  * Economy richer - can have more goods\n");
+    output("  * Living standards up across board\n\n");
+
+    output("OUTPUT GROWTH:\n");
+    output("  Old: Rice 300, Cloth 150 (Total Value: $4,050)\n");
+    output("  New: Rice 450, Cloth 150 (Total Value: $5,850)\n");
+    output("  Growth: +44%\n");
+}
+
+// ========== SYSTEM ANALYSIS ==========
+
+void CommandExecutor::cmdShowVariableChanges(const Command &cmd)
+{
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║        RECENT VARIABLE CHANGES                 ║\n");
+    output("║   (Variable Tracker - Audit Log)               ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output("Tracked Changes:\n");
+    output("  1. Price of Rice: $36.00 → $40.20 (↑ +12%)\n");
+    output("     Affects: Qty_Demanded, Consumer_Surplus, Revenue\n\n");
+    output("  2. Quantity Demanded: 82 → 72 units (↓ -12%)\n");
+    output("     Caused by: Price increase\n");
+    output("     Affects: Total_Sales, GDP\n\n");
+    output("  3. Consumer Surplus: $1,681 → $1,521 (↓ -9%)\n");
+    output("     Caused by: Price increase\n");
+    output("     Affects: Total_Welfare\n\n");
+
+    output("(Track system changes with VariableTracker)\n");
+}
+
+void CommandExecutor::cmdDependencyChain(const Command &cmd)
+{
+    string variable = getParam<string>(cmd, "variable", "Price of Rice");
+
+    output("\n╔════════════════════════════════════════════════╗\n");
+    output("║     DEPENDENCY CHAIN: " + variable + "  ║\n");
+    output("║     (How changes cascade through economy)      ║\n");
+    output("╚════════════════════════════════════════════════╝\n\n");
+
+    output(variable + " Changed\n");
+    output("  ↓\n");
+    output("Quantity Demanded falls (Law of Demand)\n");
+    output("  ↓\n");
+    output("Total Revenue might change (depends on elasticity)\n");
+    output("  ↓ (if demand is inelastic)\n");
+    output("Revenue up - helps farmers\n");
+    output("  ↓\n");
+    output("Farm profits increase\n");
+    output("  ↓\n");
+    output("Farmers hire more workers\n");
+    output("  ↓\n");
+    output("Employment rises, unemployment falls\n");
+    output("  ↓\n");
+    output("New workers earn income\n");
+    output("  ↓\n");
+    output("They spend on other goods\n");
+    output("  ↓\n");
+    output("Those industries expand\n");
+    output("  ↓\n");
+    output("Overall economic activity increases (GDP grows)\n");
+}
+
+// ============================================================================
+// PROPAGATION SYSTEM COMMANDS
+// ============================================================================
+
+void CommandExecutor::cmdStep(const Command &cmd)
+{
+    // Run one tick of the simulation
+    // This orchestrates: agents act → markets clear → propagation → government → statistics
+
+    output("\n╔══════════════════════════════════════════════════╗\n");
+    output("║         Running Simulation Step                  ║\n");
+    output("╚══════════════════════════════════════════════════╝\n\n");
+
+    int ticksBefore = simulation.GetCurrentTick();
+
+    output("Phase 1: Agent actions (harvests, production)...\n");
+    output("Phase 2: Market clearing (equilibrium prices)...\n");
+    output("Phase 3: Propagation (cascading effects)...\n");
+    output("Phase 4: Government accounting...\n");
+    output("Phase 5: Statistics refresh...\n\n");
+
+    // Execute the step
+    simulation.Step();
+
+    int ticksAfter = simulation.GetCurrentTick();
+
+    output(TermColors::Styled("✓ Step complete. ", TermColors::Theme::Success));
+    output("Advanced from tick " + to_string(ticksBefore) +
+           " to tick " + to_string(ticksAfter) + "\n\n");
+
+    // Show brief summary
+    const auto &stats = simulation.GetStats();
+    ostringstream summary;
+    summary << fixed << setprecision(1);
+    summary << "Economic Snapshot:\n";
+    summary << "  GDP: $" << stats.gdp << " (" << (stats.gdpGrowth * 100) << "% growth)\n";
+    summary << "  Inflation: " << (stats.inflation * 100) << "%\n";
+    summary << "  Unemployment: " << (stats.unemployment * 100) << "%\n";
+    summary << "  Employed: " << stats.employed << " / " << stats.population << "\n";
+    output(summary.str());
+}
+
+void CommandExecutor::cmdPropagationShow(const Command &cmd)
+{
+    // Show the event history for this tick or a specific variable
+
+    EconomicPropagation *propagator = simulation.GetPropagator();
+    if (!propagator)
+    {
+        output("Error: Propagation engine not available\n");
+        return;
+    }
+
+    string variable = getParam<string>(cmd, "variable", "");
+
+    output("\n╔══════════════════════════════════════════════════╗\n");
+    output("║         Propagation Event History                ║\n");
+    output("║         (Economic cause-and-effect chain)        ║\n");
+    output("╚══════════════════════════════════════════════════╝\n\n");
+
+    string eventLog;
+    if (variable.empty())
+    {
+        // Show all events from current tick
+        eventLog = propagator->GetEventLog(-1);
+    }
+    else
+    {
+        // Show events for specific variable
+        auto events = propagator->GetHistoryForVariable(variable);
+        eventLog = "Events for: " + variable + "\n";
+        if (events.empty())
+        {
+            eventLog += "(No events recorded)\n";
+        }
+        else
+        {
+            for (const auto &event : events)
+            {
+                eventLog += "  " + event.ToString() + "\n";
+            }
+        }
+    }
+
+    output(eventLog);
+    output("\nUse 'propagation.chain <variable>' to see dependency chains.\n");
+}
+
+void CommandExecutor::cmdPropagationChain(const Command &cmd)
+{
+    // Show the dependency chain for a variable
+
+    string variable = getParam<string>(cmd, "variable", "market.Rice.price");
+
+    if (variable.empty())
+    {
+        output("Usage: propagation.chain market.Rice.price\n");
+        output("Usage: propagation.chain farmer.Shafin.profit\n");
+        output("Usage: propagation.chain government.unemployment\n");
+        return;
+    }
+
+    EconomicPropagation *propagator = simulation.GetPropagator();
+    if (!propagator)
+    {
+        output("Error: Propagation engine not available\n");
+        return;
+    }
+
+    output("\n╔══════════════════════════════════════════════════╗\n");
+    output("║      Dependency Chain: " + variable + "\n");
+    output("║      (What causes and affects this variable)    ║\n");
+    output("╚══════════════════════════════════════════════════╝\n\n");
+
+    output("CAUSES (what affects " + variable + "):\n");
+    propagator->PrintDependencyChain(variable);
+
+    output("\nAFFECTS (what " + variable + " causes):\n");
+    auto affected = propagator->GetAffectedVariables(variable);
+    if (affected.empty())
+    {
+        output("  (No direct effects)\n");
+    }
+    else
+    {
+        for (const auto &var : affected)
+        {
+            output("  ↓ " + var + "\n");
+        }
+    }
+}
+
+void CommandExecutor::cmdPropagationGraph(const Command &cmd)
+{
+    // Export the dependency graph as a Graphviz DOT file
+
+    EconomicPropagation *propagator = simulation.GetPropagator();
+    if (!propagator)
+    {
+        output("Error: Propagation engine not available\n");
+        return;
+    }
+
+    string filename = getParam<string>(cmd, "filename", "economy_dependency_graph.dot");
+
+    output("\n╔══════════════════════════════════════════════════╗\n");
+    output("║       Exporting Dependency Graph                 ║\n");
+    output("╚══════════════════════════════════════════════════╝\n\n");
+
+    propagator->ExportDependencyGraph(filename);
+
+    output("Dependency graph exported to: " + filename + "\n");
+    output("\nTo visualize this graph:\n");
+    output("  1. Install Graphviz (https://graphviz.org)\n");
+    output("  2. Run: dot -Tpng " + filename + " -o " + filename + ".png\n");
+    output("  3. Open the PNG file to see the economic relationship network\n");
 }

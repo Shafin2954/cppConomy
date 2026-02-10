@@ -28,7 +28,7 @@ namespace Config
 
     // Stochastic
     constexpr double SHOCK_PROBABILITY = 0.02;
-    constexpr int RANDOM_SEED = 42; // For reproducibility
+    constexpr int RANDOSEED = 42; // For reproducibility
 
     // Phillips Curve parameters
     constexpr double PHILLIPS_BETA = 0.5;

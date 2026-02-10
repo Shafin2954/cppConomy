@@ -2,6 +2,8 @@
 
 #include <string>
 
+using namespace std;
+
 // ============================================================================
 // Product.h - Represents goods/commodities that are traded in the economy
 //
@@ -21,16 +23,16 @@ enum class ProductType
 struct Product
 {
     ProductType type;
-    std::string name;
-    double price;           // Current market price
-    double quantity;        // Available quantity
-    bool is_inferior_good;  // For income effect demo (cheaper alternative)
-    bool is_addictive;      // For addiction logic (vertical demand curve)
-    double elasticity;      // Price elasticity of demand (0.0 - 2.0)
-    std::string substitute; // Name of substitute product (for substitution effect)
+    string name;
+    double price;          // Current market price
+    double quantity;       // Available quantity
+    bool is_inferior_good; // For income effect demo (cheaper alternative)
+    bool is_addictive;     // For addiction logic (vertical demand curve)
+    double elasticity;     // Price elasticity of demand (0.0 - 2.0)
+    string substitute;     // Name of substitute product (for substitution effect)
 
     // Constructor
-    Product(ProductType t, const std::string &n, double p, double q)
+    Product(ProductType t, const string &n, double p, double q)
         : type(t), name(n), price(p), quantity(q),
           is_inferior_good(false), is_addictive(false),
           elasticity(1.0), substitute("")

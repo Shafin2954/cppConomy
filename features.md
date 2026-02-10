@@ -42,7 +42,6 @@
 
 - marginal revenue, profit...
 
-
 - gdp [2 ways], real gdp
 - employment/un
 - child labor

@@ -5,10 +5,12 @@
 #include <functional>
 #include <sstream>
 
+using namespace std;
+
 class CommandExecutor
 {
 public:
-    using OutputCallback = std::function<void(const std::string &)>;
+    using OutputCallback = function<void(const string &)>;
 
     CommandExecutor(Simulation &simulation);
 
@@ -16,16 +18,16 @@ public:
     bool execute(const Command &cmd);
 
     // Execute from string input
-    bool execute(const std::string &input);
+    bool execute(const string &input);
 
     // Set output callback for results
-    void setOutputCallback(OutputCallback callback) { m_outputCallback = callback; }
+    void setOutputCallback(OutputCallback callback) { outputCallback = callback; }
 
     // Get last error message
-    const std::string &getLastError() const { return m_lastError; }
+    const string &getLastError() const { return lastError; }
 
     // Get parser for command info
-    const CommandParser &getParser() const { return m_parser; }
+    const CommandParser &getParser() const { return parser; }
 
 private:
     // Property assignment handler
@@ -66,14 +68,59 @@ private:
     void cmdMarket(const Command &cmd);
     void cmdSystem(const Command &cmd);
 
+    // ========== ECONOMIC ANALYSIS COMMANDS ==========
+
+    // Market mechanisms and equilibrium
+    void cmdMarketEquilibrium(const Command &cmd);
+    void cmdMarketElasticity(const Command &cmd);
+    void cmdMarketWelfare(const Command &cmd);
+    void cmdMarketSupplyShock(const Command &cmd);
+    void cmdMarketTax(const Command &cmd);
+    void cmdMarketSubsidy(const Command &cmd);
+    void cmdMarketPriceControl(const Command &cmd);
+
+    // Consumer behavior
+    void cmdConsumerOptimize(const Command &cmd);
+    void cmdConsumerSubstitute(const Command &cmd);
+
+    // Firm analysis
+    void cmdFirmCostAnalysis(const Command &cmd);
+    void cmdFirmAddWorker(const Command &cmd);
+    void cmdFirmShutdown(const Command &cmd);
+
+    // Macroeconomics
+    void cmdGDPCalculate(const Command &cmd);
+    void cmdCPIAnalysis(const Command &cmd);
+    void cmdInflationAnalysis(const Command &cmd);
+    void cmdMonetaryPolicy(const Command &cmd);
+    void cmdFiscalPolicy(const Command &cmd);
+
+    // PPF and growth
+    void cmdPPFAnalysis(const Command &cmd);
+    void cmdTechUpgrade(const Command &cmd);
+
+    // System analysis
+    void cmdShowVariableChanges(const Command &cmd);
+    void cmdDependencyChain(const Command &cmd);
+
+    // ========== PROPAGATION SYSTEM COMMANDS ==========
+
+    // Advance simulation by one tick (runs full Step())
+    void cmdStep(const Command &cmd);
+
+    // Show propagation event history and dependency chains
+    void cmdPropagationShow(const Command &cmd);
+    void cmdPropagationChain(const Command &cmd);
+    void cmdPropagationGraph(const Command &cmd);
+
     // Helper to get parameter values
     template <typename T>
-    T getParam(const Command &cmd, const std::string &name, T defaultValue) const;
+    T getParam(const Command &cmd, const string &name, T defaultValue) const;
 
-    void output(const std::string &message);
+    void output(const string &message);
 
-    Simulation &m_simulation;
-    CommandParser m_parser;
-    OutputCallback m_outputCallback;
-    std::string m_lastError;
+    Simulation &simulation;
+    CommandParser parser;
+    OutputCallback outputCallback;
+    string lastError;
 };

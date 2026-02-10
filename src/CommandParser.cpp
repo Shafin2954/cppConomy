@@ -2,16 +2,19 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+using namespace std;
 
 CommandParser::CommandParser()
 {
     // Initialize available commands (simplified for v2)
-    // Property assignment syntax: entity(filter).property = value
+    // Property assignment syntax: entity.property(filter) = value
+    // Quotes are OPTIONAL for string parameters
     // Examples:
-    //   worker(name='Alice').wage = 1500
-    //   market(name='rice').price = 150
+    //   worker.wage(Alice) = 1500
+    //   market.price(rice) = 150
+    //   farmer.land(Shafin)
     //   system.income_tax_rate = 0.2
-    m_commands = {
+    commands = {
         // Entity listing commands
         {"persons", "List all persons", {}},
         {"workers", "List all workers", {}},
@@ -45,14 +48,48 @@ CommandParser::CommandParser()
         {"reset", "Reset simulation", {}},
         {"status", "Show simulation status", {}},
         {"help", "Show help for a command", {{"command", "Command name (optional)"}}},
-        {"clear", "Clear the event log", {}}};
+        {"clear", "Clear the event log", {}},
+
+        // ========== ECONOMIC ANALYSIS COMMANDS ==========
+        // Market Analysis
+        {"market.equilibrium", "Find market equilibrium", {{"product", "Product name"}}},
+        {"market.elasticity", "Calculate price elasticity of demand", {{"product", "Product name"}}},
+        {"market.welfare", "Analyze consumer/producer surplus and welfare", {{"product", "Product name"}}},
+        {"market.supply_shock", "Simulate supply shock", {{"product", "Product name"}, {"shock_type", "bumper_harvest or natural_disaster"}}},
+        {"market.tax", "Apply excise tax", {{"product", "Product name"}, {"tax_rate", "Tax rate (0.0-1.0)"}}},
+        {"market.subsidy", "Apply subsidy", {{"product", "Product name"}, {"subsidy_rate", "Subsidy rate (0.0-1.0)"}}},
+        {"market.price_control", "Enforce price ceiling or floor", {{"product", "Product name"}, {"control_type", "ceiling or floor"}, {"control_price", "Price level"}}},
+
+        // Consumer Behavior
+        {"consumer.optimize_bundle", "Find optimal consumption bundle", {{"budget", "Consumer budget"}}},
+        {"consumer.substitute", "Analyze substitute goods", {{"product1", "First product"}, {"product2", "Second product"}}},
+
+        // Firm Production
+        {"firm.cost_analysis", "Analyze firm costs", {{"firname", "Firm name"}, {"quantity", "Production quantity"}}},
+        {"firm.add_worker", "Add worker and show diminishing returns", {{"firname", "Firm name"}}},
+        {"firm.check_shutdown", "Check shutdown rule", {{"firname", "Firm name"}}},
+
+        // Macroeconomic Analysis
+        {"gov.calculate_gdp", "Calculate GDP", {{"method", "Expenditure or Income"}}},
+        {"stats.cpi", "Analyze Consumer Price Index", {}},
+        {"stats.inflation", "Calculate inflation rate", {}},
+        {"centralBank.monetary_policy", "Adjust interest rate", {{"new_rate", "New interest rate (0.0-1.0)"}}},
+        {"gov.set_policy", "Set fiscal policy", {{"policy_type", "tax or spending"}, {"change", "Change amount"}}},
+
+        // Production Possibility Frontier
+        {"economy.ppf", "Analyze production possibilities", {}},
+        {"tech.upgrade", "Simulate technological upgrade", {{"sector", "Sector name (e.g., Agriculture)"}}},
+
+        // Variable Tracking System
+        {"system.show_changes", "Show recent variable changes", {}},
+        {"system.dependency_chain", "Show variable dependency chain", {{"variable", "Variable name"}}}};
 }
 
-Command CommandParser::parse(const std::string &input)
+Command CommandParser::parse(const string &input)
 {
     Command cmd;
 
-    std::string trimmed = trim(input);
+    string trimmed = trim(input);
     if (trimmed.empty())
     {
         cmd.errorMessage = "Empty command";
@@ -60,7 +97,7 @@ Command CommandParser::parse(const std::string &input)
     }
 
     // Check for assignment syntax: object(params).property = value
-    auto findAssignmentEquals = [](const std::string &text) -> size_t
+    auto findAssignmentEquals = [](const string &text) -> size_t
     {
         int parenDepth = 0;
         bool inSingleQuote = false;
@@ -83,27 +120,53 @@ Command CommandParser::parse(const std::string &input)
                     return i;
             }
         }
-        return std::string::npos;
+        return string::npos;
     };
 
     size_t eqPos = findAssignmentEquals(trimmed);
-    if (eqPos != std::string::npos)
+    if (eqPos != string::npos)
     {
         // This is an assignment
         cmd.commandType = Command::Type::Assignment;
 
         // Left side: object(params).property
-        std::string leftSide = trim(trimmed.substr(0, eqPos));
+        string leftSide = trim(trimmed.substr(0, eqPos));
         // Right side: value
-        std::string rightSide = trim(trimmed.substr(eqPos + 1));
+        string rightSide = trim(trimmed.substr(eqPos + 1));
 
         // Parse the value
         cmd.assignmentValue = parseValue(rightSide);
 
         // Find the property and object
-        size_t dotPos = std::string::npos;
+        size_t dotPos = string::npos;
+        size_t parenOpen = leftSide.find('(');
         size_t parenClose = leftSide.rfind(')');
-        if (parenClose != std::string::npos)
+
+        // New syntax: entity.property(params) = value
+        if (parenOpen != string::npos)
+        {
+            size_t dotBefore = leftSide.find('.');
+            if (dotBefore != string::npos && dotBefore < parenOpen)
+            {
+                dotPos = dotBefore;
+                cmd.assignmentProperty = trim(leftSide.substr(dotPos + 1, parenOpen - dotPos - 1));
+                string mainPart = leftSide.substr(0, dotPos) + leftSide.substr(parenOpen);
+
+                cmd.name = extractName(mainPart);
+                if (cmd.name.empty())
+                {
+                    cmd.errorMessage = "Invalid object name in assignment";
+                    return cmd;
+                }
+
+                cmd.params = extractParams(mainPart, cmd.name);
+                cmd.valid = true;
+                return cmd;
+            }
+        }
+
+        // Legacy syntax: entity(params).property = value
+        if (parenClose != string::npos)
         {
             dotPos = leftSide.find('.', parenClose);
         }
@@ -112,14 +175,14 @@ Command CommandParser::parse(const std::string &input)
             dotPos = leftSide.find('.');
         }
 
-        if (dotPos == std::string::npos)
+        if (dotPos == string::npos)
         {
             cmd.errorMessage = "Invalid assignment: missing property";
             return cmd;
         }
 
         cmd.assignmentProperty = trim(leftSide.substr(dotPos + 1));
-        std::string mainPart = leftSide.substr(0, dotPos);
+        string mainPart = leftSide.substr(0, dotPos);
 
         // Extract object name
         cmd.name = extractName(mainPart);
@@ -135,25 +198,41 @@ Command CommandParser::parse(const std::string &input)
         return cmd;
     }
 
-    // Check for property access syntax: system.property or name(params).property (queries)
-    size_t dotPos = std::string::npos;
-    size_t parenClose = trimmed.rfind(')');
-    if (parenClose != std::string::npos)
+    // Check for property access syntax:
+    // New: entity.property(params)
+    // Legacy: entity(params).property
+    // Simple: system.property
+    size_t dotPos = string::npos;
+    string mainPart = trimmed;
+    size_t parenOpen = trimmed.find('(');
+    if (parenOpen != string::npos)
     {
-        // Check for dot after closing parenthesis
-        dotPos = trimmed.find('.', parenClose);
-    }
-    else
-    {
-        // Simple dot access like system.gdp
-        dotPos = trimmed.find('.');
+        size_t dotBefore = trimmed.find('.');
+        if (dotBefore != string::npos && dotBefore < parenOpen)
+        {
+            dotPos = dotBefore;
+            cmd.propertyAccess = trim(trimmed.substr(dotPos + 1, parenOpen - dotPos - 1));
+            mainPart = trimmed.substr(0, dotPos) + trimmed.substr(parenOpen);
+        }
     }
 
-    std::string mainPart = trimmed;
-    if (dotPos != std::string::npos)
+    if (dotPos == string::npos)
     {
-        cmd.propertyAccess = trimmed.substr(dotPos + 1);
-        mainPart = trimmed.substr(0, dotPos);
+        size_t parenClose = trimmed.rfind(')');
+        if (parenClose != string::npos)
+        {
+            dotPos = trimmed.find('.', parenClose);
+        }
+        else
+        {
+            dotPos = trimmed.find('.');
+        }
+
+        if (dotPos != string::npos)
+        {
+            cmd.propertyAccess = trimmed.substr(dotPos + 1);
+            mainPart = trimmed.substr(0, dotPos);
+        }
     }
 
     // Extract command name
@@ -166,7 +245,7 @@ Command CommandParser::parse(const std::string &input)
 
     // Check if command exists
     bool found = false;
-    for (const auto &info : m_commands)
+    for (const auto &info : commands)
     {
         if (info.name == cmd.name)
         {
@@ -188,13 +267,13 @@ Command CommandParser::parse(const std::string &input)
     return cmd;
 }
 
-std::vector<std::string> CommandParser::getSuggestions(const std::string &partial) const
+vector<string> CommandParser::getSuggestions(const string &partial) const
 {
-    std::vector<std::string> suggestions;
-    std::string lower = partial;
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    vector<string> suggestions;
+    string lower = partial;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-    for (const auto &cmd : m_commands)
+    for (const auto &cmd : commands)
     {
         if (cmd.name.find(lower) == 0 || lower.empty())
         {
@@ -205,9 +284,9 @@ std::vector<std::string> CommandParser::getSuggestions(const std::string &partia
     return suggestions;
 }
 
-std::string CommandParser::getParameterHints(const std::string &commandName) const
+string CommandParser::getParameterHints(const string &commandName) const
 {
-    for (const auto &cmd : m_commands)
+    for (const auto &cmd : commands)
     {
         if (cmd.name == commandName)
         {
@@ -216,7 +295,7 @@ std::string CommandParser::getParameterHints(const std::string &commandName) con
                 return commandName + "()";
             }
 
-            std::stringstream ss;
+            stringstream ss;
             ss << commandName << "(";
             for (size_t i = 0; i < cmd.parameters.size(); ++i)
             {
@@ -239,12 +318,12 @@ bool CommandParser::validateCommand(const Command &cmd) const
     return cmd.valid && !cmd.name.empty();
 }
 
-std::string CommandParser::extractName(const std::string &input) const
+string CommandParser::extractName(const string &input) const
 {
     size_t parenPos = input.find('(');
-    std::string name;
+    string name;
 
-    if (parenPos != std::string::npos)
+    if (parenPos != string::npos)
     {
         name = input.substr(0, parenPos);
     }
@@ -252,7 +331,7 @@ std::string CommandParser::extractName(const std::string &input) const
     {
         // Command without parentheses
         size_t spacePos = input.find(' ');
-        if (spacePos != std::string::npos)
+        if (spacePos != string::npos)
         {
             name = input.substr(0, spacePos);
         }
@@ -265,10 +344,10 @@ std::string CommandParser::extractName(const std::string &input) const
     return trim(name);
 }
 
-std::map<std::string, ParamValue> CommandParser::extractParams(const std::string &input,
-                                                               const std::string &commandName) const
+map<string, ParamValue> CommandParser::extractParams(const string &input,
+                                                     const string &commandName) const
 {
-    std::map<std::string, ParamValue> params;
+    map<string, ParamValue> params;
 
     const CommandInfo *cmdInfo = findCommandInfo(commandName);
     const auto *paramList = cmdInfo ? &cmdInfo->parameters : nullptr;
@@ -277,34 +356,34 @@ std::map<std::string, ParamValue> CommandParser::extractParams(const std::string
     size_t startParen = input.find('(');
     size_t endParen = input.rfind(')');
 
-    if (startParen == std::string::npos || endParen == std::string::npos ||
+    if (startParen == string::npos || endParen == string::npos ||
         endParen <= startParen + 1)
     {
         return params; // No parameters
     }
 
-    std::string paramStr = input.substr(startParen + 1, endParen - startParen - 1);
+    string paramStr = input.substr(startParen + 1, endParen - startParen - 1);
 
     // Parse key=value pairs or positional values
-    std::stringstream ss(paramStr);
-    std::string token;
+    stringstream ss(paramStr);
+    string token;
 
-    while (std::getline(ss, token, ','))
+    while (getline(ss, token, ','))
     {
         token = trim(token);
         if (token.empty())
             continue;
 
         size_t eqPos = token.find('=');
-        if (eqPos != std::string::npos)
+        if (eqPos != string::npos)
         {
-            std::string key = trim(token.substr(0, eqPos));
-            std::string value = trim(token.substr(eqPos + 1));
+            string key = trim(token.substr(0, eqPos));
+            string value = trim(token.substr(eqPos + 1));
             params[key] = parseValue(value);
         }
         else if (paramList && positionalIndex < paramList->size())
         {
-            const std::string &key = (*paramList)[positionalIndex].first;
+            const string &key = (*paramList)[positionalIndex].first;
             params[key] = parseValue(token);
             positionalIndex++;
         }
@@ -313,9 +392,9 @@ std::map<std::string, ParamValue> CommandParser::extractParams(const std::string
     return params;
 }
 
-const CommandInfo *CommandParser::findCommandInfo(const std::string &commandName) const
+const CommandInfo *CommandParser::findCommandInfo(const string &commandName) const
 {
-    for (const auto &cmd : m_commands)
+    for (const auto &cmd : commands)
     {
         if (cmd.name == commandName)
             return &cmd;
@@ -323,14 +402,14 @@ const CommandInfo *CommandParser::findCommandInfo(const std::string &commandName
     return nullptr;
 }
 
-ParamValue CommandParser::parseValue(const std::string &value) const
+ParamValue CommandParser::parseValue(const string &value) const
 {
     if (value.empty())
     {
-        return std::string("");
+        return string("");
     }
 
-    // Check for quoted string
+    // Check for quoted string (quotes are optional, but supported for compatibility)
     if ((value.front() == '"' && value.back() == '"') ||
         (value.front() == '\'' && value.back() == '\''))
     {
@@ -338,8 +417,8 @@ ParamValue CommandParser::parseValue(const std::string &value) const
     }
 
     // Check for boolean
-    std::string lower = value;
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    string lower = value;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     if (lower == "true")
         return true;
     if (lower == "false")
@@ -359,7 +438,7 @@ ParamValue CommandParser::parseValue(const std::string &value) const
             isInt = false;
             continue;
         }
-        if (!std::isdigit(c))
+        if (!isdigit(c))
         {
             isInt = false;
             hasDecimal = false;
@@ -371,7 +450,7 @@ ParamValue CommandParser::parseValue(const std::string &value) const
     {
         try
         {
-            int intVal = std::stoi(value);
+            int intVal = stoi(value);
             // DEBUG: Return as double so it can be extracted as double
             return static_cast<double>(intVal);
         }
@@ -385,21 +464,22 @@ ParamValue CommandParser::parseValue(const std::string &value) const
     {
         try
         {
-            return std::stod(value);
+            return stod(value);
         }
         catch (...)
         {
         }
     }
 
-    // Default to string
+    // Default to unquoted string (quotes are optional!)
+    // This allows: farmer.land(Shafin) instead of farmer.land("Shafin")
     return value;
 }
 
-std::string CommandParser::trim(const std::string &str) const
+string CommandParser::trim(const string &str) const
 {
     size_t first = str.find_first_not_of(" \t\n\r");
-    if (first == std::string::npos)
+    if (first == string::npos)
         return "";
     size_t last = str.find_last_not_of(" \t\n\r");
     return str.substr(first, last - first + 1);

@@ -4,6 +4,8 @@
 #include <vector>
 #include <map>
 
+using namespace std;
+
 // ============================================================================
 // Government.h - The policy maker controlling fiscal and monetary policy
 //
@@ -16,53 +18,53 @@ class Government
 {
 private:
     // ========== Fiscal Policy Tools ==========
-    double m_income_tax_rate;       // Tax on worker income: affects disposable income
-    double m_corporate_tax_rate;    // Tax on business profits: affects investment
-    double m_government_spending;   // G in GDP equation: injects demand into economy
-    double m_tax_revenue_collected; // Total taxes from this period
-    double m_government_debt;       // Accumulated deficits
-    double m_budget_deficit;        // Spending - Tax Revenue
+    double income_tax_rate;       // Tax on worker income: affects disposable income
+    double corporate_tax_rate;    // Tax on business profits: affects investment
+    double government_spending;   // G in GDP equation: injects demand into economy
+    double tax_revenue_collected; // Total taxes from this period
+    double government_debt;       // Accumulated deficits
+    double budget_deficit;        // Spending - Tax Revenue
 
     // ========== Monetary Policy Tools ==========
-    double m_money_supply;  // M in economy: affects inflation (MV = PQ)
-    double m_interest_rate; // Central bank rate: affects investment decisions
+    double money_supply;  // M in economy: affects inflation (MV = PQ)
+    double interest_rate; // Central bank rate: affects investment decisions
 
     // ========== Regulations & Safety Nets ==========
-    double m_minimum_wage; // Wage floor: if >equilibrium, causes unemployment
+    double minimuwage; // Wage floor: if >equilibrium, causes unemployment
 
     // Subsidies: support specific sectors
-    std::map<std::string, double> m_subsidies; // sector -> subsidy amount
+    map<string, double> subsidies; // sector -> subsidy amount
 
     // ========== Macroeconomic Aggregates ==========
-    double m_nominal_gdp;       // Sum of all production values
-    double m_real_gdp;          // Nominal GDP adjusted for inflation
-    double m_inflation_rate;    // Percentage change in price level
-    double m_unemployment_rate; // Percentage of labor force without work
-    double m_cpi;               // Consumer Price Index (tracking inflation)
+    double nominal_gdp;       // Sum of all production values
+    double real_gdp;          // Nominal GDP adjusted for inflation
+    double inflation_rate;    // Percentage change in price level
+    double unemployment_rate; // Percentage of labor force without work
+    double cpi;               // Consumer Price Index (tracking inflation)
 
     // ========== Demographic & Social ==========
-    int m_total_population;
-    int m_literacy_rate;     // Affects productivity and earnings potential
-    double m_mortality_rate; // Natural deaths per period
+    int total_population;
+    int literacy_rate;     // Affects productivity and earnings potential
+    double mortality_rate; // Natural deaths per period
 
 public:
     // ========== Constructors ==========
     Government();
 
     // ========== Getters ==========
-    double GetIncomeTaxRate() const { return m_income_tax_rate; }
-    double GetCorporateTaxRate() const { return m_corporate_tax_rate; }
-    double GetGovernmentSpending() const { return m_government_spending; }
-    double GetMoneySupply() const { return m_money_supply; }
-    double GetInterestRate() const { return m_interest_rate; }
-    double GetMinimumWage() const { return m_minimum_wage; }
-    double GetNominalGDP() const { return m_nominal_gdp; }
-    double GetRealGDP() const { return m_real_gdp; }
-    double GetInflationRate() const { return m_inflation_rate; }
-    double GetUnemploymentRate() const { return m_unemployment_rate; }
-    double GetCPI() const { return m_cpi; }
-    double GetGovDebt() const { return m_government_debt; }
-    double GetBudgetDeficit() const { return m_budget_deficit; }
+    double GetIncomeTaxRate() const { return income_tax_rate; }
+    double GetCorporateTaxRate() const { return corporate_tax_rate; }
+    double GetGovernmentSpending() const { return government_spending; }
+    double GetMoneySupply() const { return money_supply; }
+    double GetInterestRate() const { return interest_rate; }
+    double GetMinimumWage() const { return minimuwage; }
+    double GetNominalGDP() const { return nominal_gdp; }
+    double GetRealGDP() const { return real_gdp; }
+    double GetInflationRate() const { return inflation_rate; }
+    double GetUnemploymentRate() const { return unemployment_rate; }
+    double GetCPI() const { return cpi; }
+    double GetGovDebt() const { return government_debt; }
+    double GetBudgetDeficit() const { return budget_deficit; }
 
     // ========== Fiscal Policy (Demand-side) ==========
 
@@ -106,7 +108,7 @@ public:
     // Grant subsidy to sector: reduces their costs
     // Shifts their supply curve right -> more supply -> lower price
     // Example: agricultural subsidy to farmers
-    void GrantSubsidy(const std::string &sector, double amount);
+    void GrantSubsidy(const string &sector, double amount);
 
     // ========== GDP & Price Level Calculation ==========
 
@@ -132,9 +134,9 @@ public:
 
     // ========== Demographic Tracking ==========
 
-    void SetPopulation(int population) { m_total_population = population; }
-    void SetLiteracyRate(int rate) { m_literacy_rate = rate; }
-    void SetMortalityRate(double rate) { m_mortality_rate = rate; }
+    void SetPopulation(int population) { total_population = population; }
+    void SetLiteracyRate(int rate) { literacy_rate = rate; }
+    void SetMortalityRate(double rate) { mortality_rate = rate; }
 
     // ========== Budget Constraint ==========
 
@@ -149,8 +151,8 @@ public:
     // If government moves resources from rice to ice cream production:
     // rice output falls, ice cream output rises
     // This demonstrates: opportunity cost, resource constraints
-    std::vector<double> CalculatePPF(double total_labor, double total_capital);
+    vector<double> CalculatePPF(double total_labor, double total_capital);
 
     // ========== Display ==========
-    std::string GetInfoString() const;
+    string GetInfoString() const;
 };
