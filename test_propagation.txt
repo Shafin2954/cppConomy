@@ -1,9 +1,0 @@
-initialize
-farmers
-markets
-step
-propagation.show
-step
-propagation.chain market.Corn.price
-help
-exit

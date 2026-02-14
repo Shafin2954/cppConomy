@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <string>
 #include <sstream>
 
@@ -7,18 +8,12 @@
 #include <windows.h>
 #endif
 
-// ============================================================================
-// TermColors.h - Terminal color and styling utilities
-//
-// Provides ANSI color codes and styling utilities for creating a beautiful CLI
-// Similar to modern CLIs like Claude Code
-// ============================================================================
-
-namespace TermColors
+namespace styledTerminal
 {
     // Initialize terminal for color support (Windows)
     inline void Init()
     {
+// todo: remove and run on wsl
 #ifdef _WIN32
         // Enable ANSI colors and UTF-8 on Windows 10+
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -36,7 +31,8 @@ namespace TermColors
     // ANSI Color codes
     namespace Color
     {
-        constexpr const char *Reset = "\033[0m";
+        // constexpr for compile-time constants (no memory allocation)
+        constexpr const char *Reset = "\033[0m"; // \033 to escape and start ansi command
         constexpr const char *Bold = "\033[1m";
         constexpr const char *Dim = "\033[2m";
         constexpr const char *Italic = "\033[3m";
@@ -51,6 +47,7 @@ namespace TermColors
         constexpr const char *Magenta = "\033[35m";
         constexpr const char *Cyan = "\033[36m";
         constexpr const char *White = "\033[37m";
+        constexpr const char *Gray = "\033[90m";
 
         // Bright foreground colors
         constexpr const char *BrightBlack = "\033[90m";
@@ -66,7 +63,7 @@ namespace TermColors
     // Themed color palette (similar to Claude CLI)
     namespace Theme
     {
-        constexpr const char *Primary = Color::BrightCyan;
+        constexpr const char *Primary = Color::BrightGreen;
         constexpr const char *Secondary = Color::BrightBlue;
         constexpr const char *Success = Color::BrightGreen;
         constexpr const char *Warning = Color::BrightYellow;
@@ -93,11 +90,8 @@ namespace TermColors
         constexpr const char *Separator = "─";
     }
 
-    // Utility functions for styled output
-    inline std::string Styled(const std::string &text, const char *style)
-    {
-        return std::string(style) + text + Color::Reset;
-    }
+    // Utility functions for styled output                               ╭ convert char to std::string
+    inline std::string Styled(const std::string &text, const char *style) { return std::string(style) + text + Color::Reset; } // ansiCode + text + reset
 
     // Helper to repeat a std::string n times
     inline std::string Repeat(const std::string &str, size_t count)
@@ -109,35 +103,12 @@ namespace TermColors
         return result;
     }
 
-    inline std::string Success(const std::string &text)
-    {
-        return Styled("[OK] " + text, Theme::Success);
-    }
-
-    inline std::string Error(const std::string &text)
-    {
-        return Styled("[X] " + text, Theme::Error);
-    }
-
-    inline std::string Warning(const std::string &text)
-    {
-        return Styled("[!] " + text, Theme::Warning);
-    }
-
-    inline std::string Info(const std::string &text)
-    {
-        return Styled("[i] " + text, Theme::Info);
-    }
-
-    inline std::string Prompt()
-    {
-        return Styled("❯", Theme::Primary) + " ";
-    }
-
-    inline std::string Header(const std::string &text)
-    {
-        return Styled(text, std::string(Color::Bold).append(Theme::Primary).c_str());
-    }
+    inline std::string Success(const std::string &text) { return Styled("[OK] " + text, Theme::Success); }
+    inline std::string Error(const std::string &text) { return Styled("[X] " + text, Theme::Error); }
+    inline std::string Warning(const std::string &text) { return Styled("[!] " + text, Theme::Warning); }
+    inline std::string Info(const std::string &text) { return Styled("[i] " + text, Theme::Info); }
+    inline std::string Prompt() { return Styled("❯", Theme::Primary) + " "; }
+    inline std::string Header(const std::string &text) { return Styled(text, std::string(Color::Bold).append(Theme::Primary).c_str()); }
 
     // Create a styled box
     inline std::string BoxedText(const std::string &content, const std::string &title = "")
@@ -160,7 +131,7 @@ namespace TermColors
         }
         ss << Styled(Box::TopRight, Theme::Primary) << "\n";
 
-        // Content
+        // Content | line |
         std::istringstream contentStream(content);
         std::string line;
         while (getline(contentStream, line))
@@ -180,14 +151,10 @@ namespace TermColors
     }
 
     // Create a horizontal separator
-    inline std::string Separator(size_t width = 70)
-    {
-        return Styled(Repeat(Box::Horizontal, width), Theme::Muted);
-    }
+    inline std::string Separator(size_t width = 93) { return Styled(Repeat(Box::Horizontal, width), Theme::Primary); }
 
-    // Format a key-value std::pair
-    inline std::string KeyValue(const std::string &key, const std::string &value)
-    {
-        return Styled(key, Theme::Info) + Styled(": ", Theme::Muted) + value;
-    }
+    // Format a key-value pair
+    inline std::string KeyValue(const std::string &key, const std::string &value) { return Styled(key, Theme::Info) + Styled(": ", Theme::Muted) + value; }
+
+    inline double twoDecimal(double value) { return std::round(value * 100.0) / 100.0; }
 }
