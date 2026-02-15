@@ -84,12 +84,18 @@ public:
                 cmdConsumerMU(cmd);
             else if (cmd.name == "consumer_surplus")
                 cmdConsumerSurplus(cmd);
+            else if (cmd.name == "consumer_details")
+                cmdConsumerDetails(cmd);
             else if (cmd.name == "consumer_substitution")
                 cmdConsumerSubstitution(cmd);
             else if (cmd.name == "consumer_needs")
                 cmdConsumerNeeds(cmd);
+            else if (cmd.name == "consumer_demand_curve")
+                cmdConsumerDemandCurve(cmd);
             else if (cmd.name == "farmer_supply")
                 cmdFarmerSupply(cmd);
+            else if (cmd.name == "farmer_details")
+                cmdFarmerDetails(cmd);
             else if (cmd.name == "farmer_crops")
                 cmdFarmerCrops(cmd);
             else if (cmd.name == "farmer_upgrade")
@@ -104,8 +110,12 @@ public:
                 cmdFirmMP(cmd);
             else if (cmd.name == "firm_efficiency")
                 cmdFirmEfficiency(cmd);
+            else if (cmd.name == "firm_details")
+                cmdFirmDetails(cmd);
             else if (cmd.name == "firm_hire")
                 cmdFirmHire(cmd);
+            else if (cmd.name == "firm_fire")
+                cmdFirmFire(cmd);
             else if (cmd.name == "firm_capital")
                 cmdFirmCapital(cmd);
             else if (cmd.name == "pass_day")
@@ -251,12 +261,16 @@ public:
     void cmdConsumerSurplus(const Command &cmd);
     void cmdConsumerSubstitution(const Command &cmd);
     void cmdConsumerNeeds(const Command &cmd);
+    void cmdConsumerDetails(const Command &cmd);
+    void cmdConsumerDemandCurve(const Command &cmd);
 
     // Farmer analysis
     void cmdFarmerSupply(const Command &cmd);
     void cmdFarmerCrops(const Command &cmd);
     void cmdFarmerUpgrade(const Command &cmd);
     void cmdFarmerWeather(const Command &cmd);
+    void cmdFarmerDetails(const Command &cmd);
+    void cmdFarmerSupplyCurve(const Command &cmd);
 
     // Firm analysis
     void cmdFirmCosts(const Command &cmd);
@@ -265,6 +279,8 @@ public:
     void cmdFirmEfficiency(const Command &cmd);
     void cmdFirmHire(const Command &cmd);
     void cmdFirmCapital(const Command &cmd);
+    void cmdFirmDetails(const Command &cmd);
+    void cmdFirmFire(const Command &cmd);
 
     // Simulation
     void cmdPassDay(const Command &cmd);
@@ -849,6 +865,65 @@ void cmdExec::cmdConsumerNeeds(const Command &cmd)
     output(ss.str());
 }
 
+void cmdExec::cmdConsumerDetails(const Command &cmd)
+{
+    consumer *c = simulation.selected_consumer;
+    if (!c)
+    {
+        output("Error: No consumer selected");
+        return;
+    }
+
+    std::stringstream ss;
+    ss << "CONSUMER DETAILS: " << c->name << "\n";
+    ss << std::string(40, '-') << "\n";
+    ss << "ID: " << c->id << "\n";
+    ss << "Age: " << (c->ageInDays / 365) << " years\n";
+    ss << "Savings: $" << std::fixed << std::setprecision(2) << c->savings << "\n";
+    ss << "Consumed:\n";
+    for (auto &p : c->consumed)
+    {
+        if (p.first)
+            ss << "  " << p.first->name << ": " << p.second << "\n";
+    }
+    ss << "\nNeeds and Demand Curves:\n";
+    for (auto &need : c->needs)
+    {
+        product *p = &need;
+        ss << "  " << p->name << " -> P = " << c->dd[p].c << " - " << c->dd[p].m << "Q\n";
+    }
+
+    output(ss.str());
+}
+
+void cmdExec::cmdConsumerDemandCurve(const Command &cmd)
+{
+    consumer *c = simulation.selected_consumer;
+    if (!c)
+    {
+        output("Error: No consumer selected");
+        return;
+    }
+    if (!hasParam(cmd, "product"))
+    {
+        output("Error: Missing parameter. Usage: consumer_demand_curve <product>");
+        return;
+    }
+    std::string prodName = getParam<std::string>(cmd, "product", std::string());
+    product *p = getProductByName(prodName);
+    if (!p)
+    {
+        output("Error: Unknown product");
+        return;
+    }
+
+    std::stringstream ss;
+    ss << "CONSUMER DEMAND CURVE: " << c->name << " -> " << p->name << "\n";
+    ss << std::string(40, '-') << "\n";
+    ss << "P = " << c->dd[p].c << " - " << c->dd[p].m << "Q\n";
+    output(ss.str());
+}
+
 // Farmer analysis
 void cmdExec::cmdFarmerSupply(const Command &cmd)
 {
@@ -950,6 +1025,58 @@ void cmdExec::cmdFarmerWeather(const Command &cmd)
     ss << "Current Weather Factor: " << std::fixed << std::setprecision(2) << f->weather << "\n";
     ss << "(0 = Perfect, 1 = Severe conditions)\n";
     ss << "Effect: Slope multiplier on supply curve\n";
+    output(ss.str());
+}
+
+void cmdExec::cmdFarmerDetails(const Command &cmd)
+{
+    farmer *f = simulation.selected_farmer;
+    if (!f)
+    {
+        output("Error: No farmer selected");
+        return;
+    }
+
+    std::stringstream ss;
+    ss << "FARMER DETAILS: " << f->name << "\n";
+    ss << std::string(40, '-') << "\n";
+    ss << "ID: " << f->id << "\n";
+    ss << "Land: " << std::fixed << std::setprecision(2) << f->land << " acres\n";
+    ss << "Tech Level: " << f->techLevel << "\n";
+    ss << "Crops:\n";
+    for (auto &c : f->crops)
+    {
+        ss << "  " << c.name << " (Max: " << f->maxOutput[&c] << ")\n";
+    }
+    output(ss.str());
+}
+
+void cmdExec::cmdFarmerSupplyCurve(const Command &cmd)
+{
+    farmer *f = simulation.selected_farmer;
+    if (!f)
+    {
+        output("Error: No farmer selected");
+        return;
+    }
+    if (!hasParam(cmd, "product"))
+    {
+        output("Error: Missing parameter. Usage: farmer_supply_curve <product>");
+        return;
+    }
+    std::string prodName = getParam<std::string>(cmd, "product", std::string());
+    product *p = getProductByName(prodName);
+    if (!p)
+    {
+        output("Error: Unknown product");
+        return;
+    }
+
+    std::stringstream ss;
+    ss << "FARMER SUPPLY CURVE: " << f->name << " -> " << p->name << "\n";
+    ss << std::string(40, '-') << "\n";
+    ss << "P = " << f->ss[p].c << " + " << f->ss[p].m << "Q\n";
+    ss << "Max Output: " << f->maxOutput[p] << "\n";
     output(ss.str());
 }
 
@@ -1070,6 +1197,59 @@ void cmdExec::cmdFirmEfficiency(const Command &cmd)
         ss << "RECOMMENDATION: Capital is more efficient. BUY MACHINE.\n";
     }
     output(ss.str());
+}
+
+void cmdExec::cmdFirmDetails(const Command &cmd)
+{
+    if (simulation.firms.empty())
+    {
+        output("Error: No firms");
+        return;
+    }
+    firm *f = &simulation.firms[0];
+
+    std::stringstream ss;
+    ss << "FIRM DETAILS (Owner ID: " << f->ownerId << ")\n";
+    ss << std::string(40, '-') << "\n";
+    ss << "Cash: $" << std::fixed << std::setprecision(2) << f->cash << "\n";
+    ss << "Workers: " << f->workers.size() << "\n";
+    ss << "Capital units: " << f->capitals.size() << "\n";
+    ss << "Current Output: " << std::fixed << std::setprecision(2) << f->currentOutput << "\n";
+    output(ss.str());
+}
+
+void cmdExec::cmdFirmFire(const Command &cmd)
+{
+    if (simulation.firms.empty())
+    {
+        output("Error: No firms");
+        return;
+    }
+    firm *f = &simulation.firms[0];
+
+    if (!hasParam(cmd, "laborer"))
+    {
+        output("Error: Missing parameter. Usage: firm_fire <laborer>");
+        return;
+    }
+    std::string name = getParam<std::string>(cmd, "laborer", std::string());
+    if (name.empty())
+    {
+        output("Error: Invalid laborer name");
+        return;
+    }
+
+    for (auto it = f->workers.begin(); it != f->workers.end(); ++it)
+    {
+        if (it->name == name)
+        {
+            f->workers.erase(it);
+            f->calculateCosts();
+            output("Fired " + name + ". New output: " + std::to_string(f->currentOutput));
+            return;
+        }
+    }
+    output("Error: Laborer not found in firm: " + name);
 }
 
 void cmdExec::cmdFirmHire(const Command &cmd)
