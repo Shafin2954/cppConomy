@@ -171,16 +171,16 @@ public:
         size_t rightWidth = 35;
 
         //                ╭ from box namespace                                                                             ╭ char + 4
-        std::cout << Styled(TopLeft + Repeat(Horizontal, 2) + std::string(" Economic Engine v2.0 ") + Repeat(Horizontal, leftWidth - 24) + Horizontal + Repeat(Horizontal, rightWidth) + TopRight, Color::BrightGreen) << "\n";
+        std::cout << Styled(TopLeft + Repeat(Horizontal, 2) + std::string(" Economic Engine v2.0 ") + Repeat(Horizontal, leftWidth - 24) + Horizontal + Repeat(Horizontal, rightWidth) + TopRight, Theme::Primary) << "\n";
 
         //                     ╭ lines
         for (size_t i = 0; i < 8; ++i)
         {
-            std::cout << Styled(Vertical, Color::BrightGreen) << " " << Styled(left[i], Color::BrightGreen);
-            std::cout << Styled(Vertical, Color::Gray) << " " << Styled(right[i], (i == 0) ? Color::BrightGreen : Color::Green) << Styled(Vertical, Color::BrightGreen) << "\n";
+            std::cout << Styled(Vertical, Theme::Primary) << " " << Styled(left[i], Theme::Primary);
+            std::cout << Styled(Vertical, Color::Gray) << " " << Styled(right[i], (i == 0) ? Theme::Primary : Color::Blue) << Styled(Vertical, Theme::Primary) << "\n";
         }
 
-        std::cout << Styled(BottomLeft + Repeat(Horizontal, leftWidth) + Horizontal + Repeat(Horizontal, rightWidth) + BottomRight, Color::BrightGreen) << "\n";
+        std::cout << Styled(BottomLeft + Repeat(Horizontal, leftWidth) + Horizontal + Repeat(Horizontal, rightWidth) + BottomRight, Theme::Primary) << "\n";
 
         laborer *selLaborer = simulation.GetSelectedLaborer();
         farmer *selFarmer = simulation.GetSelectedFarmer();
@@ -247,7 +247,7 @@ public:
         int titleLen = title.length() + 2;
 
         // Top border with color
-        box.push_back(Styled(TopLeft + Repeat(Horizontal, 1) + " " + title + " " + Repeat(Horizontal, width - titleLen - 1) + TopRight, Color::BrightGreen));
+        box.push_back(Styled(TopLeft + Repeat(Horizontal, 1) + " " + title + " " + Repeat(Horizontal, width - titleLen - 1) + TopRight, Theme::Primary));
 
         // Content lines (split by newline)
         std::stringstream ss(content);
@@ -263,19 +263,19 @@ public:
                 linePad = 0;
 
             box.push_back(
-                Styled("│", Color::BrightGreen) + " " + Styled(line, Color::BrightWhite) + std::string(linePad, ' ') + Styled("│", Color::BrightGreen));
+                Styled("│", Theme::Primary) + " " + Styled(line, Color::BrightWhite) + std::string(linePad, ' ') + Styled("│", Theme::Primary));
         }
 
         // Add empty line if only one content line
         if (content.find('\n') == std::string::npos)
         {
             box.push_back(
-                Styled("│", Color::BrightGreen) + std::string(width, ' ') + Styled("│", Color::BrightGreen));
+                Styled("│", Theme::Primary) + std::string(width, ' ') + Styled("│", Theme::Primary));
         }
 
         // Bottom border with color
         box.push_back(
-            Styled(BottomLeft + Repeat(Horizontal, width) + BottomRight, Color::BrightGreen));
+            Styled(BottomLeft + Repeat(Horizontal, width) + BottomRight, Theme::Primary));
 
         return box;
     }
@@ -456,7 +456,7 @@ public:
             // Reprint the input line: clear it, print prompt and full input, position cursor
             std::cout << "\033[2K"; // Clear the input line
             std::cout << Prompt();
-            std::cout << Styled(input, Color::BrightGreen);
+            std::cout << Styled(input, Theme::Primary);
 
             // Move cursor back to cursorPos within input
             size_t charsAfterCursor = input.length() - cursorPos;
@@ -699,7 +699,7 @@ public:
                 if (cursorPos == input.length())
                 {
                     input += ch;
-                    std::cout << Styled(std::string(1, ch), Color::BrightGreen);
+                    std::cout << Styled(std::string(1, ch), Theme::Primary);
                     cursorPos++;
                 }
                 else
@@ -708,7 +708,7 @@ public:
                     input.insert(input.begin() + cursorPos, ch);
                     // clear from cursor and print tail (including inserted char)
                     std::cout << "\033[K";
-                    std::cout << Styled(input.substr(cursorPos), Color::BrightGreen);
+                    std::cout << Styled(input.substr(cursorPos), Theme::Primary);
                     // move cursor back to position after inserted char
                     size_t tailLen = input.length() - cursorPos - 1;
                     for (size_t m = 0; m < tailLen; ++m)

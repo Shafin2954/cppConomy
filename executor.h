@@ -391,7 +391,7 @@ T cmdExec::getParam(const Command &cmd, const std::string &name, T defaultValue)
 // Listing commands
 void cmdExec::cmdConsumers(const Command &cmd)
 {
-    std::cout << Styled("CONSUMERS (" + std::to_string(simulation.consumers.size()) + ")\n", Color::BrightGreen);
+    std::cout << Styled("CONSUMERS (" + std::to_string(simulation.consumers.size()) + ")\n", Theme::Primary);
 
     for (auto &c : simulation.consumers)
     {
@@ -402,7 +402,7 @@ void cmdExec::cmdConsumers(const Command &cmd)
 
 void cmdExec::cmdLaborers(const Command &cmd)
 {
-    std::cout << Styled("LABORERS (" + std::to_string(simulation.laborers.size()) + ")\n", Color::BrightGreen);
+    std::cout << Styled("LABORERS (" + std::to_string(simulation.laborers.size()) + ")\n", Theme::Primary);
 
     for (auto &l : simulation.laborers)
     {
@@ -413,7 +413,7 @@ void cmdExec::cmdLaborers(const Command &cmd)
 
 void cmdExec::cmdFarmers(const Command &cmd)
 {
-    std::cout << Styled("FARMERS (" + std::to_string(simulation.farmers.size()) + ")\n", Color::BrightGreen);
+    std::cout << Styled("FARMERS (" + std::to_string(simulation.farmers.size()) + ")\n", Theme::Primary);
 
     for (auto &f : simulation.farmers)
     {
@@ -424,7 +424,7 @@ void cmdExec::cmdFarmers(const Command &cmd)
 
 void cmdExec::cmdFirms(const Command &cmd)
 {
-    std::cout << Styled("FIRMS (" + std::to_string(simulation.firms.size()) + ")\n", Color::BrightGreen);
+    std::cout << Styled("FIRMS (" + std::to_string(simulation.firms.size()) + ")\n", Theme::Primary);
 
     for (auto &f : simulation.firms)
     {
@@ -434,21 +434,21 @@ void cmdExec::cmdFirms(const Command &cmd)
 
 void cmdExec::cmdMarkets(const Command &cmd)
 {
-    std::cout << Styled("MARKETS (" + std::to_string(simulation.markets.size()) + ")\n", Color::BrightGreen);
+    std::cout << Styled("MARKETS (" + std::to_string(simulation.markets.size()) + ")\n", Theme::Primary);
 
     for (auto &m : simulation.markets)
     {
         std::cout << "\n"
-                  << m.prod->name << ":\n\t" 
-                  << Vertical << Styled("Price: ", Color::Bold) << "$" << std::to_string(twoDecimal(m.price)) << "\n\t" 
-                  << Vertical << Styled("Demand: ", Color::Bold) << "p = " << std::to_string(twoDecimal(m.aggregateDemand.c)) << " - " << std::to_string(twoDecimal(m.aggregateDemand.m)) << "Q" << "\n\t" 
+                  << m.prod->name << ":\n\t"
+                  << Vertical << Styled("Price: ", Color::Bold) << "$" << std::to_string(twoDecimal(m.price)) << "\n\t"
+                  << Vertical << Styled("Demand: ", Color::Bold) << "p = " << std::to_string(twoDecimal(m.aggregateDemand.c)) << " - " << std::to_string(twoDecimal(m.aggregateDemand.m)) << "Q" << "\n\t"
                   << Vertical << Styled("Supply: ", Color::Bold) << "p = " << std::to_string(twoDecimal(m.aggregateSupply.c)) << " + " << std::to_string(twoDecimal(m.aggregateSupply.m)) << "Q\n";
     }
 }
 
 void cmdExec::cmdProducts(const Command &cmd)
 {
-    std::cout << Styled("PRODUCTS\n", Color::BrightGreen);
+    std::cout << Styled("PRODUCTS\n", Theme::Primary);
 
     std::vector<product *> prods = {&rice, &cloth, &computer, &phone, &car, &steel};
     for (auto *p : prods)
@@ -880,7 +880,7 @@ void cmdExec::cmdFarmerSupply(const Command &cmd)
     ss << std::string(40, '-') << "\n";
     ss << "Market Price: $" << price << "\n";
     ss << "Supply Curve: P = " << f->ss[p].c << " + " << f->ss[p].m << "Q\n";
-    ss <<" | Tax: $" << f->tax << "\n";
+    ss << " | Tax: $" << f->tax << "\n";
     ss << "Tech Level: " << f->techLevel << " | Weather: " << std::fixed << std::setprecision(2) << f->weather << "\n";
     ss << "Max Output: " << f->maxOutput[p] << "\n";
     ss << std::string(40, '-') << "\n";
