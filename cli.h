@@ -177,7 +177,7 @@ public:
         for (size_t i = 0; i < 8; ++i)
         {
             std::cout << Styled(Vertical, Theme::Primary) << " " << Styled(left[i], Theme::Primary);
-            std::cout << Styled(Vertical, Color::Gray) << " " << Styled(right[i], (i == 0) ? Theme::Primary : Color::Blue) << Styled(Vertical, Theme::Primary) << "\n";
+            std::cout << Styled(Vertical, Color::Gray) << " " << Styled(right[i], (i == 0) ? Theme::Primary : Theme::Secondary) << Styled(Vertical, Theme::Primary) << "\n";
         }
 
         std::cout << Styled(BottomLeft + Repeat(Horizontal, leftWidth) + Horizontal + Repeat(Horizontal, rightWidth) + BottomRight, Theme::Primary) << "\n";
@@ -446,7 +446,7 @@ public:
                 if (i < newCount)
                 {
                     std::cout << lines[i];
-                    std::cout << "\033[92m"; // Reset colors after each suggestion
+                    std::cout << "\033[2m"; // Reset colors after each suggestion
                 }
             }
 
@@ -476,10 +476,10 @@ public:
 
             // Ctrl+C
             if (ch == 3)
-            {
+            {   
                 running = false;
                 refreshSuggestions({});
-                std::cout << "\n"
+                std::cout << "ctrl + c\n"
                           << Styled("Goodbye!\n", Theme::Success);
                 exit(0);
             }
