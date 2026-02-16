@@ -20,9 +20,10 @@ Run the program  by:
 ./cppConomy
 ```
 
-
 ### Contributors:
 
 - Md Shafin Ahmed Soron
-- Rudaba Tasnia
+- Khandaker Rudaba Tasnia
 - Kawshik Deb Nath
+- Md Siam Mahmud
+- Lamia Akter
