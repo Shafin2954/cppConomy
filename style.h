@@ -57,6 +57,7 @@ namespace styledTerminal
         constexpr const char *BrightBlue = "\033[94m";
         constexpr const char *BrightMagenta = "\033[95m";
         constexpr const char *BrightCyan = "\033[96m";
+        constexpr const char *BoldBrightCyan = "\033[1m\033[96m";
         constexpr const char *BrightWhite = "\033[97m";
     }
 
@@ -64,6 +65,7 @@ namespace styledTerminal
     namespace Theme
     {
         constexpr const char *Primary = Color::BrightCyan;
+        constexpr const char *BoldPrimary = Color::BoldBrightCyan;
         constexpr const char *Secondary = Color::BrightBlue;
         constexpr const char *Success = Color::BrightGreen;
         constexpr const char *Warning = Color::BrightYellow;

@@ -38,20 +38,94 @@ public:
     void upgradeTech(double newTechLevel) {
         techLevel = newTechLevel;
     }
-    void pass_day(double perCapita) override { // override consumer's pass_day to include weather effect and output
-        consumer::pass_day(perCapita); // age and consume products
+    void pass_day(double perCapita) override
+{
+    consumer::pass_day(perCapita);
 
-        // Weather effect (randomly adjust weather each day)
-        weather = ((double)rand() / RAND_MAX); // random value between 0 and 1
+    // Weather varies with some persistence (not completely random)
+    double weatherChange = ((double)rand() / RAND_MAX - 0.5) * 0.3;
+    weather = std::max(0.2, std::min(0.95, weather + weatherChange));
 
-        for (auto crop : crops) {
-            // Adjust max output based on growth and decay
-            maxOutput[&crop] += growthRate[&crop]; // grow the crop
-            maxOutput[&crop] -= decay[&crop] * weather; // decay based on weather
+    for (auto& crop : crops)
+    {
+        // Growth influenced by weather
+        double weatherBonus = (weather > 0.6) ? (weather - 0.6) * 20.0 : 0.0;
+        maxOutput[&crop] += (growthRate[&crop] + weatherBonus);
+        
+        // Decay influenced by bad weather
+        double weatherPenalty = (weather < 0.5) ? (0.5 - weather) * 50.0 : 0.0;
+        maxOutput[&crop] -= (decay[&crop] + weatherPenalty);
+        
+        if (maxOutput[&crop] < 0.0) maxOutput[&crop] = 0.0;
+        
+        // Update supply curve based on conditions
+        updateSupplyCurve(&crop);
+    }
+}
 
-            if (maxOutput[&crop] < 0.0) maxOutput[&crop] = 0.0; // cap at 0
-        }
-    } 
+void updateSupplyCurve(product* crop)
+{
+    if (ss.find(crop) != ss.end())
+    {
+        // Tech improvement lowers marginal cost (shifts supply right/down)
+        double techEffect = techLevel * 2.0;
+        ss[crop].c = std::max(1.0, ss[crop].c - techEffect * 0.1);
+        
+        // Bad weather increases marginal cost (shifts supply left/up)
+        double weatherEffect = (1.0 - weather) * 3.0;
+        ss[crop].c += weatherEffect;
+        
+        // Tax increases cost
+        ss[crop].c += tax * 5.0;
+        
+        // Land scarcity increases slope (harder to produce more)
+        ss[crop].m = 0.1 + (100.0 / std::max(1.0, land)) * 0.02;
+    }
+}
+
+double calculateSupply(product* crop, double marketPrice)
+{
+    if (ss.find(crop) == ss.end()) return 0.0;
+    
+    // Effective marginal cost includes all factors
+    double effectiveMC = ss[crop].c;
+    
+    // Adjust slope for weather difficulty
+    double effectiveSlope = ss[crop].m * (2.0 - weather);  // Bad weather steepens
+    
+    // Won't produce if price below MC
+    if (marketPrice <= effectiveMC) return 0.0;
+    
+    // Q = (P - MC) / m
+    double quantity = (marketPrice - effectiveMC) / effectiveSlope;
+    
+    // Physical capacity constraint
+    quantity = std::min(quantity, maxOutput[crop]);
+    
+    return std::max(0.0, quantity);
+}
+
+std::string getStyledDetails() const
+{
+    using namespace styledTerminal;
+    std::stringstream ss;
+    
+    ss << Header("FARMER: " + name) << "\n";
+    ss << KeyValue("Age", std::to_string(ageInDays / 365) + " years") << "\n";
+    ss << KeyValue("Land", std::to_string(twoDecimal(land)) + " acres") << "\n";
+    ss << KeyValue("Tech Level", std::to_string(twoDecimal(techLevel * 100)) + "%") << "\n";
+    ss << KeyValue("Weather", std::to_string(twoDecimal(weather * 100)) + "%") << "\n";
+    ss << KeyValue("Tax Rate", std::to_string(twoDecimal(tax * 100)) + "%") << "\n\n";
+    
+    ss << Styled("CROPS:\n", Theme::Primary);
+    for (const auto& crop : crops)
+    {
+        ss << "  • " << crop.name 
+           << " (Max: " << twoDecimal(maxOutput.at(const_cast<product*>(&crop))) << " units)\n";
+    }
+    
+    return ss.str();
+}
 
     double calculateCropOutput(product* crop) {
         // 1. Base Potential: Land * Growth Rate
@@ -84,30 +158,6 @@ public:
 
         return std::max(0.0, netHarvest);
     }
-    double calculateSupply(product* crop, double marketPrice){
-        double effectiveMC = ss[crop].c + tax - (techLevel * 2.0);
-        
-        // 2. ADJUST THE SLOPE (Changes in Difficulty/Nature)
-        // Bad weather makes the slope steeper (harder to produce more)
-        double effectiveSlope = ss[crop].m * weather;
-
-        // 3. CHECK PROFITABILITY
-        // If Market Price < Cost to produce 1st unit, produce NOTHING.
-        if (marketPrice <= effectiveMC) {
-            return 0.0;
-        }
-
-        // 4. CALCULATE Q (Inverting the formula P = MC + mQ)
-        // Q = (P - MC) / m
-        double quantity = (marketPrice - effectiveMC) / effectiveSlope;
-
-        // 5. CAP AT MAX CAPACITY
-        if (quantity > maxOutput[crop]) {
-            quantity = maxOutput[crop];
-        }
-
-        return quantity;
-    };
 
     double getRealisticLandSize() {
         // Random number generator
