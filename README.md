@@ -19,6 +19,7 @@ Run the program  by:
 ```
 ./cppConomy
 ```
+echo "contributor:Lamia Akter">>README.md
 
 
 ### Contributors:
