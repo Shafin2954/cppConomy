@@ -64,9 +64,9 @@ namespace styledTerminal
     // Themed color palette (similar to Claude CLI)
     namespace Theme
     {
-        constexpr const char *Primary = Color::BrightCyan;
+        constexpr const char *Primary = Color::BrightGreen;
         constexpr const char *BoldPrimary = Color::BoldBrightCyan;
-        constexpr const char *Secondary = Color::BrightBlue;
+        constexpr const char *Secondary = Color::Green;
         constexpr const char *Success = Color::BrightGreen;
         constexpr const char *Warning = Color::BrightYellow;
         constexpr const char *Error = Color::BrightRed;

@@ -49,8 +49,9 @@ public:
     laborer *selected_laborer;
     farmer *selected_farmer;
     market *selected_market;
+    firm *selected_firm;
 
-    world() : selected_consumer(nullptr), selected_laborer(nullptr), selected_farmer(nullptr), selected_market(nullptr) {}
+    world() : selected_consumer(nullptr), selected_laborer(nullptr), selected_farmer(nullptr), selected_market(nullptr), selected_firm(nullptr) {}
 
     stats getStats()
     {
@@ -152,6 +153,8 @@ public:
         selected_consumer = &consumers[0];
         selected_farmer = &farmers[0];
         selected_laborer = &laborers[0];
+        selected_market = &markets[0];
+        selected_firm = &firms[0];
     }
 
     void addConsumer(std::string name, int age)
@@ -229,6 +232,16 @@ public:
     market *GetSelectedMarket()
     {
         return selected_market;
+    }
+
+    firm *GetSelectedFirm()
+    {
+        for (auto &firm : firms)
+        {
+            if (firm.ownerId == selected_consumer->id)
+                return &firm;
+        }
+        return nullptr;
     }
 
     int getPopulation()

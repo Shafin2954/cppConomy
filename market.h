@@ -140,7 +140,7 @@ public:
         price = std::max(0.5, std::min(1000.0, price));
     }
 
-    std::string getStyledStatus() const
+    std::string getStyledDetails() const
     {
         using namespace styledTerminal;
         std::stringstream ss;
