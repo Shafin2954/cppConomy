@@ -47,14 +47,14 @@ public:
 
         std::cout << Styled("Innitializing world", Color::BrightYellow);
 // pause and clear screen
-#ifdef _WIN32
-        system("timeout 1 > nul"); // pause for 1 second (Windows)
-        std::cout << ".";
-        system("timeout 1 > nul"); // pause for 1 second (Windows)
-        std::cout << ".";
-        system("timeout 1 > nul"); // pause for 1 second (Windows)
-        std::cout << ".";
-        system("timeout 1 > nul"); // pause for 1 second (Windows)
+#ifdef _WIN32 //todo: remove comments
+        // system("timeout 1 > nul"); // pause for 1 second (Windows)
+        // std::cout << ".";
+        // system("timeout 1 > nul"); // pause for 1 second (Windows)
+        // std::cout << ".";
+        // system("timeout 1 > nul"); // pause for 1 second (Windows)
+        // std::cout << ".";
+        // system("timeout 1 > nul"); // pause for 1 second (Windows)
         system("cls");
 #else
         system("sleep 3"); // pause for 3 seconds (Unix)
@@ -79,9 +79,9 @@ public:
         while (running)
         {
             try
-            {
-                std::cout << Styled(Repeat(Horizontal, 93), Color::Gray) << "\n"; // separator
-                std::cout << Prompt();
+            {   
+
+                std::cout << "\n" << Prompt();
                 std::cout << std::flush; // ensure prompt is printed before input
 
                 std::string input = readWithAutoComplete();
@@ -89,9 +89,6 @@ public:
 
                 // Clear suggestion line
                 std::cout << "\r" << std::string(93, ' ') << "\r";
-
-                // Print bottom separator
-                std::cout << Styled(Repeat("─", 93), Theme::Muted) << "\n";
 
                 trimInput(input);
 

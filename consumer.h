@@ -54,21 +54,47 @@ public:
     }
 
     virtual void pass_day(double gdpPerCapita)
-    { // renew mu by decay rate for all products, consume products
+    {
+        double oldIncome = incomePerDay;
+
+        // Age the consumer
+        ageInDays++;
+
+        // Calculate consumption and expenses
+        expenses = 0.0;
         for (auto &need : needs)
         {
-            substitutionRatios[&need] = getMarginalUtility(need) / getMarginalUtility(rice);
-            expenses += (dd[&need].c - dd[&need].m * consumed[&need]) * muPerDollar; // approximate daily spending based on WTP and MU per dollar
+            // Calculate how much to consume
+            double consumeAmount = consumptionRate(need, gdpPerCapita);
+            consumed[&need] += consumeAmount;
+
+            // Calculate spending (WTP at current consumption level)
+            double wtp = dd[&need].c - (dd[&need].m * consumed[&need]);
+            expenses += wtp * consumeAmount;
+
+            // Decay previously consumed amount
+            consumed[&need] -= need.decayRate;
+            if (consumed[&need] < 0.0)
+                consumed[&need] = 0.0;
         }
-        savings += incomePerDay - expenses; // receive daily income
-        expenses = 0.0;
-        ageInDays++;
-        for (auto &product : needs)
+
+        // Update finances
+        savings += incomePerDay - expenses;
+
+        // Update demand curves if income changed
+        double incomeChange = incomePerDay - oldIncome;
+        if (std::abs(incomeChange) > 0.01)
         {
-            consumed[&product] += consumptionRate(product, gdpPerCapita); // consume based on consumption rate and GDP per capita
-            consumed[&product] -= product.decayRate; // fade consumed amount by decay rate
-            if (consumed[&product] < 0.0)
-                consumed[&product] = 0.0;
+            updateDemandForIncomeChange(incomeChange);
+        }
+
+        // Update MU per dollar based on new wealth
+        muPerDollar = getMUperDollar();
+
+        // Update substitution ratios
+        for (auto &need : needs)
+        {
+            substitutionRatios[&need] = updateSubRatio(need);
         }
     }
 
@@ -90,9 +116,74 @@ public:
     double consumptionRate(product product, double gdpPerCapita)
     {
         double wealth = savings + incomePerDay * 365;
-        
-        double consumptionRate = product.baseConsumption * pow((wealth / gdpPerCapita), product.eta); // Increase consumption with GDP per capita
-        std::cout << "DEBUG: " << name << " consumption rate for " << product.name << ": " << consumptionRate << " (Wealth: " << wealth << ", GDP per Capita: " << gdpPerCapita << ")\n";
-        return consumptionRate; 
+        double wealthRatio = wealth / std::max(1.0, gdpPerCapita);
+
+        // Base consumption adjusted by income elasticity
+        double baseRate = product.baseConsumption * std::pow(wealthRatio, product.eta);
+
+        // Budget constraint: can't consume more than you can afford
+        double maxAffordable = (incomePerDay * 0.3) / std::max(0.1, dd[&product].c);
+
+        return std::min(baseRate, maxAffordable);
+    }
+
+    // Update demand curve based on price changes (substitution effect)
+    void updateDemandForPriceChange(product *prod, double newPrice)
+    {
+        if (dd.find(prod) != dd.end())
+        {
+            // Price increase reduces willingness to pay ceiling
+            double priceShock = newPrice / std::max(0.1, dd[prod].c);
+            if (priceShock > 1.2) // Significant price increase
+            {
+                dd[prod].c *= 0.95; // Reduce reservation price
+            }
+        }
+    }
+
+    // Shift demand curve based on income change
+    void updateDemandForIncomeChange(double incomeChange)
+    {
+        for (auto &need : needs)
+        {
+            if (dd.find(&need) != dd.end())
+            {
+                // Normal goods: demand increases with income
+                if (need.eta > 0)
+                {
+                    dd[&need].c += incomeChange * 0.05 * need.eta;
+                }
+                // Inferior goods: demand decreases with income
+                else if (need.eta < 0)
+                {
+                    dd[&need].c += incomeChange * 0.02 * need.eta;
+                    dd[&need].c = std::max(0.5, dd[&need].c); // Floor
+                }
+            }
+        }
+    }
+
+    std::string getStyledDetails() const
+    {
+        using namespace styledTerminal;
+        std::stringstream ss;
+
+        ss << Header("CONSUMER: " + name) << "\n";
+        ss << KeyValue("Age", std::to_string(ageInDays / 365) + " years") << "\n";
+        ss << KeyValue("Savings", "$" + std::to_string(twoDecimal(savings))) << "\n";
+        ss << KeyValue("Daily Income", "$" + std::to_string(twoDecimal(incomePerDay))) << "\n";
+        ss << KeyValue("MU per Dollar", std::to_string(twoDecimal(muPerDollar))) << "\n\n";
+
+        ss << Styled("CONSUMPTION:\n", Theme::Primary);
+        for (const auto &need : needs)
+        {
+            if (consumed.find(const_cast<product *>(&need)) != consumed.end())
+            {
+                ss << "  • " << need.name << ": "
+                   << twoDecimal(consumed.at(const_cast<product *>(&need))) << " units\n";
+            }
+        }
+
+        return ss.str();
     }
 };

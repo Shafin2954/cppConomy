@@ -6,7 +6,7 @@ int main()
 {
     styledTerminal::Init(); // Initialize terminal for color support (Windows)
     world world;
-    cli cli_instance(world);
-    cli_instance.run();
+    cli cli_interface(world);
+    cli_interface.run();
     return 0;
 }

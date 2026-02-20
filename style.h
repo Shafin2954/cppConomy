@@ -57,14 +57,16 @@ namespace styledTerminal
         constexpr const char *BrightBlue = "\033[94m";
         constexpr const char *BrightMagenta = "\033[95m";
         constexpr const char *BrightCyan = "\033[96m";
+        constexpr const char *BoldBrightCyan = "\033[1m\033[96m";
         constexpr const char *BrightWhite = "\033[97m";
     }
 
     // Themed color palette (similar to Claude CLI)
     namespace Theme
     {
-        constexpr const char *Primary = Color::BrightCyan;
-        constexpr const char *Secondary = Color::BrightBlue;
+        constexpr const char *Primary = Color::BrightGreen;
+        constexpr const char *BoldPrimary = Color::BoldBrightCyan;
+        constexpr const char *Secondary = Color::Green;
         constexpr const char *Success = Color::BrightGreen;
         constexpr const char *Warning = Color::BrightYellow;
         constexpr const char *Error = Color::BrightRed;

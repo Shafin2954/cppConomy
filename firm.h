@@ -298,16 +298,35 @@ public:
         }
     }
 
-    // void printFinancials() {
-    //     std::cout << "--- Firm Status ---" << std::endl;
-    //     std::cout << "Q: " << currentOutput << " | L: " << workers.size() << " | K: " << capitals.size() << std::endl;
-    //     std::cout << "TC: $" << totalCost << " (TFC: " << totalFixedCost << " + TVC: " << totalVariableCost << ")" << std::endl;
-    //     std::cout << "AC: $" << averageCost << " | MC: $" << marginalCost << std::endl;
+    std::string getStyledDetails() const
+    {
+        using namespace styledTerminal;
+        std::stringstream ss;
 
-    //     if (marginalCost < averageCost) {
-    //         std::cout << "Note: Economies of Scale (MC < AC)" << std::endl;
-    //     } else {
-    //         std::cout << "Note: Diminishing Returns (MC > AC)" << std::endl;
-    //     }
-    // }
+        ss << Header("FIRM (Owner ID: " + std::to_string(ownerId) + ")") << "\n";
+        ss << KeyValue("Cash", "$" + std::to_string(twoDecimal(cash))) << "\n";
+        ss << KeyValue("Workers", std::to_string(workers.size())) << "\n";
+        ss << KeyValue("Capital Units", std::to_string(capitals.size())) << "\n";
+        ss << KeyValue("Wage Rate", "$" + std::to_string(twoDecimal(wage))) << "\n\n";
+
+        ss << Styled("PRODUCTION:\n", Theme::Primary);
+        ss << KeyValue("Current Output", std::to_string(twoDecimal(currentOutput))) << "\n";
+        ss << KeyValue("Total Cost", "$" + std::to_string(twoDecimal(totalCost))) << "\n";
+        ss << KeyValue("Average Cost", "$" + std::to_string(twoDecimal(averageCost))) << "\n";
+        ss << KeyValue("Marginal Cost", "$" + std::to_string(twoDecimal(marginalCost))) << "\n\n";
+
+        auto ratios = const_cast<firm *>(this)->marginalCosts();
+        ss << Styled("EFFICIENCY:\n", Theme::Info);
+        ss << "  MPL/w: " << twoDecimal(ratios[0]) << "\n";
+        ss << "  MPK/r: " << twoDecimal(ratios[1]) << "\n";
+
+        if (std::abs(ratios[0] - ratios[1]) < 0.05)
+            ss << Styled("  Status: Optimal", Theme::Success) << "\n";
+        else if (ratios[0] > ratios[1])
+            ss << Styled("  Recommendation: Hire more labor", Theme::Warning) << "\n";
+        else
+            ss << Styled("  Recommendation: Add more capital", Theme::Warning) << "\n";
+
+        return ss.str();
+    }
 };

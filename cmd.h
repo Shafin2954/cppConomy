@@ -62,9 +62,7 @@ public:
             {"clear_selection", "Clear all selections", {}},
 
             // query commands -- remove
-            {"market_equilibrium(product)", "Find equilibrium price and quantity (product optional)", {{"product", "Product name"}}},
-            {"market_demand(product)", "Show aggregate demand curve (product optional)", {{"product", "Product name"}}},
-            {"market_supply(product)", "Show aggregate supply curve (product optional)", {{"product", "Product name"}}},
+            {"market_details", "Show market details", {}},
 
             //
             {"consumer_details", "Show consumer details", {}},
