@@ -63,6 +63,7 @@ public:
 
             // query commands -- remove
             {"market_details", "Show market details", {}},
+            {"market_history", "Show price history chart for selected market", {}},
 
             //
             {"consumer_details", "Show consumer details", {}},
@@ -71,17 +72,21 @@ public:
             {"consumer_substitution", "Show substitution ratios", {}},
             {"consumer_needs", "Show consumer needs and consumption", {}},
             {"consumer_demand_curve(product)", "Show consumer demand curve for a product", {{"product", "Product name"}}},
+            {"kill_consumer", "Kill the consumer (remove from simulation)", {}},
 
 
             {"farmer_details", "Show farmer details", {}},
             {"farmer_supply(product, price)", "Calculate supply at a price", {{"product", "Crop name"}, {"price", "Market price"}}},
             {"farmer_crops", "Show farmer crops and supply curves", {}},
             {"farmer_upgrade(level)", "Upgrade farmer tech level", {{"level", "New tech level 0-1"}}},
+            {"farmer_tax(rate)", "Set farmer tax rate and show supply curve shift", {{"rate", "Tax rate 0-1"}}},
             {"farmer_weather", "Show current weather effect", {}},
             {"farmer_supply_curve(product)", "Show farmer's supply curve for a crop", {{"product", "Crop name"}}},
+            {"kill_farmer", "Kill the farmer (remove from simulation)", {}},
 
 
             {"laborer_details", "Show laborer details", {}},
+            {"kill_laborer", "Kill the laborer (remove from simulation)", {}},
 
             {"firm_details", "Show firm details", {}},
             {"firm_costs", "Calculate all cost metrics", {}},
@@ -92,7 +97,9 @@ public:
             {"firm_fire(laborer)", "Remove a laborer from the firm", {{"laborer", "Laborer name"}}},
             {"firm_capital(rental, eff)", "Add capital to the firm", {{"rental", "Rental rate"}, {"eff", "Efficiency"}}},
 
+            {"pass_day(n)", "Advance simulation by N days", {{"n", "Number of days"}}},
             {"pass_day", "Advance simulation by one day", {}},
+            {"set_income(value)", "Set selected consumer's daily income", {{"value", "Daily income in Tk"}}},
             {"status", "Show economic statistics", {}},
             {"help", "Show available commands", {}},
             {"clear", "Clear screen", {}},

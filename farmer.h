@@ -38,28 +38,39 @@ public:
     void upgradeTech(double newTechLevel) {
         techLevel = newTechLevel;
     }
-    void pass_day(double perCapita) override
-{
-    consumer::pass_day(perCapita);
 
-    // Weather varies with some persistence (not completely random)
+    double getCropMetricByName(const std::map<product *, double> &metric, const std::string &cropName) const
+    {
+        for (const auto &[cropPtr, value] : metric)
+        {
+            if (cropPtr && cropPtr->name == cropName)
+                return value;
+        }
+        return 0.0;
+    }
+
+    void pass_day(double perCapita, const std::map<std::string, double> &prices = {}) override
+{
+    consumer::pass_day(perCapita, prices);
+
+    // Weather varies with some persistence
     double weatherChange = ((double)rand() / RAND_MAX - 0.5) * 0.3;
     weather = std::max(0.2, std::min(0.95, weather + weatherChange));
 
-    for (auto& crop : crops)
+    // IMPORTANT: iterate ss map (correct original product* keys), NOT crops vector.
+    // crops vector stores copies, so &crop != &rice — using &crop as key silently
+    // creates a new zero-entry and the real maxOutput[&rice] never updates.
+    for (auto& [cropPtr, supply] : ss)
     {
-        // Growth influenced by weather
-        double weatherBonus = (weather > 0.6) ? (weather - 0.6) * 20.0 : 0.0;
-        maxOutput[&crop] += (growthRate[&crop] + weatherBonus);
-        
-        // Decay influenced by bad weather
+        double weatherBonus  = (weather > 0.6) ? (weather - 0.6) * 20.0 : 0.0;
+        maxOutput[cropPtr]  += growthRate[cropPtr] + weatherBonus;
+
         double weatherPenalty = (weather < 0.5) ? (0.5 - weather) * 50.0 : 0.0;
-        maxOutput[&crop] -= (decay[&crop] + weatherPenalty);
-        
-        if (maxOutput[&crop] < 0.0) maxOutput[&crop] = 0.0;
-        
-        // Update supply curve based on conditions
-        updateSupplyCurve(&crop);
+        maxOutput[cropPtr]  -= decay[cropPtr] + weatherPenalty;
+
+        if (maxOutput[cropPtr] < 0.0) maxOutput[cropPtr] = 0.0;
+
+        updateSupplyCurve(cropPtr);
     }
 }
 
@@ -120,8 +131,9 @@ std::string getStyledDetails() const
     ss << Styled("CROPS:\n", Theme::Primary);
     for (const auto& crop : crops)
     {
+        double max = getCropMetricByName(maxOutput, crop.name);
         ss << "  • " << crop.name 
-           << " (Max: " << twoDecimal(maxOutput.at(const_cast<product*>(&crop))) << " units)\n";
+           << " (Max: " << twoDecimal(max) << " units)\n";
     }
     
     return ss.str();

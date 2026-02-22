@@ -225,7 +225,7 @@ public:
         double mpL = MPofLabor();
         double mpK = MPofCapital();
 
-        // Calculate "Bang for Buck" (Marginal Product per Dollar)
+        // Calculate "Bang for Buck" (Marginal Product per Tk)
         double laborRatio = mpL / wage;
         double capitalRatio = mpK / getCapitalCost();
 
@@ -304,16 +304,16 @@ public:
         std::stringstream ss;
 
         ss << Header("FIRM (Owner ID: " + std::to_string(ownerId) + ")") << "\n";
-        ss << KeyValue("Cash", "$" + std::to_string(twoDecimal(cash))) << "\n";
+        ss << KeyValue("Cash", "Tk " + std::to_string(twoDecimal(cash))) << "\n";
         ss << KeyValue("Workers", std::to_string(workers.size())) << "\n";
         ss << KeyValue("Capital Units", std::to_string(capitals.size())) << "\n";
-        ss << KeyValue("Wage Rate", "$" + std::to_string(twoDecimal(wage))) << "\n\n";
+        ss << KeyValue("Wage Rate", "Tk " + std::to_string(twoDecimal(wage))) << "\n\n";
 
         ss << Styled("PRODUCTION:\n", Theme::Primary);
         ss << KeyValue("Current Output", std::to_string(twoDecimal(currentOutput))) << "\n";
-        ss << KeyValue("Total Cost", "$" + std::to_string(twoDecimal(totalCost))) << "\n";
-        ss << KeyValue("Average Cost", "$" + std::to_string(twoDecimal(averageCost))) << "\n";
-        ss << KeyValue("Marginal Cost", "$" + std::to_string(twoDecimal(marginalCost))) << "\n\n";
+        ss << KeyValue("Total Cost", "Tk " + std::to_string(twoDecimal(totalCost))) << "\n";
+        ss << KeyValue("Average Cost", "Tk " + std::to_string(twoDecimal(averageCost))) << "\n";
+        ss << KeyValue("Marginal Cost", "Tk " + std::to_string(twoDecimal(marginalCost))) << "\n\n";
 
         auto ratios = const_cast<firm *>(this)->marginalCosts();
         ss << Styled("EFFICIENCY:\n", Theme::Info);

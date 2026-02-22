@@ -2,9 +2,15 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <conio.h>
 #include <sstream>
 #include <iomanip>
+
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <termios.h>
+#include <unistd.h>
+#endif
 
 #include "style.h"
 #include "farmer.h"
@@ -20,6 +26,11 @@ using namespace Box;
 class cli
 {
 public:
+    // ── Single source of truth for terminal width ──────────────────────────
+    // Change this one number to reflow all horizontal lines, separators,
+    // the sticky header box, and executor output rules.
+    static constexpr int screen_width = 100;
+
     bool running = true;
     std::vector<std::string> history;
     int historyIndex = 0;
@@ -39,8 +50,15 @@ public:
         }
     }
 
-    cmdExec executor{simulation, [this](const std::string &msg)
-                     { handleOutput(msg); }};
+    cmdExec executor{simulation,
+                     [this](const std::string &msg)
+                     { handleOutput(msg); },
+                     [this]()
+                     {
+                         clearScreen();
+                         showStickyHeader();
+                     },
+                     screen_width};
 
     void run()
     {
@@ -88,7 +106,7 @@ public:
                 std::cout << "\n"; // Newline after input
 
                 // Clear suggestion line
-                std::cout << "\r" << std::string(93, ' ') << "\r";
+                std::cout << "\r" << std::string(screen_width, ' ') << "\r";
 
                 trimInput(input);
 
@@ -122,7 +140,7 @@ public:
                 std::cout << "\n";
                 processCommand(input);
 
-                // Refresh header after commands that might change selections
+                // Refresh header after select commands that might change selections
                 if (input.find("select") != std::string::npos)
                 {
                     clearScreen();
@@ -131,18 +149,22 @@ public:
             }
             catch (const std::exception &e)
             {
-                std::cout << Error(std::string("Unhandled exception: ") + e.what()) << "\n";
+                std::cout << "\n  " << Styled("[✗]", Theme::Error) << "  "
+                          << Styled(std::string("Exception: ") + e.what(), Theme::Highlight) << "\n\n";
             }
             catch (...)
             {
-                std::cout << Error("Unhandled exception: unknown") << "\n";
+                std::cout << "\n  " << Styled("[✗]", Theme::Error) << "  "
+                          << Styled("Unknown exception", Theme::Highlight) << "\n\n";
             }
         }
     };
 
     void showStickyHeader()
     {
-        std::vector<std::string> left = {
+        // Fixed-width ASCII art (54 chars per line).
+        // Extra horizontal space from screen_width is split evenly as padding.
+        static const std::vector<std::string> artLines = {
             "                                                      ",
             "     _____          _____                             ",
             "    / ___/__  ___  / ___/__  ___  ___  __ _  __ __    ",
@@ -150,8 +172,8 @@ public:
             "   \\___/ .__/ .__/\\___/\\___/_//_/\\___/_/_/_/\\_, /     ",
             "      /_/  /_/                             /___/      ",
             "                                                      ",
-            "                                                      ",
             "                                                      "};
+        static constexpr int artWidth = 54;
 
         // Right column - Tips and info (each line is a string)
         std::vector<std::string> right = {
@@ -164,20 +186,43 @@ public:
             "  select     - Select entities    ",
             "                                  "};
 
-        size_t leftWidth = 55;
-        size_t rightWidth = 35;
+        // Layout math — all widths derived from screen_width
+        // Total box: │ leftWidth │ rightWidth │  = screen_width
+        //   borders: 1 + leftWidth + 1 + rightWidth + 1 = screen_width
+        //   so:      leftWidth + rightWidth = screen_width - 3
+        static constexpr int rightWidth = 35;
+        const int leftWidth  = screen_width - rightWidth - 3;
 
-        //                ╭ from box namespace                                                                             ╭ char + 4
-        std::cout << Styled(TopLeft + Repeat(Horizontal, 2) + std::string(" Economic Engine v2.0 ") + Repeat(Horizontal, leftWidth - 24) + Horizontal + Repeat(Horizontal, rightWidth) + TopRight, Theme::Primary) << "\n";
+        // Art padding: the art is artWidth chars; the content area inside the
+        // left panel is leftWidth-1 (after the leading space).
+        // Split extra evenly: more on the right to balance visual weight.
+        const int artExtra   = (leftWidth - 1) - artWidth;
+        const int artLPad    = artExtra / 2;
+        const int artRPad    = artExtra - artLPad;
+        const std::string lPad(artLPad > 0 ? artLPad : 0, ' ');
+        const std::string rPad(artRPad > 0 ? artRPad : 0, ' ');
 
-        //                     ╭ lines
-        for (size_t i = 0; i < 8; ++i)
+        // Header border
+        std::cout << Styled(
+            TopLeft + Repeat(Horizontal, 2) + " Economic Engine v2.0 " +
+            Repeat(Horizontal, leftWidth - 24) + Horizontal +
+            Repeat(Horizontal, rightWidth) + TopRight,
+            Theme::Primary) << "\n";
+
+        // Art + right-panel rows
+        for (size_t i = 0; i < artLines.size(); ++i)
         {
-            std::cout << Styled(Vertical, Theme::Primary) << " " << Styled(left[i], Theme::Primary);
-            std::cout << Styled(Vertical, Color::Gray) << " " << Styled(right[i], (i == 0) ? Theme::Primary : Theme::Secondary) << Styled(Vertical, Theme::Primary) << "\n";
+            std::cout << Styled(Vertical, Theme::Primary)
+                      << " " << lPad << Styled(artLines[i], Theme::Primary) << rPad
+                      << Styled(Vertical, Color::Gray)
+                      << " " << Styled(right[i], (i == 0) ? Theme::Primary : Theme::Secondary)
+                      << Styled(Vertical, Theme::Primary) << "\n";
         }
 
-        std::cout << Styled(BottomLeft + Repeat(Horizontal, leftWidth) + Horizontal + Repeat(Horizontal, rightWidth) + BottomRight, Theme::Primary) << "\n";
+        std::cout << Styled(
+            BottomLeft + Repeat(Horizontal, leftWidth) + Horizontal +
+            Repeat(Horizontal, rightWidth) + BottomRight,
+            Theme::Primary) << "\n";
 
         laborer *selLaborer = simulation.GetSelectedLaborer();
         farmer *selFarmer = simulation.GetSelectedFarmer();
@@ -203,31 +248,43 @@ public:
             }
         }
 
+        // Slot widths: 4 boxes each with left+right border = screen_width total
+        // Each box visual width = slotWidth + 2 (borders), so 4*(sw+2) = screen_width
+        // → slotWidth = (screen_width - 8) / 4, remainder distributed left-to-right
+        const int slotBase = (screen_width - 8) / 4;
+        const int slotRem  = (screen_width - 8) % 4;
+        const int sw1 = slotBase + (slotRem > 0 ? 1 : 0);
+        const int sw2 = slotBase + (slotRem > 1 ? 1 : 0);
+        const int sw3 = slotBase + (slotRem > 2 ? 1 : 0);
+        const int sw4 = slotBase;
+
         std::vector<std::string> slot1 = createSlot("LABORER",
                                                     selLaborer ? selLaborer->name +
                                                                      "\nSkill Level: " + std::to_string((int)(selLaborer->skillLevel * 100)) + "%" +
-                                                                     "\nMin Wage: " + std::to_string((int)selLaborer->minWage) + "TK per day"
+                                                                     "\nMin Wage: " + std::to_string((int)selLaborer->minWage) + " Tk/day"
                                                                : "\nNone selected\n ",
-                                                    24);
+                                                    sw1);
 
         std::vector<std::string> slot2 = createSlot("FARMER",
                                                     selFarmer ? selFarmer->name +
                                                                     "\nLand: " + std::to_string((int)selFarmer->land) + " acres" +
                                                                     "\nCrops: " + cropNames
-                                                              : "\nNone selected\n ");
+                                                              : "\nNone selected\n ",
+                                                    sw2);
 
         std::vector<std::string> slot3 = createSlot("CONSUMER",
                                                     selConsumer ? selConsumer->name +
                                                                       "\nAge: " + std::to_string(selConsumer->ageInDays / 365) + " years" +
-                                                                      "\nSavings: $" + std::to_string((int)selConsumer->savings)
-                                                                : "\nNone selected\n ");
+                                                                      "\nSavings: Tk " + std::to_string((int)selConsumer->savings)
+                                                                : "\nNone selected\n ",
+                                                    sw3);
 
         std::vector<std::string> slot4 = createSlot("MARKET",
                                                     selMarket ? selMarket->prod->name +
-                                                                    "\nPrice: $" + marketPriceText +
+                                                                    "\nPrice: Tk " + marketPriceText +
                                                                     "\n "
                                                               : "\nNone selected\n ",
-                                                    19);
+                                                    sw4);
 
         // Print slots side by side
         for (size_t i = 0; i < slot1.size(); ++i)
@@ -318,45 +375,73 @@ public:
     {
         auto stats = simulation.getStats();
 
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(2);
+        // helpers mirroring executor style (inline since sH/kv live in cmdExec)
+        auto fmtD = [](double v, int p = 2) {
+            std::ostringstream os;
+            os << std::fixed << std::setprecision(p) << v;
+            return os.str();
+        };
+        auto padStr = [](const std::string &s, int w) {
+            if ((int)s.size() >= w) return s;
+            return s + std::string(w - (int)s.size(), ' ');
+        };
+        auto sH = [&](const std::string &title) {
+            std::cout << "\n  " << Styled(title, Theme::BoldPrimary)
+                      << "\n  " << Styled(Repeat(Horizontal, screen_width - 4), Theme::Muted) << "\n";
+        };
+        auto kv = [&](const std::string &key, const std::string &val) {
+            std::cout << "    " << Styled(padStr(key, 24), Theme::Info)
+                      << Styled(val, Theme::Highlight) << "\n";
+        };
+        auto hline = [&]() {
+            std::cout << "  " << Styled(Repeat(Horizontal, screen_width - 4), Theme::Muted) << "\n";
+        };
+        auto section = [&](const std::string &label) {
+            std::cout << "  " << Styled(label, Theme::Warning) << "\n";
+        };
 
-        // Economic Indicators
-        ss << Styled("ECONOMIC INDICATORS", Theme::Highlight) << "\n";
-        ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-        ss << KeyValue("GDP", Styled("$" + std::to_string((int)stats.gdp), Theme::Success)) << "\n";
-        ss << KeyValue("GDP Growth", Styled(std::to_string(stats.gdpGrowth) + "%", Theme::Info)) << "\n";
-        ss << KeyValue("Inflation", Styled(std::to_string(stats.inflation) + "%", Theme::Warning)) << "\n";
-        ss << KeyValue("CPI", std::to_string(stats.cpi)) << "\n";
-        ss << "\n";
+        sH("ECONOMIC STATUS");
 
-        // Labor Market
-        ss << Styled("LABOR MARKET", Theme::Highlight) << "\n";
-        ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-        ss << KeyValue("Population", Styled(std::to_string(stats.population), Theme::Info)) << "\n";
-        ss << KeyValue("Employed", Styled(std::to_string(stats.employed), Theme::Success)) << "\n";
-        ss << KeyValue("Unemployment Rate", Styled(std::to_string(stats.unemployment) + "%",
-                                                   stats.unemployment > 10 ? Theme::Error : Theme::Info))
-           << "\n";
-        ss << "\n";
+        section("OUTPUT");
+        kv("GDP",          "Tk " + fmtD(stats.gdp));
+        double gdpPerCap = stats.population > 0 ? stats.gdp / stats.population : 0.0;
+        kv("GDP per capita", "Tk " + fmtD(gdpPerCap));
+        hline();
 
-        // Government & Finance
-        ss << Styled("GOVERNMENT & FINANCE", Theme::Highlight) << "\n";
-        ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-        ss << KeyValue("Money Supply", Styled("$" + std::to_string((int)stats.moneySupply), Theme::Success)) << "\n";
-        ss << KeyValue("Interest Rate", Styled(std::to_string(stats.interestRate) + "%", Theme::Info)) << "\n";
-        ss << KeyValue("Budget", Styled("$" + std::to_string((int)stats.budget), Theme::Info)) << "\n";
-        ss << KeyValue("Public Debt", Styled("$" + std::to_string((int)stats.debt), Theme::Warning)) << "\n";
-        ss << "\n";
+        section("MARKET PRICES");
+        for (auto &m : simulation.markets)
+        {
+            if (m.price > 0.1)
+            {
+                std::string trendStr;
+                if (m.priceHistory.size() > 1) {
+                    double delta = m.price - m.priceHistory[m.priceHistory.size() - 2];
+                    trendStr = delta > 0.5 ? Styled("  ▲", Theme::Warning) :
+                               delta < -0.5 ? Styled("  ▼", Theme::Info) :
+                               Styled("  ─", Theme::Muted);
+                }
+                kv(m.prod->name, "Tk " + fmtD(m.price) + trendStr);
+            }
+        }
+        hline();
 
-        // Inequality
-        ss << Styled("INEQUALITY", Theme::Highlight) << "\n";
-        ss << Styled(Repeat("─", 50), Theme::Muted) << "\n";
-        ss << KeyValue("Gini Coefficient", Styled(std::to_string(stats.giniCoefficient), Theme::Info)) << "\n";
-        ss << KeyValue("Number of Firms", Styled(std::to_string(stats.firms), Theme::Info)) << "\n";
+        section("LABOR MARKET");
+        kv("Population",   std::to_string(stats.population));
+        kv("Employed",     std::to_string(stats.employed));
+        {
+            double uPct = stats.unemployment * 100.0;
+            const char *uColor = uPct < 5.0 ? Theme::Success
+                               : uPct < 10.0 ? Theme::Warning
+                               : Theme::Error;
+            std::cout << "    " << Styled(padStr("Unemployment", 24), Theme::Info)
+                      << Styled(fmtD(uPct) + "%", uColor) << "\n";
+        }
+        kv("Firms",        std::to_string(stats.firms));
+        hline();
 
-        std::cout << "\n"
-                  << BoxedText(ss.str(), "Economic Dashboard") << "\n";
+        section("WEALTH");
+        kv("Money Supply", "Tk " + fmtD(stats.moneySupply));
+        std::cout << "\n";
     }
 
     void processCommand(const std::string &input)
@@ -372,7 +457,8 @@ public:
 
         if (!success && !executor.getLastError().empty())
         {
-            std::cout << Error("Command failed: " + executor.getLastError()) << "\n";
+            std::cout << "\n  " << Styled("[✗]", Theme::Error) << "  "
+                      << Styled(executor.getLastError(), Theme::Highlight) << "\n\n";
         }
 
         std::cout << "\n";
@@ -380,25 +466,17 @@ public:
 
     void handleOutput(const std::string &message)
     {
-        // Check if it's an error message
-        if (message.find("Error:") == 0)
+        if (message.find("Error:") == 0 || message.find("[✗]") != std::string::npos)
         {
-            std::cout << Error(message.substr(7)) << "\n";
-        }
-        // Check if it's a success/added message
-        else if (message.find("Added") == 0 || message.find("complete") != std::string::npos ||
-                 message.find("cleared") != std::string::npos || message.find("updated") != std::string::npos)
-        {
-            std::cout << Success(message) << "\n";
-        }
-        // Check if it's a list or detailed output
-        else if (message.find(":\n") != std::string::npos || message.find("---") != std::string::npos)
-        {
-            // Format as info box for structured data
-            std::cout << message << "\n";
+            std::cout << "\n  " << Styled("[✗]", Theme::Error) << "  "
+                      << Styled(message.find("Error:") == 0 ? message.substr(6) : message,
+                                Theme::Highlight)
+                      << "\n\n";
         }
         else
         {
+            // Executor handles its own styled output for most commands.
+            // This path handles plain informational strings.
             std::cout << message << "\n";
         }
     }
@@ -728,11 +806,305 @@ public:
                     refreshSuggestions({});
                 }
             }
-#else
-        // Fallback for non-Windows
-        getline(cin, input);
-        return input;
-#endif
         }
+#else
+        // Unix/Linux interactive input with history + autocomplete.
+        if (!isatty(STDIN_FILENO))
+        {
+            std::string input;
+            std::getline(std::cin, input);
+            return input;
+        }
+
+        struct TerminalModeGuard
+        {
+            termios original{};
+            bool active = false;
+
+            TerminalModeGuard()
+            {
+                if (tcgetattr(STDIN_FILENO, &original) != 0)
+                    return;
+
+                termios raw = original;
+                raw.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));
+                raw.c_iflag &= static_cast<tcflag_t>(~(IXON | ICRNL));
+                raw.c_cc[VMIN] = 1;
+                raw.c_cc[VTIME] = 0;
+
+                if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == 0)
+                    active = true;
+            }
+
+            ~TerminalModeGuard()
+            {
+                if (active)
+                {
+                    tcsetattr(STDIN_FILENO, TCSAFLUSH, &original);
+                }
+            }
+        } termGuard;
+
+        if (!termGuard.active)
+        {
+            std::string input;
+            std::getline(std::cin, input);
+            return input;
+        }
+
+        auto readByte = []() -> int
+        {
+            unsigned char c = 0;
+            ssize_t n = ::read(STDIN_FILENO, &c, 1);
+            return (n == 1) ? static_cast<int>(c) : -1;
+        };
+
+        std::string input;
+        std::vector<std::string> suggestions;
+        int historyPos = static_cast<int>(history.size());
+        size_t cursorPos = 0;
+        int displayedSuggestionCount = 0;
+
+        std::cout << "\n\n\n\n";
+        std::cout << "\033[4A";
+        std::cout << "\033[2K";
+        std::cout << Prompt();
+        std::cout.flush();
+
+        auto refreshSuggestions = [&](const std::vector<std::string> &lines)
+        {
+            int newCount = static_cast<int>(lines.size());
+            int oldCount = displayedSuggestionCount;
+            int maxLines = (newCount > oldCount) ? newCount : oldCount;
+
+            if (maxLines == 0)
+            {
+                displayedSuggestionCount = 0;
+                return;
+            }
+
+            for (int i = 0; i < maxLines; ++i)
+            {
+                std::cout << "\033[1E";
+                std::cout << "\033[2K";
+
+                if (i < newCount)
+                {
+                    std::cout << lines[i];
+                    std::cout << "\033[2m";
+                }
+            }
+
+            std::cout << "\033[" << maxLines << "F";
+            std::cout << "\033[2K";
+            std::cout << Prompt();
+            std::cout << Styled(input, Theme::Primary);
+
+            size_t charsAfterCursor = input.length() - cursorPos;
+            if (charsAfterCursor > 0)
+            {
+                std::cout << "\033[" << charsAfterCursor << "D";
+            }
+
+            std::cout.flush();
+            displayedSuggestionCount = newCount;
+        };
+
+        auto redrawSuggestionsForInput = [&]()
+        {
+            suggestions = GetSuggestions(input);
+            if (!suggestions.empty() && !input.empty())
+            {
+                std::vector<std::string> lines;
+                int show = std::min<int>(4, static_cast<int>(suggestions.size()));
+                for (int i = 0; i < show; ++i)
+                {
+                    lines.push_back(Styled(suggestions[i], Color::Dim));
+                }
+                refreshSuggestions(lines);
+            }
+            else
+            {
+                refreshSuggestions({});
+            }
+        };
+
+        while (true)
+        {
+            int code = readByte();
+            if (code < 0)
+                continue;
+
+            char ch = static_cast<char>(code);
+
+            if (ch == 3)
+            {
+                running = false;
+                refreshSuggestions({});
+                std::cout << "ctrl + c\n"
+                          << Styled("Goodbye!\n", Theme::Success);
+                exit(0);
+            }
+
+            if (ch == '\r' || ch == '\n')
+            {
+                refreshSuggestions({});
+                return input;
+            }
+            else if (ch == '\b' || ch == 127)
+            {
+                if (!input.empty() && cursorPos > 0)
+                {
+                    if (cursorPos == input.length())
+                    {
+                        input.pop_back();
+                        cursorPos = input.length();
+                        std::cout << "\b \b";
+                    }
+                    else
+                    {
+                        input.erase(cursorPos - 1, 1);
+                        std::cout << "\033[D";
+                        cursorPos--;
+                        std::cout << "\033[K";
+                        std::cout << input.substr(cursorPos);
+                        for (size_t m = 0; m < input.length() - cursorPos; ++m)
+                            std::cout << "\033[D";
+                    }
+
+                    redrawSuggestionsForInput();
+                }
+            }
+            else if (ch == '\t')
+            {
+                suggestions = GetSuggestions(input);
+                if (!suggestions.empty())
+                {
+                    if (cursorPos < input.length())
+                    {
+                        for (size_t mv = 0; mv < input.length() - cursorPos; ++mv)
+                            std::cout << "\033[C";
+                        cursorPos = input.length();
+                    }
+
+                    for (size_t i = 0; i < input.length(); ++i)
+                        std::cout << "\b \b";
+
+                    std::string suggestion = suggestions[0];
+                    size_t parenPos = suggestion.find('(');
+                    std::string fill = (parenPos != std::string::npos) ? suggestion.substr(0, parenPos + 1) : suggestion;
+
+                    input = fill;
+                    std::cout << input;
+                    cursorPos = input.length();
+
+                    redrawSuggestionsForInput();
+                }
+            }
+            else if (ch == 27)
+            {
+                int seq1 = readByte();
+                if (seq1 != '[')
+                    continue;
+
+                int seq2 = readByte();
+                if (seq2 < 0)
+                    continue;
+
+                // Up arrow
+                if (seq2 == 'A' && !history.empty())
+                {
+                    if (historyPos > 0)
+                        historyPos--;
+
+                    if (cursorPos < input.length())
+                    {
+                        for (size_t mv = 0; mv < input.length() - cursorPos; ++mv)
+                            std::cout << "\033[C";
+                    }
+
+                    for (size_t i = 0; i < input.length(); ++i)
+                        std::cout << "\b \b";
+
+                    if (historyPos >= 0 && historyPos < static_cast<int>(history.size()))
+                    {
+                        input = history[static_cast<size_t>(historyPos)];
+                        std::cout << input;
+                        cursorPos = input.length();
+                        redrawSuggestionsForInput();
+                    }
+                }
+                // Down arrow
+                else if (seq2 == 'B' && !history.empty())
+                {
+                    if (historyPos < static_cast<int>(history.size()))
+                        historyPos++;
+
+                    if (cursorPos < input.length())
+                    {
+                        for (size_t mv = 0; mv < input.length() - cursorPos; ++mv)
+                            std::cout << "\033[C";
+                    }
+
+                    for (size_t i = 0; i < input.length(); ++i)
+                        std::cout << "\b \b";
+
+                    if (historyPos >= 0 && historyPos < static_cast<int>(history.size()))
+                    {
+                        input = history[static_cast<size_t>(historyPos)];
+                        std::cout << input;
+                        cursorPos = input.length();
+                        redrawSuggestionsForInput();
+                    }
+                    else
+                    {
+                        input.clear();
+                        cursorPos = 0;
+                        refreshSuggestions({});
+                    }
+                }
+                // Left arrow
+                else if (seq2 == 'D')
+                {
+                    if (cursorPos > 0)
+                    {
+                        std::cout << "\033[D";
+                        cursorPos--;
+                    }
+                }
+                // Right arrow
+                else if (seq2 == 'C')
+                {
+                    if (cursorPos < input.length())
+                    {
+                        std::cout << "\033[C";
+                        cursorPos++;
+                    }
+                }
+            }
+            else if (ch >= 32 && ch <= 126)
+            {
+                if (cursorPos == input.length())
+                {
+                    input += ch;
+                    std::cout << Styled(std::string(1, ch), Theme::Primary);
+                    cursorPos++;
+                }
+                else
+                {
+                    input.insert(input.begin() + static_cast<std::string::difference_type>(cursorPos), ch);
+                    std::cout << "\033[K";
+                    std::cout << Styled(input.substr(cursorPos), Theme::Primary);
+
+                    size_t tailLen = input.length() - cursorPos - 1;
+                    for (size_t m = 0; m < tailLen; ++m)
+                        std::cout << "\033[D";
+                    cursorPos++;
+                }
+
+                redrawSuggestionsForInput();
+            }
+        }
+#endif
     }
 };

@@ -4,6 +4,8 @@
 #include <map>
 #include "consumer.h"
 #include "farmer.h"
+#include "laborer.h"
+#include "firm.h"
 #include "product.h"
 
 class market
@@ -31,56 +33,107 @@ public:
 
     market(product *prod) : prod(prod), aggregateDemand({0, 0}), aggregateSupply({0, 0}) {}
 
-    // Aggregate all consumer demand curves
+    // Aggregate demand curves from consumers, farmers, and laborers
     // Q = sum(c/m) - sum(1/m) * p
-    void calculateAggregateDemand(std::vector<consumer> &consumers)
+    void calculateAggregateDemand(const std::vector<consumer> &consumers,
+                                  const std::vector<farmer> &farmers,
+                                  const std::vector<laborer> &laborers)
     {
-        if (consumers.empty())
-        {
-            aggregateDemand = {0, 0};
-            return;
-        }
-
         double totalInvM = 0.0; // sum of 1/m
         double cByM = 0.0;      // sum of c/m
 
-        for (auto &c : consumers)
+        auto collectDemand = [&](const consumer &agent)
         {
-            if (c.dd.find(prod) != c.dd.end())
-            {
-                totalInvM += 1.0 / c.dd[prod].m;
-                cByM += c.dd[prod].c / c.dd[prod].m;
-            }
-        }
+            auto it = agent.dd.find(prod);
+            if (it == agent.dd.end())
+                return;
 
-        aggregateDemand.m = 1.0 / totalInvM;
-        aggregateDemand.c = aggregateDemand.m * cByM;
+            double slope = it->second.m;
+            if (slope <= 0.000001)
+                return;
+
+            totalInvM += 1.0 / slope;
+            cByM += it->second.c / slope;
+        };
+
+        for (const auto &c : consumers)
+            collectDemand(c);
+
+        for (const auto &f : farmers)
+            collectDemand(static_cast<const consumer &>(f));
+
+        for (const auto &l : laborers)
+            collectDemand(static_cast<const consumer &>(l));
+
+        if (totalInvM <= 0.000001)
+        {
+            aggregateDemand = {0, 0};
+        }
+        else
+        {
+            aggregateDemand.m = 1.0 / totalInvM;
+            aggregateDemand.c = aggregateDemand.m * cByM;
+        }
     }
 
     // Aggregate all farmer supply curves
-    // Q = sum(c/m) + sum(1/m) * p
-    void calculateAggregateSupply(std::vector<farmer> &farmers)
+    // Q = sum(c/m) + sum(1/m) * p  (horizontal summation)
+    void calculateAggregateSupply(const std::vector<farmer> &farmers,
+                                   const std::vector<firm>   &firms = {})
     {
-        if (farmers.empty())
+        double totalInvM = 0.0;
+        double cByM      = 0.0;
+
+        // ── Farmer supply ─────────────────────────────────────────────────
+        for (const auto &f : farmers)
+        {
+            auto it = f.ss.find(prod);
+            if (it == f.ss.end()) continue;
+            double slope = it->second.m;
+            if (slope <= 0.000001) continue;
+            totalInvM += 1.0 / slope;
+            cByM      += it->second.c / slope;
+        }
+
+        // ── Firm supply ───────────────────────────────────────────────────
+        // Each firm that makes this product contributes a linearised supply
+        // curve derived from its current MC.
+        // Scale: 1 production-function unit ≈ 80 market units (calibration).
+        static constexpr double OUTPUT_SCALE = 80.0;
+
+        for (const auto &fi : firms)
+        {
+            // Does this firm make this product?
+            bool makes = false;
+            for (const auto &p : fi.products)
+                if (p.name == prod->name) { makes = true; break; }
+            if (!makes) continue;
+            if (fi.currentOutput < 0.001) continue;
+
+            // Effective per-market-unit MC
+            double effMC = fi.marginalCost / OUTPUT_SCALE;
+            if (effMC < 0.5) effMC = fi.wage / OUTPUT_SCALE;  // fallback
+
+            // Upward-sloping supply: P = intercept + slope*Q
+            // Intercept = effMC*0.5 (sell once price covers half of MC — overhead covered by revenue)
+            // Slope      = effMC / (fi.currentOutput * OUTPUT_SCALE)
+            double intercept = effMC * 0.5;
+            double slope     = effMC / (fi.currentOutput * OUTPUT_SCALE);
+            if (slope <= 0.000001) continue;
+
+            totalInvM += 1.0 / slope;
+            cByM      += intercept / slope;
+        }
+
+        if (totalInvM <= 0.000001)
         {
             aggregateSupply = {0, 0};
-            return;
         }
-
-        double totalInvM = 0.0;
-        double cByM = 0.0;
-
-        for (auto &f : farmers)
+        else
         {
-            if (f.ss.find(prod) != f.ss.end())
-            { // Check if farmer produces this crop
-                totalInvM += 1.0 / f.ss[prod].m;
-                cByM += f.ss[prod].c / f.ss[prod].m;
-            }
+            aggregateSupply.m = 1.0 / totalInvM;
+            aggregateSupply.c = aggregateSupply.m * cByM;
         }
-
-        aggregateSupply.m = 1.0 / totalInvM;
-        aggregateSupply.c = aggregateSupply.m * cByM;
     }
 
     // Find equilibrium price and quantity
@@ -94,6 +147,7 @@ public:
 
     double excessDemand = 0.0;         // Track disequilibrium
     double priceAdjustmentSpeed = 0.1; // How fast prices adjust
+    std::vector<double> priceHistory;  // Price recorded each pass_day
 
     // Replace findEquilibrium with dynamic adjustment
     equilibrium findEquilibrium()
@@ -138,6 +192,11 @@ public:
 
         // Floor and ceiling
         price = std::max(0.5, std::min(1000.0, price));
+
+        // Record history (keep last 30 days)
+        priceHistory.push_back(price);
+        if (priceHistory.size() > 30)
+            priceHistory.erase(priceHistory.begin());
     }
 
     std::string getStyledDetails() const
@@ -146,7 +205,7 @@ public:
         std::stringstream ss;
 
         ss << Header("MARKET: " + prod->name) << "\n";
-        ss << KeyValue("Current Price", "$" + std::to_string(twoDecimal(price))) << "\n";
+        ss << KeyValue("Current Price", "Tk " + std::to_string(twoDecimal(price))) << "\n";
         ss << KeyValue("Excess Demand", std::to_string(twoDecimal(excessDemand))) << "\n\n";
 
         ss << Styled("DEMAND CURVE:\n", Theme::Info);
@@ -164,10 +223,12 @@ public:
 double quantityTraded = 0.0;  // Track actual trades
 double revenue = 0.0;         // Price × Quantity traded
 
-void clearMarket(std::vector<consumer>& allConsumers, std::vector<farmer>& suppliers)
+void clearMarket(const std::vector<consumer> &allConsumers,
+                 const std::vector<farmer> &allFarmers,
+                 const std::vector<laborer> &allLaborers)
 {
-    calculateAggregateDemand(allConsumers);
-    calculateAggregateSupply(suppliers);
+    calculateAggregateDemand(allConsumers, allFarmers, allLaborers);
+    calculateAggregateSupply(allFarmers);
     
     auto eq = findEquilibrium();
     
@@ -188,9 +249,9 @@ std::string getStyledEquilibrium()
     auto eq = findEquilibrium();
     
     ss << Header("MARKET EQUILIBRIUM: " + prod->name) << "\n\n";
-    ss << KeyValue("Equilibrium Price", "$" + std::to_string(twoDecimal(eq.price))) << "\n";
+    ss << KeyValue("Equilibrium Price", "Tk " + std::to_string(twoDecimal(eq.price))) << "\n";
     ss << KeyValue("Equilibrium Quantity", std::to_string(twoDecimal(eq.quantity)) + " units") << "\n";
-    ss << KeyValue("Market Value", "$" + std::to_string(twoDecimal(eq.price * eq.quantity))) << "\n";
+    ss << KeyValue("Market Value", "Tk " + std::to_string(twoDecimal(eq.price * eq.quantity))) << "\n";
     ss << KeyValue("Excess Demand", std::to_string(twoDecimal(excessDemand))) << "\n\n";
     
     ss << Styled("Demand: P = ", Theme::Info) 

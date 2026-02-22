@@ -26,7 +26,7 @@ public:
     double expenses;
     double incomePerDay; // Budget per day
 
-    double muPerDollar = getMUperDollar();
+    double muPerTk = getMUperTk();
     std::vector<product> needs; // goods needed (n)
 
     //              ╭ pointer to the same stored products
@@ -34,26 +34,36 @@ public:
     std::map<product *, double> substitutionRatios;
     std::map<product *, double> consumed;
 
+    // dd and consumed are keyed by global product pointers (e.g. &rice).
+    // needs stores copies, so &need != &rice. This helper finds the real key by name.
+    product *findKey(const std::string &name)
+    {
+        for (auto &[ptr, line] : dd)
+            if (ptr && ptr->name == name)
+                return ptr;
+        return nullptr;
+    }
+
     consumer(int id, const std::string &name, int ageInYears) : id(id), name(name), ageInDays(ageInYears * 365)
     {
         isAlive = true;
     }
 
-    double getMUperDollar()
+    double getMUperTk()
     {
         double wealth = savings + (incomePerDay * 30); // consider 30 days of income as part of wealth
         if (wealth < 1)
-            wealth = 1;      // high MU per dollar
-        return 1.0 / wealth; // inverse relationship between wealth and MU per dollar
+            wealth = 1;      // high MU per Tk
+        return 1.0 / wealth; // inverse relationship between wealth and MU per Tk
     }
 
     double getMarginalUtility(product product)
-    { // wtp * muPerDollar // wtp = p (Willingness To Pay)
+    { // wtp * muPerTk // wtp = p (Willingness To Pay)
         double wtp = dd[&product].c - (dd[&product].m * consumed[&product]);
-        return wtp * muPerDollar;
+        return wtp * muPerTk;
     }
 
-    virtual void pass_day(double gdpPerCapita)
+    virtual void pass_day(double gdpPerCapita, const std::map<std::string, double> &prices = {})
     {
         double oldIncome = incomePerDay;
 
@@ -64,18 +74,30 @@ public:
         expenses = 0.0;
         for (auto &need : needs)
         {
-            // Calculate how much to consume
-            double consumeAmount = consumptionRate(need, gdpPerCapita);
-            consumed[&need] += consumeAmount;
+            // dd and consumed are keyed by global pointers (e.g. &rice), not &need.
+            // findKey() matches by product name to get the correct key.
+            product *key = findKey(need.name);
+            if (!key)
+                continue;
 
-            // Calculate spending (WTP at current consumption level)
-            double wtp = dd[&need].c - (dd[&need].m * consumed[&need]);
-            expenses += wtp * consumeAmount;
+            // Calculate how much to consume (uses the correct key into dd)
+            double consumeAmount = consumptionRate(need, gdpPerCapita, key);
+            consumed[key] += consumeAmount;
+
+            // Use actual market price if provided, otherwise fall back to WTP
+            double price;
+            auto it = prices.find(need.name);
+            if (it != prices.end() && it->second > 0.01)
+                price = it->second;
+            else
+                price = std::max(0.01, dd[key].c - dd[key].m * consumed[key]);
+
+            expenses += price * consumeAmount;
 
             // Decay previously consumed amount
-            consumed[&need] -= need.decayRate;
-            if (consumed[&need] < 0.0)
-                consumed[&need] = 0.0;
+            consumed[key] -= need.decayRate;
+            if (consumed[key] < 0.0)
+                consumed[key] = 0.0;
         }
 
         // Update finances
@@ -88,19 +110,21 @@ public:
             updateDemandForIncomeChange(incomeChange);
         }
 
-        // Update MU per dollar based on new wealth
-        muPerDollar = getMUperDollar();
+        // Update MU per Tk based on new wealth
+        muPerTk = getMUperTk();
 
         // Update substitution ratios
         for (auto &need : needs)
         {
-            substitutionRatios[&need] = updateSubRatio(need);
+            product *key = findKey(need.name);
+            if (key)
+                substitutionRatios[key] = updateSubRatio(need);
         }
     }
 
     double consumerSurplus(product product, double marketPrice)
     {
-        return .5 * dd[&product].c - marketPrice * consumed[&product]; // .5 * c * quantity consumer
+        return .5 * (dd[&product].c - marketPrice) * consumed[&product]; // .5 * c * quantity consumer
     }
 
     void die()
@@ -113,16 +137,18 @@ public:
         return getMarginalUtility(product) / getMarginalUtility(rice);
     }
 
-    double consumptionRate(product product, double gdpPerCapita)
+    // key must be the global product pointer (from findKey), not a local copy's address
+    double consumptionRate(const product &prod, double gdpPerCapita, product *key)
     {
         double wealth = savings + incomePerDay * 365;
         double wealthRatio = wealth / std::max(1.0, gdpPerCapita);
 
         // Base consumption adjusted by income elasticity
-        double baseRate = product.baseConsumption * std::pow(wealthRatio, product.eta);
+        double baseRate = prod.baseConsumption * std::pow(wealthRatio, prod.eta);
 
-        // Budget constraint: can't consume more than you can afford
-        double maxAffordable = (incomePerDay * 0.3) / std::max(0.1, dd[&product].c);
+        // Budget constraint: can't spend more than 30% of daily income on one good
+        double intercept = (dd.count(key) && dd[key].c > 0.01) ? dd[key].c : 1.0;
+        double maxAffordable = (incomePerDay * 0.3) / intercept;
 
         return std::min(baseRate, maxAffordable);
     }
@@ -170,9 +196,9 @@ public:
 
         ss << Header("CONSUMER: " + name) << "\n";
         ss << KeyValue("Age", std::to_string(ageInDays / 365) + " years") << "\n";
-        ss << KeyValue("Savings", "$" + std::to_string(twoDecimal(savings))) << "\n";
-        ss << KeyValue("Daily Income", "$" + std::to_string(twoDecimal(incomePerDay))) << "\n";
-        ss << KeyValue("MU per Dollar", std::to_string(twoDecimal(muPerDollar))) << "\n\n";
+        ss << KeyValue("Savings", "Tk " + std::to_string(twoDecimal(savings))) << "\n";
+        ss << KeyValue("Daily Income", "Tk " + std::to_string(twoDecimal(incomePerDay))) << "\n";
+        ss << KeyValue("MU per Tk", std::to_string(twoDecimal(muPerTk))) << "\n\n";
 
         ss << Styled("CONSUMPTION:\n", Theme::Primary);
         for (const auto &need : needs)

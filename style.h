@@ -89,7 +89,6 @@ namespace styledTerminal
         constexpr const char *HorizontalDown = "┬";
         constexpr const char *HorizontalUp = "┴";
         constexpr const char *Cross = "┼";
-        constexpr const char *Separator = "─";
     }
 
     // Utility functions for styled output                               ╭ convert char to std::string
@@ -138,9 +137,10 @@ namespace styledTerminal
         std::string line;
         while (getline(contentStream, line))
         {
+            int pad = std::max(0, (int)width - (int)line.length() - 3);
             ss << Styled(Box::Vertical, Theme::Primary) << " "
                << line
-               << std::string(width - line.length() - 3, ' ')
+               << std::string(pad, ' ')
                << Styled(Box::Vertical, Theme::Primary) << "\n";
         }
 
